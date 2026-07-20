@@ -1,0 +1,598 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  MANAGER
+  DEVELOPER
+  CLIENT
+}
+
+enum ProjectStatus {
+  PENDING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum MilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  DELAYED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  CREDIT_CARD
+  PAYPAL
+  CRYPTO
+  CASH
+  OTHER
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWING
+  SHORTLISTED
+  INTERVIEW
+  HIRED
+  REJECTED
+}
+
+enum FileCategory {
+  PROPOSAL
+  CONTRACT
+  REQUIREMENT
+  DESIGN
+  DELIVERABLE
+  INVOICE
+  OTHER
+}
+
+enum NotificationType {
+  PROJECT_UPDATE
+  MILESTONE_COMPLETED
+  MESSAGE_RECEIVED
+  PAYMENT_DUE
+  PAYMENT_RECEIVED
+  HIRING_UPDATE
+  SYSTEM
+}
+
+enum TimelineStageStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  role          Role     @default(CLIENT)
+  isActive      Boolean  @default(true)
+  isVerified    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Profile (one-to-one per role)
+  adminProfile     AdminProfile?
+  managerProfile   ManagerProfile?
+  developerProfile DeveloperProfile?
+  clientProfile    ClientProfile?
+
+  // Auth tokens
+  refreshTokens RefreshToken[]
+  passwordResets PasswordReset[]
+
+  // Activity
+  sentMessages     Message[]      @relation("SentMessages")
+  notifications    Notification[]
+  activityLogs     ActivityLog[]
+
+  // Projects (as manager or developer)
+  managedProjects  Project[]       @relation("ProjectManager")
+  assignedProjects ProjectDeveloper[]
+
+  // Progress updates posted by this user
+  progressUpdates  ProgressUpdate[]
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROFILES
+// ─────────────────────────────────────────────────────────────────────────────
+
+model AdminProfile {
+  id        String @id @default(uuid())
+  userId    String @unique
+  firstName String
+  lastName  String
+  avatar    String?
+  phone     String?
+
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admin_profiles")
+}
+
+model ManagerProfile {
+  id         String  @id @default(uuid())
+  userId     String  @unique
+  firstName  String
+  lastName   String
+  avatar     String?
+  phone      String?
+  department String?
+  bio        String?
+
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("manager_profiles")
+}
+
+model DeveloperProfile {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  firstName    String
+  lastName     String
+  avatar       String?
+  phone        String?
+  bio          String?
+  title        String?   // e.g. "Senior React Developer"
+  githubUrl    String?
+  linkedinUrl  String?
+  portfolioUrl String?
+  resumeUrl    String?
+  skills       String[]  // array of skill tags
+  experience   Int?      // years of experience
+  isAvailable  Boolean  @default(true)
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Portfolio items
+  portfolioItems PortfolioItem[]
+
+  @@map("developer_profiles")
+}
+
+model ClientProfile {
+  id                 String  @id @default(uuid())
+  userId             String  @unique
+  companyName        String
+  companyLogo        String?
+  contactPerson      String
+  phone              String?
+  website            String?
+  address            String?
+  companyDescription String?
+
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Projects this client owns
+  projects           Project[] @relation("ProjectClient")
+
+  // Conversations
+  conversations      Conversation[]
+
+  @@map("client_profiles")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTH TOKENS
+// ─────────────────────────────────────────────────────────────────────────────
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  isRevoked Boolean  @default(false)
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_resets")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROJECT
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Project {
+  id                  String        @id @default(uuid())
+  name                String
+  description         String?
+  projectType         String?
+  technologies        String[]
+  status              ProjectStatus @default(PENDING)
+  priority            Priority      @default(MEDIUM)
+  completionPercent   Int           @default(0)
+  startDate           DateTime?
+  estimatedDelivery   DateTime?
+  actualDelivery      DateTime?
+  managerNotes        String?
+  budget              Decimal?      @db.Decimal(12, 2)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  // Relations
+  managerId           String
+  manager             User          @relation("ProjectManager", fields: [managerId], references: [id])
+
+  clientId            String
+  client              ClientProfile @relation("ProjectClient", fields: [clientId], references: [id])
+
+  developers          ProjectDeveloper[]
+  milestones          Milestone[]
+  progressUpdates     ProgressUpdate[]
+  timelineStages      TimelineStage[]
+  files               ProjectFile[]
+  payments            Payment[]
+  gallery             ProjectGallery[]
+
+  @@index([managerId])
+  @@index([clientId])
+  @@index([status])
+  @@map("projects")
+}
+
+// Project ↔ Developer join table
+model ProjectDeveloper {
+  id          String  @id @default(uuid())
+  projectId   String
+  userId      String
+  role        String? // e.g. "Frontend Lead"
+  joinedAt    DateTime @default(now())
+
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  developer   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@map("project_developers")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MILESTONE
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Milestone {
+  id          String          @id @default(uuid())
+  projectId   String
+  name        String
+  description String?
+  dueDate     DateTime?
+  completedAt DateTime?
+  status      MilestoneStatus @default(PENDING)
+  order       Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  project     Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("milestones")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TIMELINE STAGES
+// ─────────────────────────────────────────────────────────────────────────────
+
+model TimelineStage {
+  id          String              @id @default(uuid())
+  projectId   String
+  name        String
+  description String?
+  status      TimelineStageStatus @default(PENDING)
+  order       Int
+  completedAt DateTime?
+  createdAt   DateTime            @default(now())
+
+  project     Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("timeline_stages")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROGRESS UPDATES
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ProgressUpdate {
+  id                String   @id @default(uuid())
+  projectId         String
+  authorId          String
+  title             String
+  description       String
+  progressPercent   Int      // Updates project.completionPercent
+  images            String[] // Cloudinary URLs
+  attachments       String[] // Cloudinary URLs
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  author            User     @relation(fields: [authorId], references: [id])
+
+  @@index([projectId])
+  @@map("progress_updates")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROJECT FILES
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ProjectFile {
+  id          String       @id @default(uuid())
+  projectId   String
+  name        String
+  url         String       // Cloudinary URL
+  publicId    String       // Cloudinary public_id for deletion
+  category    FileCategory @default(OTHER)
+  mimeType    String?
+  sizeBytes   Int?
+  uploadedBy  String       // userId
+  createdAt   DateTime     @default(now())
+
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("project_files")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROJECT GALLERY
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ProjectGallery {
+  id        String   @id @default(uuid())
+  projectId String
+  url       String
+  publicId  String
+  caption   String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("project_gallery")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAYMENT
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Payment {
+  id            String        @id @default(uuid())
+  projectId     String
+  invoiceNumber String        @unique
+  amount        Decimal       @db.Decimal(12, 2)
+  currency      String        @default("USD")
+  status        PaymentStatus @default(PENDING)
+  method        PaymentMethod?
+  paidAt        DateTime?
+  dueDate       DateTime?
+  description   String?
+  invoiceUrl    String?       // Generated PDF URL
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  project       Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("payments")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MESSAGES
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Conversation {
+  id        String    @id @default(uuid())
+  clientId  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  client    ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  messages  Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  senderId       String
+  content        String
+  attachments    String[]
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@map("messages")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HIRING
+// ─────────────────────────────────────────────────────────────────────────────
+
+model HiringApplication {
+  id           String            @id @default(uuid())
+  firstName    String
+  lastName     String
+  email        String
+  phone        String?
+  resumeUrl    String?
+  coverLetter  String?
+  skills       String[]
+  experience   Int?
+  linkedinUrl  String?
+  portfolioUrl String?
+  status       ApplicationStatus @default(PENDING)
+  notes        String?           // Internal manager notes
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@map("hiring_applications")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PORTFOLIO (Developer)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model PortfolioItem {
+  id           String   @id @default(uuid())
+  developerId  String   // DeveloperProfile.id
+  title        String
+  description  String?
+  url          String?
+  imageUrl     String?
+  technologies String[]
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  developer    DeveloperProfile @relation(fields: [developerId], references: [id], onDelete: Cascade)
+
+  @@map("portfolio_items")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRICING (Homepage CMS)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model PricingPlan {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  price        Decimal  @db.Decimal(10, 2)
+  currency     String   @default("USD")
+  billingCycle String   @default("one-time") // "one-time" | "monthly" | "yearly"
+  features     String[]
+  isPopular    Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("pricing_plans")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HOMEPAGE CMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+model HomepageContent {
+  id        String   @id @default(uuid())
+  section   String   @unique // "hero" | "about" | "services" | "testimonials" | "faq" | "contact"
+  content   Json     // Flexible JSON for each section's data
+  isActive  Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  @@map("homepage_content")
+}
+
+model Testimonial {
+  id         String   @id @default(uuid())
+  clientName String
+  company    String?
+  avatar     String?
+  rating     Int      @default(5)
+  text       String
+  isActive   Boolean  @default(true)
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@map("testimonials")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Notification {
+  id         String           @id @default(uuid())
+  userId     String
+  type       NotificationType
+  title      String
+  body       String
+  data       Json?            // Extra metadata (e.g. projectId, messageId)
+  isRead     Boolean          @default(false)
+  createdAt  DateTime         @default(now())
+
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ACTIVITY LOG
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ActivityLog {
+  id         String   @id @default(uuid())
+  userId     String
+  action     String   // e.g. "PROJECT_CREATED", "MILESTONE_COMPLETED"
+  entity     String?  // e.g. "Project", "Milestone"
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
