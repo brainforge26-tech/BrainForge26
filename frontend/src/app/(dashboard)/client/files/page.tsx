@@ -5,10 +5,11 @@ import {
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { Badge }      from '@/components/ui/Badge';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { fetchMyFiles } from '@/features/client/client.actions';
 
 type FileCategory = 'PROPOSAL' | 'CONTRACT' | 'REQUIREMENT' | 'DESIGN' | 'DELIVERABLE' | 'INVOICE' | 'OTHER';
 
-const CATEGORY_VARIANT: Record<FileCategory, 'primary'|'secondary'|'cyan'|'warning'|'success'|'muted'> = {
+const CATEGORY_VARIANT: Record<string, 'primary'|'secondary'|'cyan'|'warning'|'success'|'muted'> = {
   PROPOSAL:    'primary',
   CONTRACT:    'secondary',
   REQUIREMENT: 'cyan',
@@ -16,12 +17,6 @@ const CATEGORY_VARIANT: Record<FileCategory, 'primary'|'secondary'|'cyan'|'warni
   DELIVERABLE: 'success',
   INVOICE:     'muted',
   OTHER:       'muted',
-};
-
-const ICON_FOR_MIME: Record<string, React.ElementType> = {
-  'image': FileImage,
-  'code':  FileCode,
-  'zip':   Archive,
 };
 
 function getIcon(mime?: string | null): React.ElementType {
@@ -39,23 +34,16 @@ function formatBytes(bytes?: number | null) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-const SAMPLE_FILES = [
-  { id: '1', name: 'Project_Proposal_ECommerce.pdf',  category: 'PROPOSAL'    as FileCategory, mimeType: 'application/pdf', sizeBytes: 512000,  createdAt: '2026-06-01', url: '#', project: { name: 'E-Commerce Platform' } },
-  { id: '2', name: 'Service_Agreement_Signed.pdf',    category: 'CONTRACT'    as FileCategory, mimeType: 'application/pdf', sizeBytes: 248000,  createdAt: '2026-06-05', url: '#', project: { name: 'E-Commerce Platform' } },
-  { id: '3', name: 'Requirements_Document_v2.docx',   category: 'REQUIREMENT' as FileCategory, mimeType: 'application/vnd.openxmlformats', sizeBytes: 128000,  createdAt: '2026-06-10', url: '#', project: { name: 'E-Commerce Platform' } },
-  { id: '4', name: 'UI_Designs_Figma_Export.zip',     category: 'DESIGN'      as FileCategory, mimeType: 'application/zip', sizeBytes: 8200000, createdAt: '2026-07-01', url: '#', project: { name: 'E-Commerce Platform' } },
-  { id: '5', name: 'Homepage_Preview.png',            category: 'DESIGN'      as FileCategory, mimeType: 'image/png',       sizeBytes: 1400000, createdAt: '2026-07-05', url: '#', project: { name: 'E-Commerce Platform' } },
-  { id: '6', name: 'Invoice_INV-041.pdf',             category: 'INVOICE'     as FileCategory, mimeType: 'application/pdf', sizeBytes: 95000,   createdAt: '2026-07-01', url: '#', project: { name: 'E-Commerce Platform' } },
-];
+export default async function ClientFilesPage() {
+  const files = await fetchMyFiles();
 
-const grouped = SAMPLE_FILES.reduce<Record<string, typeof SAMPLE_FILES>>((acc, f) => {
-  const cat = f.category;
-  if (!acc[cat]) acc[cat] = [];
-  acc[cat].push(f);
-  return acc;
-}, {});
+  const grouped = files.reduce<Record<string, typeof files>>((acc, f: any) => {
+    const cat = f.category || 'OTHER';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(f);
+    return acc;
+  }, {});
 
-export default function ClientFilesPage() {
   return (
     <div className="animate-fade-up space-y-6">
       <PageHeader
@@ -73,17 +61,23 @@ export default function ClientFilesPage() {
         ))}
       </div>
 
+      {files.length === 0 && (
+        <div className="p-12 text-center text-[#7A8499] border border-white/[0.06] rounded-2xl bg-white/[0.02]">
+          <p>No files shared with you yet.</p>
+        </div>
+      )}
+
       {/* Files by category */}
-      {Object.entries(grouped).map(([category, files]) => (
+      {Object.entries(grouped).map(([category, catFiles]) => (
         <Card key={category} variant="default" padding="none" className="overflow-hidden">
           <CardHeader className="px-6 pt-5 pb-4 border-b border-white/[0.06]">
             <div className="flex items-center gap-2">
               <CardTitle className="text-base capitalize">{category.charAt(0) + category.slice(1).toLowerCase()}s</CardTitle>
-              <Badge variant={CATEGORY_VARIANT[category as FileCategory]} size="sm">{files.length}</Badge>
+              <Badge variant={CATEGORY_VARIANT[category] || 'muted'} size="sm">{(catFiles as any[]).length}</Badge>
             </div>
           </CardHeader>
           <CardContent className="p-0 divide-y divide-white/[0.04]">
-            {files.map(file => {
+            {(catFiles as any[]).map(file => {
               const Icon = getIcon(file.mimeType);
               return (
                 <div key={file.id} className="flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition-colors group">
@@ -93,7 +87,7 @@ export default function ClientFilesPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white truncate">{file.name}</p>
                     <p className="text-xs text-[#7A8499] mt-0.5">
-                      {file.project.name} · {formatBytes(file.sizeBytes)} · {new Date(file.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
+                      {file.project?.name || 'N/A'} · {formatBytes(file.sizeBytes)} · {new Date(file.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">

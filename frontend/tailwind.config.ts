@@ -14,67 +14,69 @@ const config: Config = {
       // ─── Color System (design.md) ─────────────────────────────────────────
       colors: {
         // Backgrounds
-        'bg-primary': '#050816',
-        'bg-secondary': '#0B1224',
-        'bg-card': 'rgba(255,255,255,0.04)',
+        'bg-primary': '#09090B',
+        'bg-secondary': '#111114',
+        'bg-card': 'rgba(20,20,25,0.85)',
+        'bg-glass': 'rgba(255,255,255,0.04)',
 
         // Borders
         border: 'rgba(255,255,255,0.08)',
         'border-hover': 'rgba(255,255,255,0.15)',
 
-        // Accents
+        // Accents - Extra Deep Dark Crimson (Burgundy)
         accent: {
-          primary: '#4F7DFF',
-          secondary: '#7C5CFF',
-          highlight: '#00D4FF',
+          primary: '#730E27',
+          secondary: '#52091B',
+          highlight: '#8B1532',
         },
 
         // Semantic
-        success: '#22C55E',
-        warning: '#F59E0B',
+        success: '#00D26A',
+        warning: '#FFC247',
+        info: '#4B8CFF',
         error: '#EF4444',
 
         // Text
         'text-primary': '#FFFFFF',
-        'text-secondary': '#AAB3C5',
-        'text-muted': '#7A8499',
+        'text-secondary': '#B4B7C5',
+        'text-muted': '#7C8193',
 
         // Shadcn-compatible aliases (used by Radix/Shadcn components)
-        background: '#050816',
+        background: '#09090B',
         foreground: '#FFFFFF',
         primary: {
-          DEFAULT: '#4F7DFF',
+          DEFAULT: '#730E27',
           foreground: '#FFFFFF',
         },
         secondary: {
-          DEFAULT: '#0B1224',
-          foreground: '#AAB3C5',
+          DEFAULT: '#111114',
+          foreground: '#B4B7C5',
         },
         muted: {
           DEFAULT: 'rgba(255,255,255,0.04)',
-          foreground: '#7A8499',
+          foreground: '#7C8193',
         },
         destructive: {
           DEFAULT: '#EF4444',
           foreground: '#FFFFFF',
         },
         card: {
-          DEFAULT: 'rgba(255,255,255,0.04)',
+          DEFAULT: 'rgba(20,20,25,0.85)',
           foreground: '#FFFFFF',
         },
         popover: {
-          DEFAULT: '#0B1224',
+          DEFAULT: '#111114',
           foreground: '#FFFFFF',
         },
         input: 'rgba(255,255,255,0.06)',
-        ring: '#4F7DFF',
+        ring: '#730E27',
       },
 
       // ─── Typography ───────────────────────────────────────────────────────
       fontFamily: {
-        sans: ['var(--font-geist-sans)', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-space-grotesk)', 'var(--font-inter)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-geist-mono)', 'Fira Code', 'monospace'],
-        display: ['var(--font-geist-sans)', 'Inter', 'sans-serif'],
+        display: ['var(--font-space-grotesk)', 'sans-serif'],
       },
       fontSize: {
         'display-2xl': ['4.5rem', { lineHeight: '1.1', fontWeight: '700' }],
@@ -107,10 +109,11 @@ const config: Config = {
 
       // ─── Box Shadows ─────────────────────────────────────────────────────
       boxShadow: {
-        glow: '0 0 20px rgba(79,125,255,0.25)',
-        'glow-lg': '0 0 40px rgba(79,125,255,0.35)',
+        glow: '0 0 16px rgba(115,14,39,0.12)',
+        'glow-lg': '0 0 32px rgba(115,14,39,0.18)',
         'glow-cyan': '0 0 20px rgba(0,212,255,0.25)',
         'glow-purple': '0 0 20px rgba(124,92,255,0.25)',
+        'glow-pink': '0 16px 40px rgba(115,14,39,0.12)',
         card: '0 4px 24px rgba(0,0,0,0.4)',
         'card-hover': '0 8px 48px rgba(0,0,0,0.6)',
         glass: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
@@ -168,8 +171,8 @@ const config: Config = {
           '100%': { backgroundPosition: '200% 0' },
         },
         'pulse-glow': {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(79,125,255,0.25)' },
-          '50%': { boxShadow: '0 0 40px rgba(79,125,255,0.5)' },
+          '0%, 100%': { boxShadow: '0 0 16px rgba(115,14,39,0.12)' },
+          '50%': { boxShadow: '0 0 28px rgba(115,14,39,0.18)' },
         },
         'spin-slow': {
           from: { transform: 'rotate(0deg)' },
@@ -196,10 +199,10 @@ const config: Config = {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'accent-gradient': 'linear-gradient(135deg, #4F7DFF 0%, #7C5CFF 100%)',
-        'accent-gradient-h': 'linear-gradient(90deg, #4F7DFF 0%, #00D4FF 100%)',
-        'card-gradient': 'linear-gradient(135deg, rgba(79,125,255,0.08) 0%, rgba(124,92,255,0.04) 100%)',
-        'hero-gradient': 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(79,125,255,0.15), transparent)',
+        'accent-gradient': 'linear-gradient(135deg, #730E27 0%, #52091B 100%)',
+        'accent-gradient-h': 'linear-gradient(90deg, #730E27 0%, #52091B 100%)',
+        'card-gradient': 'linear-gradient(135deg, rgba(115,14,39,0.04) 0%, rgba(82,9,27,0.02) 100%)',
+        'hero-gradient': 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(115,14,39,0.05), transparent)',
         'noise': "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E\")",
       },
 

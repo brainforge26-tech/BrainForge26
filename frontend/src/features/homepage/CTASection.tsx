@@ -20,13 +20,13 @@ export function CTASection() {
           className="relative rounded-[28px] overflow-hidden"
         >
           {/* Gradient background card */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#4F7DFF]/20 via-[#7C5CFF]/10 to-[#00D4FF]/10" />
-          <div className="absolute inset-0 border border-[rgba(79,125,255,0.2)] rounded-[28px]" />
-          <div className="absolute inset-0 bg-[#050816]/60 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#A61C43]/08 via-[#851636]/04 to-[rgba(166,28,67,0.01)]" />
+          <div className="absolute inset-0 border border-[rgba(166,28,67,0.12)] rounded-[28px]" />
+          <div className="absolute inset-0 bg-[#09090B]/60 backdrop-blur-sm" />
 
           {/* Decorative orbs */}
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#4F7DFF] rounded-full blur-[80px] opacity-20 pointer-events-none" />
-          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#7C5CFF] rounded-full blur-[80px] opacity-15 pointer-events-none" />
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#A61C43] rounded-full blur-[100px] opacity-05 pointer-events-none" />
+          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#851636] rounded-full blur-[100px] opacity-04 pointer-events-none" />
 
           {/* Content */}
           <div className="relative z-10 px-8 py-16 md:px-16 text-center">

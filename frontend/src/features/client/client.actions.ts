@@ -9,6 +9,20 @@ const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000/api/v1';
 export type PaymentStatus  = 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED' | 'REFUNDED';
 export type FileCategory   = 'PROPOSAL' | 'CONTRACT' | 'REQUIREMENT' | 'DESIGN' | 'DELIVERABLE' | 'INVOICE' | 'OTHER';
 
+export type ClientProfile = {
+  companyName: string;
+  contactPerson: string;
+  email?: string;
+  phone: string | null;
+  website: string | null;
+  address: string | null;
+  companyDescription: string | null;
+  user: {
+    createdAt: string;
+    email: string;
+  };
+};
+
 export type ClientPayment = {
   id: string; invoiceNumber: string; amount: string; currency: string;
   status: PaymentStatus; method: string | null; paidAt: string | null;
@@ -27,6 +41,14 @@ export type Message = {
   id: string; conversationId: string; senderId: string; content: string;
   attachments: string[]; isRead: boolean; createdAt: string;
   sender: { email: string; role: string };
+};
+
+export type ClientDashboardStats = {
+  activeProjects: number;
+  completedProjects: number;
+  totalPayments: number;
+  unreadMessages: number;
+  recentPayments: ClientPayment[];
 };
 
 export type ActionState = { success: true; message: string } | { success: false; error: string };
@@ -76,11 +98,52 @@ export async function fetchMyPayments(): Promise<ClientPayment[]> {
   } catch { return []; }
 }
 
+// ─── Fetch profile ────────────────────────────────────────────────────────────
+export async function fetchMyProfile(): Promise<ClientProfile | null> {
+  try {
+    const res = await apiFetch<{ data: { profile: ClientProfile } }>('/client/profile');
+    return res.data?.profile ?? null;
+  } catch { return null; }
+}
+
 // ─── Fetch files ──────────────────────────────────────────────────────────────
 export async function fetchMyFiles(): Promise<ClientFile[]> {
   try {
     const res = await apiFetch<{ data: { files: ClientFile[] } }>('/client/files');
     return res.data?.files ?? [];
+  } catch { return []; }
+}
+
+// ─── Fetch projects ───────────────────────────────────────────────────────────
+export async function fetchMyProjects(): Promise<any[]> {
+  try {
+    const res = await apiFetch<{ data: { projects: any[] } }>('/client/projects');
+    return res.data?.projects ?? [];
+  } catch { return []; }
+}
+
+export async function fetchProjectById(id: string): Promise<any | null> {
+  try {
+    const res = await apiFetch<{ data: { project: any } }>(`/client/projects/${id}`);
+    return res.data?.project ?? null;
+  } catch { return null; }
+}
+
+// ─── Fetch stats ──────────────────────────────────────────────────────────────
+export async function fetchMyDashboardStats(): Promise<ClientDashboardStats | null> {
+  try {
+    const res = await apiFetch<{ data: { stats: ClientDashboardStats } }>('/client/stats');
+    return res.data?.stats ?? null;
+  } catch { return null; }
+}
+
+// ─── Fetch messages ───────────────────────────────────────────────────────────
+export async function fetchMyMessages(): Promise<Message[]> {
+  try {
+    const convRes = await apiFetch<{ data: { conversation: any } }>('/client/conversation');
+    if (!convRes.data?.conversation) return [];
+    const msgRes = await apiFetch<{ data: { messages: Message[] } }>(`/client/conversation/${convRes.data.conversation.id}/messages`);
+    return msgRes.data?.messages ?? [];
   } catch { return []; }
 }
 
@@ -116,4 +179,12 @@ export async function sendMessageAction(_prev: ActionState, formData: FormData):
     revalidatePath('/client/messages');
     return { success: true, message: 'Message sent' };
   } catch (err) { return { success: false, error: (err as Error).message }; }
+}
+
+// ─── Fetch My Applications ────────────────────────────────────────────────────
+export async function fetchMyApplications() {
+  try {
+    const res = await apiFetch<{ data: any[] }>('/hiring/my-applications');
+    return res.data ?? [];
+  } catch { return []; }
 }

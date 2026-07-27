@@ -8,7 +8,12 @@ import { sendSuccess, sendCreated } from '../../utils/response';
 import { BadRequestError } from '../../errors/AppError';
 import type { AuthRequest } from '../../middlewares/authenticate';
 
-function auth(req: Request) { return (req as AuthRequest).user; }
+export async function listPublicProjects(req: Request, res: Response, next: NextFunction) {
+  try {
+    const projects = await ProjectService.listPublicProjects();
+    sendSuccess(res, { projects });
+  } catch (err) { next(err); }
+}
 
 export async function listProjects(req: Request, res: Response, next: NextFunction) {
   try {

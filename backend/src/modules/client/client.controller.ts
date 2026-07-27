@@ -71,3 +71,10 @@ export async function markRead(req: Request, res: Response, next: NextFunction) 
 export async function getDashboardStats(req: Request, res: Response, next: NextFunction) {
   try { sendSuccess(res, await ClientService.getDashboardStats(uid(req))); } catch (e) { next(e); }
 }
+
+export async function listClients(req: Request, res: Response, next: NextFunction) {
+  try {
+    const clients = await ClientService.listAllClients();
+    sendSuccess(res, { clients });
+  } catch (e) { next(e); }
+}

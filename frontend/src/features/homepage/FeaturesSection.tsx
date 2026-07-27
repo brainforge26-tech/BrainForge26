@@ -18,19 +18,19 @@ const FEATURES = [
     icon: Zap,
     title: 'Rapid Development',
     description: 'Agile sprints, daily updates, and fast iteration cycles keep your project moving.',
-    color: '#4F7DFF',
+    color: '#A61C43',
   },
   {
     icon: Users,
     title: 'Dedicated Team',
     description: 'A hand-picked team of senior developers, designers, and project managers just for you.',
-    color: '#7C5CFF',
+    color: '#C02C54',
   },
   {
     icon: Lock,
     title: 'Enterprise Security',
     description: 'SOC 2-aligned processes, NDAs, secure code reviews, and GDPR compliance by default.',
-    color: '#00D4FF',
+    color: '#A61C43',
   },
   {
     icon: RefreshCw,
@@ -52,7 +52,7 @@ export function FeaturesSection() {
 
   return (
     <section id="features" ref={ref} className="relative py-24 overflow-hidden">
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#7C5CFF] opacity-[0.04] rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#851636] opacity-[0.02] rounded-full blur-[100px] pointer-events-none" />
 
       <div className="section-wrapper relative z-10">
         <motion.div
@@ -61,7 +61,7 @@ export function FeaturesSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-14"
         >
-          <div className="section-label justify-center mb-3">Why BrainForceIT</div>
+          <div className="section-label justify-center mb-3">Why BrainForge</div>
           <h2 className="text-[clamp(1.875rem,4vw,3rem)] font-extrabold tracking-tight">
             Built for{' '}
             <span className="gradient-text">Serious Teams</span>
@@ -79,7 +79,7 @@ export function FeaturesSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.45, delay: i * 0.07, ease: 'easeOut' }}
-              className="flex gap-4 p-6 rounded-[20px] bg-white/[0.03] border border-white/[0.07] hover:border-white/[0.12] hover:bg-white/[0.05] transition-all duration-250 group"
+              className="flex gap-4 p-6 rounded-[24px] bg-[rgba(20,20,25,0.85)] backdrop-blur-xl border border-white/[0.08] hover:border-[#A61C43] hover:shadow-[0_12px_36px_rgba(166,28,67,.12)] hover:-translate-y-2 transition-all duration-250 group"
             >
               <div
                 className="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 mt-0.5 transition-transform duration-200 group-hover:scale-110"

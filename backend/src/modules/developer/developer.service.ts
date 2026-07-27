@@ -84,6 +84,11 @@ export async function getMyProjects(userId: string) {
           manager: { select: { email: true, managerProfile: { select: { firstName: true, lastName: true } } } },
           milestones:     { orderBy: { order: 'asc' }, take: 5 },
           timelineStages: { orderBy: { order: 'asc' } },
+          files:          { orderBy: { createdAt: 'desc' } },
+          progressUpdates: { orderBy: { createdAt: 'desc' }, take: 5, include: { author: { select: { email: true } } } },
+          developers: {
+            include: { developer: { select: { email: true, developerProfile: { select: { firstName: true, lastName: true, title: true } } } } },
+          },
         },
       },
     },

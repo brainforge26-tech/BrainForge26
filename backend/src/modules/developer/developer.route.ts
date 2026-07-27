@@ -16,8 +16,11 @@ developerRouter.post('/me/portfolio',            DC.addPortfolioItem);
 developerRouter.patch('/me/portfolio/:itemId',   DC.updatePortfolioItem);
 developerRouter.delete('/me/portfolio/:itemId',  DC.deletePortfolioItem);
 
+import * as CC from '../client/client.controller';
+
 // ── Users/developers routes (manager + admin) ─────────────────────────────────
 export const usersRouter = Router();
 
 usersRouter.get('/developers',     authenticate, authorize('MANAGER','ADMIN'), DC.listDevelopers);
 usersRouter.get('/developers/:id', authenticate, authorize('MANAGER','ADMIN'), DC.getDeveloperById);
+usersRouter.get('/clients',        authenticate, authorize('MANAGER','ADMIN'), CC.listClients);

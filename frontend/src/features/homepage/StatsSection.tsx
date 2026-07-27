@@ -28,10 +28,10 @@ export function StatsSection() {
               initial={{ opacity: 0, y: 24 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: i * 0.1, ease: 'easeOut' }}
-              className="relative p-6 rounded-[20px] bg-white/[0.03] border border-white/[0.07] text-center hover:border-[rgba(79,125,255,0.2)] hover:bg-white/[0.05] transition-all duration-300 group"
+              className="relative p-6 rounded-[24px] bg-[rgba(20,20,25,0.85)] backdrop-blur-xl border border-[rgba(255,255,255,0.08)] text-center hover:border-[rgba(166,28,67,0.15)] hover:shadow-[0_12px_36px_rgba(166,28,67,.08)] transition-all duration-300 group hover:-translate-y-1"
             >
               {/* Subtle top accent line */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-px bg-gradient-to-r from-transparent via-[#4F7DFF] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-px bg-gradient-to-r from-transparent via-[#A61C43] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
               <p className="text-4xl font-extrabold gradient-text-blue tracking-tight">{value}</p>
               <p className="mt-2 text-sm font-semibold text-white">{label}</p>

@@ -1,67 +1,74 @@
 import {
   Users, FolderKanban, UserCheck, TrendingUp,
-  Activity, Shield, BarChart3, ArrowUpRight,
+  Shield, ArrowUpRight,
 } from 'lucide-react';
+import Link from 'next/link';
 import { PageHeader }  from '@/components/dashboard/PageHeader';
 import { StatCard }    from '@/components/common/StatCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge }       from '@/components/ui/Badge';
+import { fetchAdminStats, fetchManagers } from '@/features/admin/admin.actions';
+import { fetchProjects } from '@/features/manager/manager.actions';
 
-// ─── Placeholder data (replaced with real API calls in Step 8) ───────────────
-const STATS = [
-  { title: 'Total Managers',    value: '6',   change: 20,   icon: Users,        iconColor: '#4F7DFF',  desc: 'vs last month' },
-  { title: 'Active Projects',   value: '24',  change: 12.5, icon: FolderKanban, iconColor: '#7C5CFF',  desc: 'vs last month' },
-  { title: 'Total Developers',  value: '18',  change: 8.3,  icon: UserCheck,    iconColor: '#00D4FF',  desc: 'vs last month' },
-  { title: 'Revenue (Month)',   value: '$48k', change: 15.2, icon: TrendingUp,   iconColor: '#22C55E',  desc: 'vs last month' },
-];
+export default async function AdminDashboardPage() {
+  const stats = await fetchAdminStats().catch(() => ({
+    totalManagers: 0,
+    totalDevelopers: 0,
+    totalClients: 0,
+    totalProjects: 0,
+    activeProjects: 0,
+    completedProjects: 0,
+    totalRevenue: 0,
+  }));
 
-const RECENT_MANAGERS = [
-  { name: 'Sarah Johnson', email: 'sarah@brainforceit.com', projects: 5, status: 'Active' },
-  { name: 'Mike Chen',     email: 'mike@brainforceit.com',  projects: 3, status: 'Active' },
-  { name: 'Priya Patel',   email: 'priya@brainforceit.com', projects: 7, status: 'Active' },
-  { name: 'James Wilson',  email: 'james@brainforceit.com', projects: 2, status: 'Inactive' },
-];
+  const managersData = await fetchManagers(1, '').catch(() => ({
+    managers: [],
+    pagination: { total: 0, page: 1, limit: 10, totalPages: 0 },
+  }));
 
-const RECENT_ACTIVITY = [
-  { action: 'New client registered',       time: '2 min ago',  color: '#22C55E' },
-  { action: 'Project "E-Shop" completed',  time: '1 hr ago',   color: '#4F7DFF' },
-  { action: 'Manager Sarah created',       time: '3 hrs ago',  color: '#7C5CFF' },
-  { action: 'Developer hired: Alex K.',    time: '5 hrs ago',  color: '#00D4FF' },
-  { action: 'Invoice #INV-042 paid',       time: '1 day ago',  color: '#22C55E' },
-];
+  const projectsData = await fetchProjects(1).catch(() => ({
+    projects: [],
+    pagination: { total: 0, page: 1, limit: 10, totalPages: 0 },
+  }));
 
-export default function AdminDashboardPage() {
+  const STAT_CARDS = [
+    { title: 'Total Managers',    value: String(stats.totalManagers),   icon: Users,        iconColor: '#730E27', desc: 'System administrators' },
+    { title: 'Active Projects',   value: String(stats.activeProjects),  icon: FolderKanban, iconColor: '#8B1532', desc: `${stats.totalProjects} total projects` },
+    { title: 'Total Developers',  value: String(stats.totalDevelopers), icon: UserCheck,    iconColor: '#00D26A', desc: 'Active engineer roster' },
+    { title: 'Total Revenue',     value: `$${stats.totalRevenue.toLocaleString()}`, icon: TrendingUp, iconColor: '#22C55E', desc: 'Completed milestone pay' },
+  ];
+
   return (
     <div className="animate-fade-up space-y-8">
       <PageHeader
         title="Admin Dashboard"
-        description="System-wide overview of BrainForceIT operations."
+        description="System-wide overview of BrainForgeIT operations and live backend metrics."
         action={
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[rgba(79,125,255,0.1)] border border-[rgba(79,125,255,0.2)]">
-            <Shield className="w-4 h-4 text-[#4F7DFF]" />
-            <span className="text-xs font-semibold text-[#4F7DFF]">Admin Access</span>
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[rgba(115,14,39,0.12)] border border-[rgba(115,14,39,0.25)]">
+            <Shield className="w-4 h-4 text-[#8B1532]" />
+            <span className="text-xs font-bold text-[#8B1532]">Live Admin Control</span>
           </div>
         }
       />
 
-      {/* ── Stats row ──────────────────────────────────────────────────────── */}
+      {/* ── Dynamic Stats row ────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-        {STATS.map((s) => (
+        {STAT_CARDS.map((s) => (
           <StatCard key={s.title} {...s} description={s.desc} />
         ))}
       </div>
 
-      {/* ── Middle row ─────────────────────────────────────────────────────── */}
+      {/* ── Middle row: Managers & Recent Projects ──────────────────────────── */}
       <div className="grid lg:grid-cols-3 gap-6">
 
-        {/* Manager list */}
+        {/* Manager list (Dynamic API) */}
         <Card variant="default" padding="none" className="lg:col-span-2 overflow-hidden">
           <CardHeader className="px-6 pt-6 pb-4 border-b border-white/[0.06]">
             <div className="flex items-center justify-between">
-              <CardTitle>Managers</CardTitle>
-              <a href="/admin/managers" className="flex items-center gap-1 text-xs text-[#4F7DFF] hover:text-[#00D4FF] transition-colors">
-                View all <ArrowUpRight className="w-3.5 h-3.5" />
-              </a>
+              <CardTitle>System Managers</CardTitle>
+              <Link href="/admin/managers" className="flex items-center gap-1 text-xs text-[#8B1532] hover:text-white transition-colors font-bold">
+                View all ({managersData.pagination.total}) <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </CardHeader>
           <CardContent>
@@ -69,72 +76,76 @@ export default function AdminDashboardPage() {
               <thead>
                 <tr>
                   <th>Manager</th>
-                  <th>Projects</th>
+                  <th>Department</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {RECENT_MANAGERS.map((m) => (
-                  <tr key={m.email}>
-                    <td>
-                      <div>
-                        <p className="text-sm font-medium text-white">{m.name}</p>
-                        <p className="text-xs text-[#7A8499]">{m.email}</p>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="text-sm font-semibold text-white">{m.projects}</span>
-                    </td>
-                    <td>
-                      <Badge
-                        variant={m.status === 'Active' ? 'success' : 'muted'}
-                        size="sm" dot>
-                        {m.status}
-                      </Badge>
+                {managersData.managers.map((m) => {
+                  const name = m.managerProfile ? `${m.managerProfile.firstName} ${m.managerProfile.lastName}` : m.email.split('@')[0];
+                  return (
+                    <tr key={m.id}>
+                      <td>
+                        <div>
+                          <p className="text-sm font-medium text-white">{name}</p>
+                          <p className="text-xs text-[#7A8499]">{m.email}</p>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="text-sm font-semibold text-[#AAB3C5]">
+                          {m.managerProfile?.department || 'Operations'}
+                        </span>
+                      </td>
+                      <td>
+                        <Badge
+                          variant={m.isActive ? 'success' : 'muted'}
+                          size="sm" dot>
+                          {m.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {managersData.managers.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="text-center py-8 text-sm text-[#7A8499]">
+                      No managers registered yet.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </CardContent>
         </Card>
 
-        {/* Activity feed */}
+        {/* Live Projects Feed (Dynamic API) */}
         <Card variant="default" padding="md">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Recent Activity</CardTitle>
-              <Activity className="w-4 h-4 text-[#7A8499]" />
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
+              <CardTitle>Recent Projects</CardTitle>
+              <Link href="/admin/projects" className="flex items-center gap-1 text-xs text-[#8B1532] hover:text-white transition-colors font-bold">
+                All Projects <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4 mt-2">
-            {RECENT_ACTIVITY.map((a, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: a.color }} />
-                <div className="min-w-0">
-                  <p className="text-sm text-white leading-snug">{a.action}</p>
-                  <p className="text-xs text-[#7A8499] mt-0.5">{a.time}</p>
+          <CardContent className="space-y-3 mt-3">
+            {projectsData.projects.slice(0, 5).map((p) => (
+              <Link key={p.id} href={`/admin/projects/${p.id}`} className="block p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-white/[0.12] hover:bg-white/[0.04] transition-all">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm font-bold text-white truncate">{p.name}</p>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[rgba(115,14,39,0.15)] text-[#8B1532]">
+                    {p.status}
+                  </span>
                 </div>
-              </div>
+                <p className="text-xs text-[#7A8499]">Client: {p.client?.companyName || 'N/A'}</p>
+              </Link>
             ))}
+            {projectsData.projects.length === 0 && (
+              <p className="text-xs text-[#7A8499] text-center py-6">No projects found in database.</p>
+            )}
           </CardContent>
         </Card>
       </div>
-
-      {/* ── Analytics placeholder ───────────────────────────────────────────── */}
-      <Card variant="default" padding="md">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-[#4F7DFF]" />
-            <CardTitle>Revenue Analytics</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="h-48 flex items-center justify-center rounded-xl bg-white/[0.02] border border-white/[0.06]">
-            <p className="text-sm text-[#7A8499]">Charts will be wired in Step 17 — Final Optimization</p>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

@@ -6,25 +6,8 @@ import { PageHeader } from '@/components/dashboard/PageHeader';
 import { StatCard }   from '@/components/common/StatCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge }      from '@/components/ui/Badge';
-
-const STATS = [
-  { title: 'Active Projects',    value: '2',     change: 0,    icon: FolderKanban, iconColor: '#4F7DFF', desc: 'in progress'  },
-  { title: 'Completed Projects', value: '5',     change: 25.0, icon: CheckCircle2, iconColor: '#22C55E', desc: 'all time'     },
-  { title: 'Total Payments',     value: '$32k',  change: 8.3,  icon: CreditCard,   iconColor: '#7C5CFF', desc: 'all time'     },
-  { title: 'Unread Messages',    value: '3',     change: 0,    icon: MessageSquare, iconColor: '#F59E0B', desc: 'new'         },
-];
-
-const MY_PROJECTS = [
-  { name: 'E-Commerce Platform',  type: 'Web App',  status: 'ACTIVE',    progress: 72,  manager: 'Sarah J.', due: 'Aug 15' },
-  { name: 'Mobile App',          type: 'Mobile',   status: 'ACTIVE',    progress: 45,  manager: 'Mike C.',  due: 'Sep 1'  },
-  { name: 'Old Website Redesign', type: 'Web',     status: 'COMPLETED', progress: 100, manager: 'Sarah J.', due: 'Done'   },
-];
-
-const RECENT_PAYMENTS = [
-  { invoice: 'INV-041', amount: '$4,500', status: 'PAID',    date: 'Jul 1' },
-  { invoice: 'INV-042', amount: '$3,200', status: 'PENDING', date: 'Jul 20' },
-  { invoice: 'INV-043', amount: '$2,800', status: 'OVERDUE', date: 'Jun 15' },
-];
+import { fetchMyDashboardStats, fetchMyProjects } from '@/features/client/client.actions';
+import Link from 'next/link';
 
 const PAYMENT_VARIANT: Record<string, 'success' | 'warning' | 'error'> = {
   PAID:    'success',
@@ -32,13 +15,27 @@ const PAYMENT_VARIANT: Record<string, 'success' | 'warning' | 'error'> = {
   OVERDUE: 'error',
 };
 
-const STATUS_VARIANT: Record<string, 'primary' | 'success' | 'warning' | 'muted'> = {
+const STATUS_VARIANT: Record<string, 'primary' | 'success' | 'warning' | 'muted' | 'error'> = {
   ACTIVE:    'primary',
   COMPLETED: 'success',
   PENDING:   'warning',
+  ON_HOLD:   'muted',
+  CANCELLED: 'error',
 };
 
-export default function ClientDashboardPage() {
+export default async function ClientDashboardPage() {
+  const [stats, projects] = await Promise.all([
+    fetchMyDashboardStats(),
+    fetchMyProjects()
+  ]);
+
+  const STATS = [
+    { title: 'Active Projects',    value: String(stats?.activeProjects || 0), change: 0, icon: FolderKanban, iconColor: '#4F7DFF', desc: 'in progress'  },
+    { title: 'Completed Projects', value: String(stats?.completedProjects || 0), change: 0, icon: CheckCircle2, iconColor: '#22C55E', desc: 'all time'     },
+    { title: 'Total Payments',     value: `$${(stats?.totalPayments || 0).toLocaleString()}`, change: 0, icon: CreditCard, iconColor: '#7C5CFF', desc: 'all time' },
+    { title: 'Unread Messages',    value: String(stats?.unreadMessages || 0), change: 0, icon: MessageSquare, iconColor: '#F59E0B', desc: 'new'         },
+  ];
+
   return (
     <div className="animate-fade-up space-y-8">
       <PageHeader
@@ -65,40 +62,44 @@ export default function ClientDashboardPage() {
           <CardHeader className="px-6 pt-6 pb-4 border-b border-white/[0.06]">
             <div className="flex items-center justify-between">
               <CardTitle>My Projects</CardTitle>
-              <a href="/client/projects" className="flex items-center gap-1 text-xs text-[#4F7DFF] hover:text-[#00D4FF] transition-colors">
+              <Link href="/client/projects" className="flex items-center gap-1 text-xs text-[#4F7DFF] hover:text-[#00D4FF] transition-colors">
                 View all <ArrowUpRight className="w-3.5 h-3.5" />
-              </a>
+              </Link>
             </div>
           </CardHeader>
           <CardContent>
             <div className="divide-y divide-white/[0.05]">
-              {MY_PROJECTS.map((p) => (
-                <div key={p.name} className="px-6 py-4 hover:bg-white/[0.02] transition-colors cursor-pointer">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div>
-                      <p className="text-sm font-semibold text-white">{p.name}</p>
-                      <p className="text-xs text-[#7A8499] mt-0.5">
-                        {p.type} · Manager: {p.manager}
-                      </p>
+              {projects.length === 0 ? (
+                <div className="p-6 text-[#7A8499] text-sm text-center">No projects assigned yet.</div>
+              ) : (
+                projects.slice(0, 5).map((p: any) => (
+                  <Link key={p.id} href={`/client/projects/${p.id}`} className="block px-6 py-4 hover:bg-white/[0.02] transition-colors cursor-pointer">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div>
+                        <p className="text-sm font-semibold text-white">{p.name}</p>
+                        <p className="text-xs text-[#7A8499] mt-0.5">
+                          {p.projectType} · Manager: {p.manager?.managerProfile?.firstName} {p.manager?.managerProfile?.lastName}
+                        </p>
+                      </div>
+                      <Badge variant={STATUS_VARIANT[p.status] ?? 'muted'} size="sm" dot>
+                        {p.status}
+                      </Badge>
                     </div>
-                    <Badge variant={STATUS_VARIANT[p.status] ?? 'muted'} size="sm" dot>
-                      {p.status}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-[#4F7DFF] to-[#7C5CFF] transition-all"
-                        style={{ width: `${p.progress}%` }}
-                      />
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-[#4F7DFF] to-[#7C5CFF] transition-all"
+                          style={{ width: `${p.completionPercent}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-medium text-[#AAB3C5] w-10 text-right">{p.completionPercent}%</span>
+                      <div className="flex items-center gap-1 text-xs text-[#7A8499]">
+                        <Clock className="w-3 h-3" /> {p.estimatedDelivery ? new Date(p.estimatedDelivery).toLocaleDateString() : 'TBD'}
+                      </div>
                     </div>
-                    <span className="text-xs font-medium text-[#AAB3C5] w-10 text-right">{p.progress}%</span>
-                    <div className="flex items-center gap-1 text-xs text-[#7A8499]">
-                      <Clock className="w-3 h-3" /> {p.due}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  </Link>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -110,24 +111,28 @@ export default function ClientDashboardPage() {
             <CardHeader className="px-5 pt-5 pb-3 border-b border-white/[0.06]">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">Payments</CardTitle>
-                <a href="/client/payments" className="flex items-center gap-1 text-xs text-[#4F7DFF] hover:text-[#00D4FF] transition-colors">
+                <Link href="/client/payments" className="flex items-center gap-1 text-xs text-[#4F7DFF] hover:text-[#00D4FF] transition-colors">
                   View all <ArrowUpRight className="w-3 h-3" />
-                </a>
+                </Link>
               </div>
             </CardHeader>
             <CardContent className="divide-y divide-white/[0.05]">
-              {RECENT_PAYMENTS.map((pay) => (
-                <div key={pay.invoice} className="flex items-center justify-between px-5 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-white">{pay.invoice}</p>
-                    <p className="text-xs text-[#7A8499]">{pay.date}</p>
+              {!stats?.recentPayments?.length ? (
+                <div className="p-5 text-[#7A8499] text-sm text-center">No recent payments.</div>
+              ) : (
+                stats.recentPayments.map((pay: any) => (
+                  <div key={pay.id} className="flex items-center justify-between px-5 py-3">
+                    <div>
+                      <p className="text-sm font-medium text-white">{pay.invoiceNumber}</p>
+                      <p className="text-xs text-[#7A8499]">{new Date(pay.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-white">${Number(pay.amount).toLocaleString()}</span>
+                      <Badge variant={PAYMENT_VARIANT[pay.status] || 'muted'} size="sm">{pay.status}</Badge>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-white">{pay.amount}</span>
-                    <Badge variant={PAYMENT_VARIANT[pay.status]} size="sm">{pay.status}</Badge>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
 
@@ -141,11 +146,11 @@ export default function ClientDashboardPage() {
                 { label: 'Payment History',    href: '/client/payments', icon: TrendingUp },
                 { label: 'My Profile',         href: '/client/profile',  icon: ArrowUpRight },
               ].map(({ label, href, icon: Icon }) => (
-                <a key={label} href={href}
+                <Link key={label} href={href}
                   className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.06] transition-all group text-sm text-[#AAB3C5] group-hover:text-white">
                   <Icon className="w-4 h-4 text-[#4F7DFF]" />
                   {label}
-                </a>
+                </Link>
               ))}
             </CardContent>
           </Card>

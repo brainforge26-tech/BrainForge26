@@ -12,6 +12,11 @@ import projectRouter   from '../modules/project/project.route';
 import pricingRouter   from '../modules/pricing/pricing.route';
 import { developerRouter, usersRouter } from '../modules/developer/developer.route';
 import clientRouter    from '../modules/client/client.route';
+import fileRouter      from '../modules/file/file.route';
+import homepageRouter  from '../modules/homepage/homepage.route';
+import hiringRouter    from '../modules/hiring/hiring.route';
+import messageRouter   from '../modules/message/message.route';
+import serviceRouter   from '../modules/service/service.route';
 
 export function createApp(): Application {
   const app = express();
@@ -58,9 +63,14 @@ export function createApp(): Application {
   app.use('/api/v1/admin',      adminRouter);
   app.use('/api/v1/projects',   projectRouter);
   app.use('/api/v1/pricing',    pricingRouter);
+  app.use('/api/v1/homepage',   homepageRouter);
+  app.use('/api/v1/hiring',     hiringRouter);
   app.use('/api/v1/developer',  developerRouter);
+  app.use('/api/v1/messages',   messageRouter);
   app.use('/api/v1/users',      usersRouter);
   app.use('/api/v1/client',     clientRouter);
+  app.use('/api/v1/projects',   fileRouter);
+  app.use('/api/v1/services',   serviceRouter);
 
   // ─── 404 Handler ─────────────────────────────────────────────────────────────
   app.use(notFoundHandler);

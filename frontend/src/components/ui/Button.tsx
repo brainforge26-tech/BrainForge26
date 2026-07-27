@@ -8,17 +8,17 @@ import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
   // Base
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4F7DFF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050816] disabled:pointer-events-none disabled:opacity-50 select-none',
+  'group inline-flex items-center justify-center gap-2.5 whitespace-nowrap font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A61C43] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090B] disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer',
   {
     variants: {
       variant: {
         // ── Filled gradient (primary CTA) ────────────────────────────────────
         primary:
-          'bg-gradient-to-r from-[#4F7DFF] to-[#7C5CFF] text-white shadow-[0_4px_20px_rgba(79,125,255,0.3)] hover:shadow-[0_8px_30px_rgba(79,125,255,0.5)] hover:-translate-y-0.5 active:translate-y-0',
+          'bg-gradient-to-r from-[#730E27] via-[#8B1532] to-[#52091B] text-white border border-white/15 shadow-[0_8px_30px_rgba(115,14,39,0.35)] hover:shadow-[0_12px_45px_rgba(115,14,39,0.5)] hover:-translate-y-0.5 active:translate-y-0',
 
         // ── Ghost / glass secondary ──────────────────────────────────────────
         secondary:
-          'bg-white/5 text-white border border-white/10 hover:bg-white/10 hover:border-[rgba(79,125,255,0.4)] hover:shadow-[0_0_20px_rgba(79,125,255,0.1)] hover:-translate-y-0.5',
+          'bg-[#111114]/90 text-white border border-white/15 backdrop-blur-xl hover:bg-white/10 hover:border-[rgba(115,14,39,0.35)] hover:shadow-[0_8px_30px_rgba(115,14,39,0.15)] hover:-translate-y-0.5 active:translate-y-0',
 
         // ── Destructive ──────────────────────────────────────────────────────
         destructive:
@@ -30,23 +30,23 @@ const buttonVariants = cva(
 
         // ── Link style ───────────────────────────────────────────────────────
         link:
-          'text-[#4F7DFF] underline-offset-4 hover:underline hover:text-[#00D4FF] p-0 h-auto',
+          'text-[#C02C54] underline-offset-4 hover:underline hover:text-[#A61C43] p-0 h-auto',
 
         // ── Outline ──────────────────────────────────────────────────────────
         outline:
-          'border border-[rgba(79,125,255,0.4)] text-[#4F7DFF] hover:bg-[rgba(79,125,255,0.08)] hover:-translate-y-0.5',
+          'border border-[rgba(166,28,67,0.4)] text-[#C02C54] hover:bg-[rgba(166,28,67,0.08)] hover:-translate-y-0.5',
 
         // ── Cyan accent ──────────────────────────────────────────────────────
         cyan:
           'bg-gradient-to-r from-[#00D4FF] to-[#4F7DFF] text-white shadow-[0_4px_20px_rgba(0,212,255,0.25)] hover:shadow-[0_8px_30px_rgba(0,212,255,0.4)] hover:-translate-y-0.5',
       },
       size: {
-        xs:  'h-7  px-3   text-xs   rounded-full',
-        sm:  'h-9  px-4   text-sm   rounded-full',
-        md:  'h-11 px-6   text-base rounded-full',
-        lg:  'h-13 px-8   text-lg   rounded-full',
-        xl:  'h-14 px-10  text-xl   rounded-full',
-        icon: 'h-10 w-10 rounded-full',
+        xs:  'h-8  px-3   text-xs   rounded-full',
+        sm:  'h-10 px-4.5 text-sm   rounded-full',
+        md:  'h-12 px-6   text-base rounded-full',
+        lg:  'h-14 px-8   text-base sm:text-lg rounded-full font-bold',
+        xl:  'h-16 px-10  text-lg sm:text-xl rounded-full font-bold',
+        icon: 'h-11 w-11 rounded-full',
       },
     },
     defaultVariants: {
@@ -93,10 +93,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {loading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
-          leftIcon
+          leftIcon && (
+            <span className="transition-transform duration-200 ease-out group-hover:-translate-x-1 group-hover:scale-110 shrink-0 inline-flex items-center">
+              {leftIcon}
+            </span>
+          )
         )}
         {children}
-        {!loading && rightIcon}
+        {!loading && rightIcon && (
+          <span className="transition-transform duration-200 ease-out group-hover:translate-x-1.5 shrink-0 inline-flex items-center">
+            {rightIcon}
+          </span>
+        )}
       </Comp>
     );
   },

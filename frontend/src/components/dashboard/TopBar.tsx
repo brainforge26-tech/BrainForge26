@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Search, LogOut, ChevronDown } from 'lucide-react';
+import { Bell, Search, LogOut, ChevronDown, Menu } from 'lucide-react';
 import { useState } from 'react';
 import { logoutAction } from '@/features/auth/auth.actions';
 import { Avatar } from '@/components/ui/Avatar';
@@ -22,21 +22,32 @@ const ROLE_COLOR: Record<string, string> = {
 
 interface TopBarProps {
   user: SessionUser;
+  onOpenMobileMenu?: () => void;
 }
 
-export function TopBar({ user }: TopBarProps) {
+export function TopBar({ user, onOpenMobileMenu }: TopBarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="h-16 shrink-0 flex items-center justify-between px-6 border-b border-white/[0.06] bg-[#050816]/80 backdrop-blur-sm sticky top-0 z-20">
-      {/* Search */}
-      <div className="relative hidden sm:flex items-center">
-        <Search className="absolute left-3 w-4 h-4 text-[#7A8499]" />
-        <input
-          type="text"
-          placeholder="Search…"
-          className="w-64 pl-9 pr-4 py-2 text-sm bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-[#7A8499] focus:outline-none focus:border-[#4F7DFF] focus:ring-1 focus:ring-[rgba(79,125,255,0.2)] transition-all"
-        />
+    <header className="h-16 shrink-0 flex items-center justify-between px-4 md:px-6 border-b border-white/[0.06] bg-[#050816]/80 backdrop-blur-sm sticky top-0 z-20">
+      <div className="flex items-center gap-3">
+        {/* Mobile menu toggle */}
+        <button 
+          className="md:hidden p-2 -ml-2 text-[#AAB3C5] hover:text-white transition-colors"
+          onClick={onOpenMobileMenu}
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+
+        {/* Search */}
+        <div className="relative hidden sm:flex items-center">
+          <Search className="absolute left-3 w-4 h-4 text-[#7A8499]" />
+          <input
+            type="text"
+            placeholder="Search…"
+            className="w-64 pl-9 pr-4 py-2 text-sm bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-[#7A8499] focus:outline-none focus:border-[#4F7DFF] focus:ring-1 focus:ring-[rgba(79,125,255,0.2)] transition-all"
+          />
+        </div>
       </div>
 
       {/* Right side */}

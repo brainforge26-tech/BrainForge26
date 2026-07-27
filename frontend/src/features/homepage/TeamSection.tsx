@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Github, Linkedin, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
 
 const TEAM = [
   {
@@ -135,9 +136,9 @@ export function TeamSection() {
           <p className="text-[#AAB3C5] text-sm mb-5">
             We&apos;re always looking for talented developers. Apply to our hiring program.
           </p>
-          <button className="btn-primary inline-flex items-center gap-2">
+          <Link href="/apply" className="btn-primary inline-flex items-center gap-2">
             View Open Positions <ExternalLink className="w-4 h-4" />
-          </button>
+          </Link>
         </motion.div>
       </div>
     </section>

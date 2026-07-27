@@ -29,6 +29,9 @@ export type AssignedProject = {
     manager: { email: string; managerProfile: { firstName: string; lastName: string } | null } | null;
     milestones: { id: string; name: string; status: string; dueDate: string | null }[];
     timelineStages: { id: string; name: string; status: string; order: number }[];
+    files?: any[];
+    progressUpdates?: any[];
+    developers?: any[];
   };
 };
 
@@ -91,6 +94,12 @@ export async function fetchMyProjects(): Promise<AssignedProject[]> {
     const res = await apiFetch<{ data: { projects: AssignedProject[] } }>('/developer/me/projects');
     return res.data?.projects ?? [];
   } catch { return []; }
+}
+
+export async function fetchProjectById(id: string): Promise<AssignedProject['project'] | null> {
+  const projects = await fetchMyProjects();
+  const found = projects.find(p => p.project.id === id);
+  return found ? found.project : null;
 }
 
 // ─── Update profile ───────────────────────────────────────────────────────────
@@ -159,4 +168,12 @@ export async function updateResumeAction(resumeUrl: string): Promise<ActionState
     revalidatePath('/developer/documents');
     return { success: true, message: 'Resume updated' };
   } catch (err) { return { success: false, error: (err as Error).message }; }
+}
+
+// ─── Fetch My Applications ────────────────────────────────────────────────────
+export async function fetchMyApplications() {
+  try {
+    const res = await apiFetch<{ data: any[] }>('/hiring/my-applications');
+    return res.data ?? [];
+  } catch { return []; }
 }

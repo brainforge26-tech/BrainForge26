@@ -6,18 +6,46 @@ import { ProjectsSection } from '@/features/homepage/ProjectsSection';
 import { PricingSection }  from '@/features/homepage/PricingSection';
 import { TeamSection }     from '@/features/homepage/TeamSection';
 import { CTASection }      from '@/features/homepage/CTASection';
+import { SectionStack }    from '@/components/layout/SectionStack';
+import { fetchHomepageContent, fetchPricingPlans } from '@/features/homepage/homepage.actions';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const content = await fetchHomepageContent();
+  const pricingPlans = await fetchPricingPlans();
+
   return (
-    <>
-      <HeroSection />
-      <StatsSection />
-      <ServicesSection />
-      <FeaturesSection />
-      <ProjectsSection />
-      <PricingSection />
-      <TeamSection />
-      <CTASection />
-    </>
+    <div className="relative bg-[#09090B]">
+      <SectionStack isHero>
+        <HeroSection content={content.hero} />
+      </SectionStack>
+
+      <SectionStack>
+        <StatsSection />
+      </SectionStack>
+
+      <SectionStack id="services">
+        <ServicesSection />
+      </SectionStack>
+
+      <SectionStack id="features">
+        <FeaturesSection />
+      </SectionStack>
+
+      <SectionStack id="projects" disableSticky>
+        <ProjectsSection />
+      </SectionStack>
+
+      <SectionStack id="pricing" disableSticky>
+        <PricingSection plans={pricingPlans} />
+      </SectionStack>
+
+      <SectionStack id="team">
+        <TeamSection />
+      </SectionStack>
+
+      <SectionStack id="contact">
+        <CTASection />
+      </SectionStack>
+    </div>
   );
 }

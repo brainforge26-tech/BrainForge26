@@ -542,6 +542,19 @@ model HomepageContent {
   @@map("homepage_content")
 }
 
+model SpecializedService {
+  id          String   @id @default(uuid())
+  icon        String?  // Identifier for the icon (e.g. 'Globe', 'Smartphone')
+  title       String   
+  features    String[] 
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("specialized_services")
+}
+
 model Testimonial {
   id         String   @id @default(uuid())
   clientName String

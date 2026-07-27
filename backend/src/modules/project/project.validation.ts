@@ -4,13 +4,21 @@ export const createProjectSchema = z.object({
   name:               z.string().min(2, 'Project name is required'),
   description:        z.string().optional(),
   projectType:        z.string().optional(),
-  technologies:       z.array(z.string()).default([]),
+  technologies:       z.array(z.string()).or(z.string()).transform(val => {
+                        if (Array.isArray(val)) return val;
+                        return val ? val.split(',').map(s => s.trim()).filter(Boolean) : [];
+                      }).default([]),
   priority:           z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).default('MEDIUM'),
-  clientId:           z.string().uuid('Invalid client ID'),
-  startDate:          z.string().datetime().optional(),
-  estimatedDelivery:  z.string().datetime().optional(),
-  budget:             z.number().positive().optional(),
+  clientId:           z.string().optional(),
+  managerId:          z.string().optional(),
+  startDate:          z.string().optional(),
+  estimatedDelivery:  z.string().optional(),
+  budget:             z.coerce.number().positive().optional(),
   managerNotes:       z.string().optional(),
+  images:             z.array(z.string()).or(z.string()).transform(val => {
+                        if (Array.isArray(val)) return val;
+                        return val ? [val] : [];
+                      }).optional(),
 });
 
 export const updateProjectSchema = z.object({

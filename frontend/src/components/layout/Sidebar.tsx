@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, FolderKanban, DollarSign,
   Settings, Bell, MessageSquare, ChevronLeft,
   ChevronRight, LogOut, Zap, FileText, BarChart3,
-  UserCheck, Briefcase, Home, CreditCard,
+  UserCheck, Briefcase, Home, CreditCard, Globe,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,11 +23,12 @@ interface NavItem {
 
 const NAV_BY_ROLE: Record<SidebarRole, NavItem[]> = {
   admin: [
-    { label: 'Dashboard',   href: '/admin',          icon: LayoutDashboard },
-    { label: 'Managers',    href: '/admin/managers',  icon: Users },
-    { label: 'Projects',    href: '/admin/projects',  icon: FolderKanban },
-    { label: 'Analytics',   href: '/admin/analytics', icon: BarChart3 },
-    { label: 'Settings',    href: '/admin/settings',  icon: Settings },
+    { label: 'Dashboard',   href: '/admin',           icon: LayoutDashboard },
+    { label: 'Managers',    href: '/admin/managers',   icon: Users },
+    { label: 'Projects',    href: '/admin/projects',   icon: FolderKanban },
+    { label: 'Services',    href: '/admin/services',   icon: Globe },
+    { label: 'Analytics',   href: '/admin/analytics',  icon: BarChart3 },
+    { label: 'Settings',    href: '/admin/settings',   icon: Settings },
   ],
   manager: [
     { label: 'Dashboard',   href: '/manager',              icon: LayoutDashboard },
@@ -36,11 +37,13 @@ const NAV_BY_ROLE: Record<SidebarRole, NavItem[]> = {
     { label: 'Clients',     href: '/manager/clients',      icon: Users },
     { label: 'Hiring',      href: '/manager/hiring',       icon: Briefcase },
     { label: 'Pricing',     href: '/manager/pricing',      icon: DollarSign },
+    { label: 'Services',    href: '/manager/services',     icon: Globe },
     { label: 'Homepage',    href: '/manager/homepage',     icon: Home },
     { label: 'Messages',    href: '/manager/messages',     icon: MessageSquare },
   ],
   developer: [
     { label: 'Dashboard',   href: '/developer',            icon: LayoutDashboard },
+    { label: 'Applications',href: '/developer/applications',icon: Briefcase },
     { label: 'Projects',    href: '/developer/projects',   icon: FolderKanban },
     { label: 'Profile',     href: '/developer/profile',    icon: Users },
     { label: 'Messages',    href: '/developer/messages',   icon: MessageSquare },
@@ -61,37 +64,49 @@ interface SidebarProps {
   userName?: string;
   userEmail?: string;
   userAvatar?: string;
+  badges?: Record<string, number>;
+  mobileOpen?: boolean;
+  setMobileOpen?: (open: boolean) => void;
 }
 
-export function Sidebar({ role, userName = 'User', userEmail = '' }: SidebarProps) {
+export function Sidebar({ role, userName = 'User', userEmail = '', badges, mobileOpen, setMobileOpen }: SidebarProps) {
   const pathname  = usePathname();
   const [collapsed, setCollapsed] = React.useState(false);
   const navItems  = NAV_BY_ROLE[role];
+
+  // Auto-close mobile sidebar when route changes
+  React.useEffect(() => {
+    if (mobileOpen && setMobileOpen) {
+      setMobileOpen(false);
+    }
+  }, [pathname]);
 
   return (
     <motion.aside
       animate={{ width: collapsed ? 72 : 256 }}
       transition={{ duration: 0.25, ease: 'easeInOut' }}
-      className="relative flex flex-col h-screen bg-[#0B1224] border-r border-white/[0.06] shrink-0 overflow-hidden"
+      className="relative flex flex-col h-full bg-[#0B1224] border-r border-white/[0.06] shrink-0 overflow-hidden"
     >
       {/* ── Logo ────────────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 px-4 h-16 border-b border-white/[0.06]">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-[#4F7DFF] to-[#7C5CFF] shadow-[0_0_16px_rgba(79,125,255,0.4)] shrink-0">
-          <Zap className="w-4 h-4 text-white" />
+      <div className="flex items-center justify-between px-4 h-16 border-b border-white/[0.06] shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-[#4F7DFF] to-[#7C5CFF] shadow-[0_0_16px_rgba(79,125,255,0.4)] shrink-0">
+            <Zap className="w-4 h-4 text-white" />
+          </div>
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.15 }}
+                className="font-bold text-base text-white tracking-tight whitespace-nowrap"
+              >
+                Brain<span className="gradient-text-blue">Force</span>IT
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
-        <AnimatePresence>
-          {!collapsed && (
-            <motion.span
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -8 }}
-              transition={{ duration: 0.15 }}
-              className="font-bold text-base text-white tracking-tight whitespace-nowrap"
-            >
-              Brain<span className="gradient-text-blue">Force</span>IT
-            </motion.span>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* ── Nav items ───────────────────────────────────────────────────────── */}
@@ -99,6 +114,7 @@ export function Sidebar({ role, userName = 'User', userEmail = '' }: SidebarProp
         {navItems.map((item) => {
           const Icon    = item.icon;
           const active  = pathname === item.href || pathname.startsWith(item.href + '/');
+          const badge   = badges?.[item.href] ?? item.badge;
 
           return (
             <Link
@@ -131,9 +147,9 @@ export function Sidebar({ role, userName = 'User', userEmail = '' }: SidebarProp
                   </motion.span>
                 )}
               </AnimatePresence>
-              {!collapsed && item.badge && item.badge > 0 && (
+              {!collapsed && badge && badge > 0 && (
                 <span className="ml-auto flex items-center justify-center w-5 h-5 rounded-full bg-[#4F7DFF] text-[10px] font-bold text-white">
-                  {item.badge > 9 ? '9+' : item.badge}
+                  {badge > 9 ? '9+' : badge}
                 </span>
               )}
             </Link>
@@ -178,25 +194,27 @@ export function Sidebar({ role, userName = 'User', userEmail = '' }: SidebarProp
           )}
         </AnimatePresence>
 
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[#7A8499] hover:text-[#EF4444] hover:bg-[rgba(239,68,68,0.08)] transition-all group">
-          <LogOut className="w-5 h-5 shrink-0" />
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.span
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="whitespace-nowrap"
-              >
-                Sign Out
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </button>
+        <form action="/api/auth/logout" method="POST" className="w-full">
+          <button type="submit" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[#7A8499] hover:text-[#EF4444] hover:bg-[rgba(239,68,68,0.08)] transition-all group">
+            <LogOut className="w-5 h-5 shrink-0" />
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.span
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="whitespace-nowrap"
+                >
+                  Sign Out
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        </form>
       </div>
 
-      {/* ── Collapse toggle ──────────────────────────────────────────────────── */}
+      {/* ── Collapse toggle (Desktop only) ─────────────────────────────────── */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-[#0B1224] border border-white/[0.12] text-[#AAB3C5] hover:text-white hover:border-[#4F7DFF] transition-all shadow-md"
+        className="hidden md:flex absolute -right-3 top-20 z-10 items-center justify-center w-6 h-6 rounded-full bg-[#0B1224] border border-white/[0.12] text-[#AAB3C5] hover:text-white hover:border-[#4F7DFF] transition-all shadow-md"
         aria-label="Toggle sidebar"
       >
         {collapsed

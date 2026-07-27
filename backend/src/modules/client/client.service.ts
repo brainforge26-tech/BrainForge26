@@ -4,7 +4,10 @@ import type { UpdateClientProfileInput, SendMessageInput } from './client.valida
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 async function getClientProfile(userId: string) {
-  const profile = await prisma.clientProfile.findUnique({ where: { userId } });
+  const profile = await prisma.clientProfile.findUnique({ 
+    where: { userId },
+    include: { user: { select: { email: true, createdAt: true } } }
+  });
   if (!profile) throw new NotFoundError('Client profile not found');
   return profile;
 }
@@ -157,4 +160,17 @@ export async function getDashboardStats(userId: string) {
     totalPayments:     Number(totalPayment._sum.amount ?? 0),
     unreadMessages,
   };
+}
+
+export async function listAllClients() {
+  return prisma.clientProfile.findMany({
+    include: {
+      user: {
+        select: { email: true, isActive: true, createdAt: true }
+      }
+    },
+    orderBy: {
+      companyName: 'asc'
+    }
+  });
 }

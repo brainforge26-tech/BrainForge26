@@ -16,31 +16,64 @@ const projectInclude = {
   },
   milestones:     { orderBy: { order: 'asc' as const } },
   timelineStages: { orderBy: { order: 'asc' as const } },
+  gallery:        { orderBy: { order: 'asc' as const } },
   _count: { select: { progressUpdates: true, files: true, payments: true } },
 } as const;
 
 // ─── Create project ───────────────────────────────────────────────────────────
-export async function createProject(managerId: string, input: CreateProjectInput) {
-  // Verify client exists
-  const client = await prisma.clientProfile.findUnique({ where: { id: input.clientId } });
-  if (!client) throw new NotFoundError('Client not found');
+export async function createProject(currentUserId: string, input: CreateProjectInput) {
+  // 1. Resolve client Profile
+  let clientId = input.clientId;
+  if (!clientId) {
+    const firstClient = await prisma.clientProfile.findFirst();
+    if (!firstClient) throw new NotFoundError('No client profiles found. Please register a client first.');
+    clientId = firstClient.id;
+  } else {
+    const client = await prisma.clientProfile.findUnique({ where: { id: clientId } });
+    if (!client) {
+      const fallbackClient = await prisma.clientProfile.findFirst();
+      if (!fallbackClient) throw new NotFoundError('Selected client not found.');
+      clientId = fallbackClient.id;
+    }
+  }
+
+  // 2. Resolve managerId (allow passing managerId or default to user)
+  const managerId = input.managerId ?? currentUserId;
+
+  const parseDate = (d?: string) => {
+    if (!d) return undefined;
+    const date = new Date(d);
+    return isNaN(date.getTime()) ? undefined : date;
+  };
 
   const project = await prisma.project.create({
     data: {
       name:              input.name,
       description:       input.description,
       projectType:       input.projectType,
-      technologies:      input.technologies,
-      priority:          input.priority,
+      technologies:      input.technologies ?? [],
+      priority:          input.priority ?? 'MEDIUM',
       managerId,
-      clientId:          input.clientId,
-      startDate:         input.startDate    ? new Date(input.startDate)    : undefined,
-      estimatedDelivery: input.estimatedDelivery ? new Date(input.estimatedDelivery) : undefined,
+      clientId,
+      startDate:         parseDate(input.startDate),
+      estimatedDelivery: parseDate(input.estimatedDelivery),
       budget:            input.budget,
       managerNotes:      input.managerNotes,
     },
     include: projectInclude,
   });
+
+  // 3. Save gallery images if provided
+  if (input.images && input.images.length > 0) {
+    await prisma.projectGallery.createMany({
+      data: input.images.map((url, i) => ({
+        projectId: project.id,
+        url,
+        publicId: `gallery_${project.id}_${i}`,
+        order: i,
+      })),
+    });
+  }
 
   // Create default timeline stages
   const DEFAULT_STAGES = [
@@ -60,10 +93,18 @@ export async function createProject(managerId: string, input: CreateProjectInput
 
   // Log activity
   await prisma.activityLog.create({
-    data: { userId: managerId, action: 'PROJECT_CREATED', entity: 'Project', entityId: project.id },
+    data: { userId: currentUserId, action: 'PROJECT_CREATED', entity: 'Project', entityId: project.id },
   });
 
-  return project;
+  return getProjectById(project.id, currentUserId, 'ADMIN');
+}
+
+// ─── List public projects ─────────────────────────────────────────────────────
+export async function listPublicProjects() {
+  return prisma.project.findMany({
+    include: projectInclude,
+    orderBy: { createdAt: 'desc' },
+  });
 }
 
 // ─── List projects ────────────────────────────────────────────────────────────

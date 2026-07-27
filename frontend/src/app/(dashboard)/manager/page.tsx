@@ -1,34 +1,41 @@
 import {
   FolderKanban, Users, UserCheck, CheckCircle2,
-  Clock, ArrowUpRight, TrendingUp, Briefcase,
+  Clock, ArrowUpRight, TrendingUp, Briefcase, MessageSquare
 } from 'lucide-react';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { StatCard }   from '@/components/common/StatCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge }      from '@/components/ui/Badge';
-
-const STATS = [
-  { title: 'Active Projects',    value: '8',   change: 14.3, icon: FolderKanban, iconColor: '#4F7DFF', desc: 'vs last month' },
-  { title: 'Total Clients',      value: '12',  change: 8.0,  icon: Users,        iconColor: '#7C5CFF', desc: 'vs last month' },
-  { title: 'My Developers',      value: '6',   change: 0,    icon: UserCheck,    iconColor: '#00D4FF', desc: 'no change'     },
-  { title: 'Completed This Month', value: '3', change: 50.0, icon: CheckCircle2, iconColor: '#22C55E', desc: 'vs last month' },
-];
-
-const RECENT_PROJECTS = [
-  { name: 'E-Commerce Rebuild',  client: 'TechCorp',    status: 'ACTIVE',    progress: 72, due: 'Aug 15' },
-  { name: 'Mobile App v2',       client: 'StartupXYZ',  status: 'ACTIVE',    progress: 45, due: 'Sep 1'  },
-  { name: 'Analytics Dashboard', client: 'DataFlow Inc', status: 'PENDING',  progress: 10, due: 'Oct 10' },
-  { name: 'Landing Page Revamp', client: 'BlueWave',    status: 'COMPLETED', progress: 100, due: 'Done'  },
-];
+import { fetchProjects, fetchClients, fetchDevelopers } from '@/features/manager/manager.actions';
+import { formatDistanceToNow } from 'date-fns';
+import Link from 'next/link';
 
 const STATUS_VARIANT: Record<string, 'primary' | 'success' | 'warning' | 'muted'> = {
   ACTIVE:    'primary',
   PENDING:   'warning',
   COMPLETED: 'success',
   ON_HOLD:   'muted',
+  CANCELLED: 'muted',
 };
 
-export default function ManagerDashboardPage() {
+export default async function ManagerDashboardPage() {
+  const [projectsRes, clients, developers] = await Promise.all([
+    fetchProjects(1),
+    fetchClients(),
+    fetchDevelopers(),
+  ]);
+
+  const projects = projectsRes?.projects || [];
+  const activeProjectsCount = projects.filter(p => p.status === 'ACTIVE').length;
+  const completedProjectsCount = projects.filter(p => p.status === 'COMPLETED').length;
+
+  const STATS = [
+    { title: 'Active Projects',    value: String(activeProjectsCount),   change: 0, icon: FolderKanban, iconColor: '#4F7DFF', desc: 'Current active' },
+    { title: 'Total Clients',      value: String(clients.length),  change: 0,  icon: Users,        iconColor: '#7C5CFF', desc: 'Registered clients' },
+    { title: 'My Developers',      value: String(developers.length),   change: 0,    icon: UserCheck,    iconColor: '#00D4FF', desc: 'Available team'     },
+    { title: 'Total Completed',    value: String(completedProjectsCount), change: 0, icon: CheckCircle2, iconColor: '#22C55E', desc: 'All time' },
+  ];
+
   return (
     <div className="animate-fade-up space-y-8">
       <PageHeader
@@ -51,59 +58,69 @@ export default function ManagerDashboardPage() {
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Projects table */}
-        <Card variant="default" padding="none" className="lg:col-span-2 overflow-hidden">
-          <CardHeader className="px-6 pt-6 pb-4 border-b border-white/[0.06]">
+        <Card variant="default" padding="none" className="lg:col-span-2 overflow-hidden flex flex-col min-h-[300px]">
+          <CardHeader className="px-6 pt-6 pb-4 border-b border-white/[0.06] shrink-0">
             <div className="flex items-center justify-between">
               <CardTitle>My Projects</CardTitle>
-              <a href="/manager/projects" className="flex items-center gap-1 text-xs text-[#4F7DFF] hover:text-[#00D4FF] transition-colors">
+              <Link href="/manager/projects" className="flex items-center gap-1 text-xs text-[#4F7DFF] hover:text-[#00D4FF] transition-colors">
                 View all <ArrowUpRight className="w-3.5 h-3.5" />
-              </a>
+              </Link>
             </div>
           </CardHeader>
-          <CardContent>
-            <table className="premium-table">
-              <thead>
-                <tr>
-                  <th>Project</th>
-                  <th>Progress</th>
-                  <th>Due</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {RECENT_PROJECTS.map((p) => (
-                  <tr key={p.name}>
-                    <td>
-                      <div>
-                        <p className="text-sm font-medium text-white">{p.name}</p>
-                        <p className="text-xs text-[#7A8499]">{p.client}</p>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-white/[0.08] rounded-full overflow-hidden min-w-[60px]">
-                          <div
-                            className="h-full rounded-full bg-gradient-to-r from-[#4F7DFF] to-[#7C5CFF] transition-all"
-                            style={{ width: `${p.progress}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-[#7A8499] w-8 text-right">{p.progress}%</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="flex items-center gap-1 text-xs text-[#AAB3C5]">
-                        <Clock className="w-3 h-3" /> {p.due}
-                      </div>
-                    </td>
-                    <td>
-                      <Badge variant={STATUS_VARIANT[p.status] ?? 'muted'} size="sm" dot>
-                        {p.status}
-                      </Badge>
-                    </td>
+          <CardContent className="flex-1 overflow-x-auto p-0">
+            {projects.length > 0 ? (
+              <table className="premium-table w-full">
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Progress</th>
+                    <th>Due</th>
+                    <th>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {projects.slice(0, 5).map((p) => (
+                    <tr key={p.id}>
+                      <td>
+                        <div>
+                          <p className="text-sm font-medium text-white max-w-[200px] truncate">{p.name}</p>
+                          <p className="text-xs text-[#7A8499] max-w-[200px] truncate">{p.client?.companyName || 'No Client'}</p>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.5 bg-white/[0.08] rounded-full overflow-hidden min-w-[60px]">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-[#4F7DFF] to-[#7C5CFF] transition-all"
+                              style={{ width: `${p.completionPercent || 0}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-[#7A8499] w-8 text-right">{p.completionPercent || 0}%</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-1 text-xs text-[#AAB3C5]">
+                          <Clock className="w-3 h-3" /> {p.estimatedDelivery ? formatDistanceToNow(new Date(p.estimatedDelivery), { addSuffix: true }) : 'N/A'}
+                        </div>
+                      </td>
+                      <td>
+                        <Badge variant={STATUS_VARIANT[p.status] ?? 'muted'} size="sm" dot>
+                          {p.status}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-[#7A8499]">
+                <FolderKanban className="w-10 h-10 mb-3 opacity-20" />
+                <p className="text-sm font-medium">No projects found.</p>
+                <Link href="/manager/projects/new" className="mt-2 text-xs text-[#4F7DFF] hover:underline">
+                  Create your first project
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -120,11 +137,11 @@ export default function ManagerDashboardPage() {
               { label: 'Post Progress',    href: '/manager/projects',      color: '#22C55E' },
               { label: 'Manage Pricing',   href: '/manager/pricing',       color: '#F59E0B' },
             ].map(({ label, href, color }) => (
-              <a key={label} href={href}
+              <Link key={label} href={href}
                 className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.07] hover:border-white/[0.12] hover:bg-white/[0.06] transition-all group">
                 <span className="text-sm font-medium text-[#AAB3C5] group-hover:text-white transition-colors">{label}</span>
                 <ArrowUpRight className="w-4 h-4 transition-colors" style={{ color }} />
-              </a>
+              </Link>
             ))}
           </CardContent>
         </Card>
