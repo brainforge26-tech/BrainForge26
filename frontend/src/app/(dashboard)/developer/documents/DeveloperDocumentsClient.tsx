@@ -31,8 +31,11 @@ export function DeveloperDocumentsClient({ resumeUrl: initialResumeUrl }: { resu
     if (!resumeUrl.trim()) { toast.error('Please enter a resume URL'); return; }
     startT(async () => {
       const r = await updateResumeAction(resumeUrl.trim());
-      if (r.success) { toast.success(r.message); }
-      else toast.error(r.error);
+      if ('message' in r) {
+        toast.success(r.message);
+      } else if ('error' in r) {
+        toast.error(r.error);
+      }
     });
   }
 

@@ -12,13 +12,13 @@ export function TimelineTab({ project }: { project: Project }) {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(addStageAction, initial);
 
   useEffect(() => {
-    if (state.success) toast.success(state.message);
+    if ('message' in state && state.message) toast.success(state.message);
   }, [state.success, state]);
 
   const handleStatusChange = async (stageId: string, status: string) => {
     const res = await updateTimelineStageAction(project.id, stageId, status);
-    if (res.success) toast.success(res.message);
-    else toast.error(res.error);
+    if ('message' in res) toast.success(res.message);
+    else if ('error' in res) toast.error(res.error);
   };
 
   const STAGE_COLOR: Record<string, string> = {

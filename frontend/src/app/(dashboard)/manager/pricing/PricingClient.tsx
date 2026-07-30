@@ -17,13 +17,13 @@ export function PricingClient({ initialPlans }: { initialPlans: any[] }) {
   const [isPending, startT] = useTransition();
 
   useEffect(() => {
-    if (state.success) { toast.success(state.message); setShowForm(false); }
+    if ('message' in state && state.message) { toast.success(state.message); setShowForm(false); }
   }, [state.success, state]);
 
   function handleDelete(id: string) {
     startT(async () => {
       const r = await deletePricingAction(id);
-      if (r.success) toast.success(r.message); else toast.error(r.error);
+      if ('message' in r) toast.success(r.message); else if ('error' in r) toast.error(r.error);
     });
   }
 

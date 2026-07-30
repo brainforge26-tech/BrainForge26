@@ -49,7 +49,7 @@ export function MessageClient({ initialConversations, currentUser, clients }: { 
       const formData = new FormData();
       formData.append('content', msg);
       const res = await sendMessageAction(activeId, null, formData);
-      if (!res.success) {
+      if ('error' in res && res.error) {
         toast.error(res.error);
       } else {
         // Fetch again to ensure sync
@@ -63,7 +63,7 @@ export function MessageClient({ initialConversations, currentUser, clients }: { 
       const formData = new FormData();
       formData.append('clientId', clientId);
       const res = await startConversationAction(null, formData);
-      if (!res.success) {
+      if ('error' in res && res.error) {
         toast.error(res.error);
       } else {
         toast.success('Conversation started');

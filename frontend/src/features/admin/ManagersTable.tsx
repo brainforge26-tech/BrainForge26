@@ -32,8 +32,8 @@ export function ManagersTable({ initialData }: Props) {
     setMenu(null);
     startTransition(async () => {
       const r = await deactivateManagerAction(id);
-      if (r.success) toast.success(r.message);
-      else toast.error(r.error);
+      if ('message' in r) toast.success(r.message);
+      else if ('error' in r) toast.error(r.error);
     });
   }
 
@@ -42,8 +42,8 @@ export function ManagersTable({ initialData }: Props) {
     setMenu(null);
     startTransition(async () => {
       const r = await deleteManagerAction(id);
-      if (r.success) toast.success(r.message);
-      else toast.error(r.error);
+      if ('message' in r) toast.success(r.message);
+      else if ('error' in r) toast.error(r.error);
     });
   }
 

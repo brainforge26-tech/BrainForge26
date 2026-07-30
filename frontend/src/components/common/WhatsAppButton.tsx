@@ -42,8 +42,8 @@ export function WhatsAppButton() {
         className="relative group flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-[#128C7E] via-[#25D366] to-[#25D366] text-white shadow-[0_10px_30px_rgba(37,211,102,0.45)] hover:shadow-[0_15px_40px_rgba(37,211,102,0.6)] transition-all duration-300 border border-white/20"
         aria-label="Chat on WhatsApp"
       >
-        {/* Pulsing Outer Ring */}
-        <span className="absolute inset-0 rounded-full bg-[#25D366] opacity-30 animate-ping pointer-events-none" />
+        {/* Static Soft Outer Ring */}
+        <span className="absolute inset-0 rounded-full bg-[#25D366] opacity-20 pointer-events-none" />
 
         {/* WhatsApp Icon (SVG) */}
         <svg

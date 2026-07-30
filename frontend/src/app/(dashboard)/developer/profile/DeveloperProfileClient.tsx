@@ -36,7 +36,7 @@ export function DeveloperProfileClient({ initialProfile }: { initialProfile: Dev
   function handleDeletePortfolio(id: string) {
     startT(async () => {
       const r = await deletePortfolioAction(id);
-      if (r.success) toast.success(r.message); else toast.error(r.error);
+      if ('message' in r) toast.success(r.message); else if ('error' in r) toast.error(r.error);
     });
   }
 

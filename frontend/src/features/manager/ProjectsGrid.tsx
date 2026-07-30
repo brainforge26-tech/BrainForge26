@@ -36,7 +36,7 @@ export function ProjectsGrid({ initialData }: Props) {
     setMenu(null);
     startT(async () => {
       const r = await updateProjectStatusAction(id, status);
-      if (r.success) toast.success(r.message); else toast.error(r.error);
+      if ('message' in r) toast.success(r.message); else if ('error' in r) toast.error(r.error);
     });
   }
 
