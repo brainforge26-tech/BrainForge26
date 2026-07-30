@@ -106,6 +106,15 @@ fi
 # ------------------------------------------------------------------------------
 echo "==> [4/10] Writing production environment files..."
 
+# Generate secure random passwords if not already existing
+DB_PASS=$(openssl rand -base64 24 | tr -dc 'a-zA-Z0-9' | head -c 24)
+JWT_SECRET=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 32)
+JWT_REFRESH_SECRET=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 32)
+COOKIE_SECRET=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 32)
+RESET_PASS_TOKEN=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 32)
+
+# ...
+
 # Backend .env
 cat <<EOF > "${TARGET_DIR}/backend/.env"
 PORT=${BACKEND_PORT}
@@ -115,6 +124,8 @@ JWT_ACCESS_SECRET="${JWT_SECRET}"
 JWT_REFRESH_SECRET="${JWT_REFRESH_SECRET}"
 JWT_ACCESS_EXPIRES_IN="1d"
 JWT_REFRESH_EXPIRES_IN="7d"
+COOKIE_SECRET="${COOKIE_SECRET}"
+RESET_PASS_TOKEN="${RESET_PASS_TOKEN}"
 CLIENT_URL="https://${FRONTEND_DOMAIN}"
 EOF
 
