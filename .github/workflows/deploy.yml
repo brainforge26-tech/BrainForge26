@@ -29,6 +29,20 @@ jobs:
             echo "========================================="
 
             APP_DIR="/var/www/BrainForge26"
+
+            # Initial Setup Fallback if directory does not exist on VPS yet
+            if [ ! -d "$APP_DIR" ]; then
+                echo "==> Initial Setup: /var/www/BrainForge26 not found on VPS."
+                echo "==> Cloning repository and executing initial setup_vps_project2.sh..."
+                sudo mkdir -p "$APP_DIR"
+                sudo chown -R $USER:$USER "$APP_DIR"
+                git clone https://github.com/brainforge26-tech/BrainForge26.git "$APP_DIR"
+                cd "$APP_DIR"
+                chmod +x setup_vps_project2.sh
+                ./setup_vps_project2.sh
+                exit 0
+            fi
+
             cd "$APP_DIR"
 
             # 1. Record Previous Commit SHA for Rollback Safety
