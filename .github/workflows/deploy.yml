@@ -1,0 +1,103 @@
+name: Production CI/CD Deployment - BrainForge26
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy BrainForge26 to VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Remote VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -e
+            echo "========================================="
+            echo "Starting Continuous Deployment for BrainForge26"
+            echo "========================================="
+
+            APP_DIR="/var/www/BrainForge26"
+            cd "$APP_DIR"
+
+            # 1. Record Previous Commit SHA for Rollback Safety
+            PREV_COMMIT=$(git rev-parse HEAD)
+            echo "Current Commit SHA: $PREV_COMMIT"
+
+            # 2. Pull Latest Code from main branch
+            echo "==> Fetching latest changes from GitHub..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            # 3. Backend CI & Build Pipeline
+            echo "==> Installing Backend dependencies & running Prisma migrations..."
+            cd "$APP_DIR/backend"
+            npm ci
+            npx prisma generate
+            npx prisma migrate deploy
+            npm run build
+
+            # 4. Frontend CI & Build Pipeline
+            echo "==> Installing Frontend dependencies & building Next.js production app..."
+            cd "$APP_DIR/frontend"
+            npm ci
+            npm run build
+
+            # 5. Reload PM2 Applications (Zero-Downtime Reload)
+            echo "==> Reloading PM2 services..."
+            cd "$APP_DIR"
+            pm2 reload ecosystem.config.js --env production --update-env
+
+            # 6. Verify Health of Application Services
+            echo "==> Verifying service health..."
+            sleep 3
+            curl -f http://127.0.0.1:5001 || curl -f http://127.0.0.1:5001/api/v1/health
+            curl -f http://127.0.0.1:3001
+
+            echo "✓ DEPLOYMENT SUCCESSFUL!"
+
+      - name: Automatic Rollback on Failure
+        if: failure()
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            echo "========================================="
+            echo "⚠ DEPLOYMENT FAILED! Initiating Rollback..."
+            echo "========================================="
+            APP_DIR="/var/www/BrainForge26"
+            cd "$APP_DIR"
+
+            # Revert to previous working commit
+            git reset --hard HEAD@{1}
+
+            # Rebuild Backend
+            cd "$APP_DIR/backend"
+            npm ci
+            npx prisma generate
+            npm run build
+
+            # Rebuild Frontend
+            cd "$APP_DIR/frontend"
+            npm ci
+            npm run build
+
+            # Reload PM2 Services with working version
+            cd "$APP_DIR"
+            pm2 reload ecosystem.config.js --env production --update-env
+
+            echo "✓ Rollback executed successfully. Previous working commit restored."

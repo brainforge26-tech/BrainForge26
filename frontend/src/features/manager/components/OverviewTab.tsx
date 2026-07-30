@@ -59,7 +59,7 @@ export function OverviewTab({ project }: { project: Project }) {
             Project Showcase & Gallery Photos
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {project.gallery.map((img) => (
+            {project.gallery.map((img: { id: string; url: string; caption?: string | null }) => (
               <div key={img.id} className="relative aspect-video rounded-xl overflow-hidden border border-white/10 group bg-black/40">
                 <img src={img.url} alt={img.caption || project.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               </div>

@@ -21,7 +21,8 @@ export default async function ProjectDetailsPage({ params }: PageProps) {
     project = {
       id: foundDbProject.id,
       title: foundDbProject.name,
-      category: foundDbProject.projectType || 'Web Application',
+      category: (foundDbProject.projectType as any) || 'Web Apps',
+      type: foundDbProject.projectType || 'Web Application',
       client: foundDbProject.client?.companyName || 'Enterprise Client',
       timeline: foundDbProject.estimatedDelivery ? new Date(foundDbProject.estimatedDelivery).getFullYear().toString() : '2026',
       status: foundDbProject.status === 'COMPLETED' ? 'Completed' : 'Active',
@@ -40,6 +41,7 @@ export default async function ProjectDetailsPage({ params }: PageProps) {
         'High-concurrency microservices architecture',
       ],
       role: 'Fullstack Engineering & Design Lead',
+      color: '#C02C54',
     };
   } else {
     project = PROJECTS_DATA.find((p) => p.id === id) || PROJECTS_DATA[0];

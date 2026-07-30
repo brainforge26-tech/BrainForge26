@@ -19,6 +19,7 @@ export type Project = {
   developers: { developer: { id: string; email: string; developerProfile: { firstName: string; lastName: string; title: string | null } | null } }[];
   milestones: any[];
   timelineStages: any[];
+  gallery?: { id: string; url: string; caption?: string | null }[];
   _count: { progressUpdates: number; files: number; payments: number };
 };
 
