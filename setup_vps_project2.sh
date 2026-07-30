@@ -197,6 +197,7 @@ pm2 save
 # 8. Nginx Site Configuration
 # ------------------------------------------------------------------------------
 echo "==> [8/10] Deploying Nginx site configuration..."
+sudo mkdir -p /var/www/html
 
 sudo tee /etc/nginx/sites-available/brainforge26.tech > /dev/null <<'EOF'
 server {
@@ -216,6 +217,10 @@ server {
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
 
     location /_next/static/ {
         proxy_pass http://127.0.0.1:3001;
@@ -254,6 +259,10 @@ server {
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
 
     location /socket.io/ {
         proxy_pass http://127.0.0.1:5001;
