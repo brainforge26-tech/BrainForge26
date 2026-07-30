@@ -132,7 +132,7 @@ echo "✓ Environment configuration written."
 # ------------------------------------------------------------------------------
 echo "==> [5/10] Building Backend application..."
 cd "${TARGET_DIR}/backend"
-npm ci
+npm install --no-audit
 npx prisma generate
 npx prisma migrate deploy
 npm run build
@@ -142,7 +142,7 @@ npm run build
 # ------------------------------------------------------------------------------
 echo "==> [6/10] Building Frontend application..."
 cd "${TARGET_DIR}/frontend"
-npm ci
+npm install --no-audit
 npm run build
 
 # ------------------------------------------------------------------------------

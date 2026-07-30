@@ -57,7 +57,7 @@ jobs:
             # 3. Backend CI & Build Pipeline
             echo "==> Installing Backend dependencies & running Prisma migrations..."
             cd "$APP_DIR/backend"
-            npm ci
+            npm install --no-audit
             npx prisma generate
             npx prisma migrate deploy
             npm run build
@@ -65,7 +65,7 @@ jobs:
             # 4. Frontend CI & Build Pipeline
             echo "==> Installing Frontend dependencies & building Next.js production app..."
             cd "$APP_DIR/frontend"
-            npm ci
+            npm install --no-audit
             npm run build
 
             # 5. Reload PM2 Applications (Zero-Downtime Reload)
@@ -101,13 +101,13 @@ jobs:
 
             # Rebuild Backend
             cd "$APP_DIR/backend"
-            npm ci
+            npm install --no-audit
             npx prisma generate
             npm run build
 
             # Rebuild Frontend
             cd "$APP_DIR/frontend"
-            npm ci
+            npm install --no-audit
             npm run build
 
             # Reload PM2 Services with working version
