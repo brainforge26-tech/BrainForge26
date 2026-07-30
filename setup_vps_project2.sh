@@ -32,8 +32,8 @@ echo "==========================================================================
 # 1. Package Installation & Verification
 # ------------------------------------------------------------------------------
 echo "==> [1/10] Verifying and installing system prerequisites..."
-sudo apt-get update -y
-sudo apt-get install -y git curl build-essential postgresql postgresql-contrib nginx certbot python3-certbot-nginx openssl
+sudo apt-get update -y || true
+sudo apt-get install -y --fix-missing git curl build-essential postgresql postgresql-contrib nginx certbot python3-certbot-nginx openssl || true
 
 # Ensure Node.js & PM2 are available globally
 if ! command -v node &> /dev/null; then
