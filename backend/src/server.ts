@@ -6,7 +6,11 @@ async function bootstrap(): Promise<void> {
   const app = createApp();
 
   // Connect to PostgreSQL via Prisma
-  await connectDatabase();
+  try {
+    await connectDatabase();
+  } catch (err) {
+    console.error('Database connection warning during bootstrap:', err);
+  }
 
   const server = app.listen(env.PORT, () => {
     console.log('');
@@ -35,14 +39,9 @@ async function bootstrap(): Promise<void> {
 
   process.on('unhandledRejection', (reason) => {
     console.error('Unhandled Rejection:', reason);
-    server.close(async () => {
-      await disconnectDatabase();
-      process.exit(1);
-    });
   });
 }
 
 bootstrap().catch((err) => {
   console.error('Failed to start server:', err);
-  process.exit(1);
 });
