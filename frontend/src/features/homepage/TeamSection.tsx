@@ -5,60 +5,17 @@ import { motion, useInView } from 'framer-motion';
 import { Github, Linkedin, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 
-const TEAM = [
-  {
-    name:   'Alex Carter',
-    role:   'Full-Stack Lead',
-    skills: ['Next.js', 'Node.js', 'PostgreSQL'],
-    avatar: 'AC',
-    color:  '#4F7DFF',
-    exp:    '7 yrs',
-  },
-  {
-    name:   'Sara Kim',
-    role:   'UI/UX & Frontend',
-    skills: ['React', 'Figma', 'Tailwind'],
-    avatar: 'SK',
-    color:  '#7C5CFF',
-    exp:    '5 yrs',
-  },
-  {
-    name:   'James Okafor',
-    role:   'Backend & DevOps',
-    skills: ['Express', 'AWS', 'Docker'],
-    avatar: 'JO',
-    color:  '#00D4FF',
-    exp:    '6 yrs',
-  },
-  {
-    name:   'Priya Mehta',
-    role:   'Mobile Developer',
-    skills: ['React Native', 'Flutter', 'Firebase'],
-    avatar: 'PM',
-    color:  '#22C55E',
-    exp:    '4 yrs',
-  },
-  {
-    name:   'David Chen',
-    role:   'Data & Analytics',
-    skills: ['Python', 'PostgreSQL', 'BI Tools'],
-    avatar: 'DC',
-    color:  '#F59E0B',
-    exp:    '5 yrs',
-  },
-  {
-    name:   'Lena Müller',
-    role:   'QA & Security',
-    skills: ['Testing', 'Pen Testing', 'Compliance'],
-    avatar: 'LM',
-    color:  '#EF4444',
-    exp:    '4 yrs',
-  },
-];
+interface TeamSectionProps {
+  members?: { name: string; role: string; skills?: string[]; avatar?: string; exp?: string }[];
+}
 
-export function TeamSection() {
-  const ref    = useRef(null);
+export function TeamSection({ members = [] }: TeamSectionProps) {
+  const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
+
+  if (members.length === 0) {
+    return null;
+  }
 
   return (
     <section id="team" ref={ref} className="relative py-24 overflow-hidden">
@@ -78,20 +35,18 @@ export function TeamSection() {
         </motion.div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {TEAM.map(({ name, role, skills, avatar, color, exp }, i) => (
+          {members.map(({ name, role, skills = [], avatar, exp }, i) => (
             <motion.div
-              key={name}
+              key={name || i}
               initial={{ opacity: 0, y: 28 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.45, delay: i * 0.08 }}
               className="group glass-card p-6 flex flex-col items-center text-center gap-4">
 
-              {/* Avatar */}
               <div className="relative">
                 <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg transition-transform duration-200 group-hover:scale-110"
-                  style={{ background: `linear-gradient(135deg, ${color}40, ${color}20)`, border: `1px solid ${color}40` }}>
-                  {avatar}
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg transition-transform duration-200 group-hover:scale-110 bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 border border-cyan-500/30">
+                  {avatar || name.substring(0, 2).toUpperCase()}
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#22C55E] border-2 border-[#050816]" />
               </div>
@@ -101,19 +56,19 @@ export function TeamSection() {
                 <p className="text-sm text-[#7A8499] mt-0.5">{role}</p>
               </div>
 
-              {/* Skills */}
-              <div className="flex flex-wrap justify-center gap-1.5">
-                {skills.map(s => (
-                  <span key={s}
-                    className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-white/[0.05] border border-white/[0.08] text-[#AAB3C5]">
-                    {s}
-                  </span>
-                ))}
-              </div>
+              {skills.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  {skills.map(s => (
+                    <span key={s}
+                      className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-white/[0.05] border border-white/[0.08] text-[#AAB3C5]">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )}
 
-              {/* Exp + socials */}
               <div className="flex items-center justify-between w-full pt-3 border-t border-white/[0.06]">
-                <span className="text-xs text-[#7A8499]">{exp} experience</span>
+                <span className="text-xs text-[#7A8499]">{exp || 'Experienced'}</span>
                 <div className="flex gap-2">
                   <button className="w-7 h-7 rounded-lg bg-white/[0.05] hover:bg-white/[0.10] transition-colors flex items-center justify-center text-[#7A8499] hover:text-white">
                     <Github className="w-3.5 h-3.5" />
@@ -127,7 +82,6 @@ export function TeamSection() {
           ))}
         </div>
 
-        {/* Hiring CTA */}
         <motion.div
           initial={{ opacity: 0, y: 16 }} animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.6 }}

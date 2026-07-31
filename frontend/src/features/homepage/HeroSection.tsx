@@ -28,12 +28,10 @@ export function HeroSection({ content }: { content?: any }) {
   const scale   = useTransform(scrollYProgress, [0, 0.55], [0.95, 1.02]);
   const opacity = useTransform(scrollYProgress, [0, 0.85], [1, 0.85]);
 
-  const { title, subtitle, primaryCTA, secondaryCTA } = content || {
-    title: 'Scale Your Business \nwith AI Solutions',
-    subtitle: 'BrainForge delivers premium web applications, AI models, and enterprise solutions with elite developers, transparent project management, and guaranteed quality.',
-    primaryCTA: 'Start Your Project',
-    secondaryCTA: 'Watch Demo'
-  };
+  const title = content?.title || 'Transforming Ideas into Digital Excellence';
+  const subtitle = content?.subtitle || 'We build world-class software solutions for ambitious brands, from concept to deployment.';
+  const primaryCTA = content?.primaryCTA || 'Start Your Project';
+  const secondaryCTA = content?.secondaryCTA || 'Explore Services';
 
   return (
     <section ref={containerRef} className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-20 pb-24">

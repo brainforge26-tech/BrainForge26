@@ -12,6 +12,16 @@ export async function fetchHomepageContent() {
   }
 }
 
+export async function fetchSpecializedServices() {
+  try {
+    const res = await publicFetch<{ data: any[] }>('/homepage/services');
+    return res?.data || [];
+  } catch (error) {
+    console.error('Failed to fetch specialized services:', error);
+    return [];
+  }
+}
+
 export async function fetchTestimonials() {
   try {
     const res = await publicFetch<{ data: any[] }>('/homepage/testimonials');
@@ -57,7 +67,7 @@ export async function submitApplicationAction(prevState: any, formData: FormData
 
     const res = await publicFetch<{ success: boolean; message: string }>('/hiring/apply', {
       method: 'POST',
-      body: raw // publicFetch handles JSON.stringify inside
+      body: raw
     });
 
     if (!res?.success) throw new Error(res?.message || 'Failed to submit application');

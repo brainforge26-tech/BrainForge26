@@ -4,27 +4,26 @@ import { useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useInView } from 'framer-motion';
-import { ArrowRight, ExternalLink, Sparkles, Layers } from 'lucide-react';
+import { ArrowRight, Sparkles, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { PROJECTS_DATA } from '@/data/projectsData';
 
 interface ProjectsSectionProps {
-  initialProjects?: any[];
+  projects?: any[];
 }
 
-export function ProjectsSection({ initialProjects }: ProjectsSectionProps) {
-  const ref    = useRef(null);
+export function ProjectsSection({ projects = [] }: ProjectsSectionProps) {
+  const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
 
-  const displayProjects = initialProjects && initialProjects.length > 0 ? initialProjects : PROJECTS_DATA;
+  if (projects.length === 0) {
+    return null;
+  }
 
   return (
     <section id="projects" ref={ref} className="relative py-24 overflow-hidden">
-      {/* Background Glow */}
       <div className="absolute left-0 top-1/3 w-[500px] h-[500px] bg-[#730E27] opacity-[0.03] rounded-full blur-[120px] pointer-events-none" />
 
       <div className="section-wrapper relative z-10">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -43,9 +42,8 @@ export function ProjectsSection({ initialProjects }: ProjectsSectionProps) {
           </p>
         </motion.div>
 
-        {/* Grid Showcase */}
         <div className="grid md:grid-cols-2 gap-8">
-          {displayProjects.slice(0, 4).map((project, i) => (
+          {projects.slice(0, 4).map((project, i) => (
             <motion.div
               key={project.id}
               initial={{ opacity: 0, y: 28 }}
@@ -53,92 +51,61 @@ export function ProjectsSection({ initialProjects }: ProjectsSectionProps) {
               transition={{ duration: 0.5, delay: i * 0.1 }}
               className="group glass-card overflow-hidden rounded-[28px] border border-white/[0.08] hover:border-[rgba(115,14,39,0.35)] hover:shadow-[0_20px_50px_rgba(115,14,39,0.2)] transition-all duration-300 flex flex-col"
             >
-              {/* Image Preview Container */}
               <div className="relative h-60 w-full overflow-hidden bg-[#111114]">
                 <Image
                   src={project.coverImage || 'https://images.unsplash.com/photo-1556742049-0a67562867ef?auto=format&fit=crop&w=1200&q=80'}
                   alt={project.title || project.name}
                   fill
-                  className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111114] via-[#111114]/30 to-transparent" />
-                
-                {/* Category Badge */}
-                <div className="absolute top-4 left-4 z-10">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#09090B]/80 backdrop-blur-md border border-white/10 text-white shadow-md">
-                    {project.category || project.projectType || 'Web App'}
-                  </span>
-                </div>
-
-                {/* Status Badge */}
-                <div className="absolute top-4 right-4 z-10">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-[rgba(0,210,106,0.12)] border border-[rgba(0,210,106,0.25)] text-[#00D26A]">
-                    {project.status || 'Active'}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#09090B] via-transparent to-transparent opacity-80" />
+                <div className="absolute top-4 right-4">
+                  <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full bg-black/60 backdrop-blur-md text-[#C02C54] border border-[#A61C43]/30">
+                    {project.status || 'Featured'}
                   </span>
                 </div>
               </div>
 
-              {/* Card Body */}
-              <div className="p-7 flex flex-col flex-1">
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <h3 className="text-xl font-bold text-white group-hover:text-[#8B1532] transition-colors">
+              <div className="p-7 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-white group-hover:text-[#C02C54] transition-colors mb-2">
                     {project.title || project.name}
                   </h3>
-                  <Link
-                    href={`/projects/${project.id}`}
-                    className="w-9 h-9 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#AAB3C5] group-hover:text-white group-hover:bg-[#730E27] group-hover:border-[#730E27] transition-all"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </Link>
+                  <p className="text-sm text-[#AAB3C5] line-clamp-2 leading-relaxed mb-6">
+                    {project.description}
+                  </p>
                 </div>
 
-                <p className="text-sm text-[#AAB3C5] line-clamp-2 leading-relaxed mb-5">
-                  {project.description}
-                </p>
-
-                {/* Tech Stack Chips */}
-                <div className="flex flex-wrap gap-2 mt-auto mb-6">
-                  {(project.tech || project.technologies || []).slice(0, 4).map((t: string) => (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {(project.technologies || ['Next.js', 'PostgreSQL']).map((tech: string, idx: number) => (
                     <span
-                      key={t}
-                      className="px-3 py-1 rounded-full text-xs font-semibold bg-white/[0.04] border border-white/[0.08] text-[#AAB3C5]"
+                      key={idx}
+                      className="px-2.5 py-1 text-xs font-medium rounded-lg bg-white/[0.04] border border-white/[0.06] text-zinc-300"
                     >
-                      {t}
+                      {tech}
                     </span>
                   ))}
                 </div>
 
-                {/* View Details Link */}
-                <Link
-                  href={`/projects/${project.id}`}
-                  className="inline-flex items-center gap-2 text-sm font-bold text-[#8B1532] hover:text-white transition-colors pt-4 border-t border-white/[0.06]"
-                >
-                  View Case Study & Gallery <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+                <Link href={`/projects/${project.id}`} className="mt-auto">
+                  <Button variant="outline" className="w-full justify-center group-hover:border-[#A61C43]">
+                    View Case Study <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
                 </Link>
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Bottom Action Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.5 }}
-          className="flex justify-center mt-14"
-        >
-          <Link href="/projects">
-            <Button
-              variant="primary"
-              size="lg"
-              className="rounded-[12px] px-8 py-3.5 shadow-[0_10px_35px_rgba(115,14,39,0.35)] hover:scale-105"
-              rightIcon={<ArrowRight className="w-5 h-5" />}
-            >
-              View All Projects Portfolio
-            </Button>
-          </Link>
-        </motion.div>
+        {projects.length > 4 && (
+          <div className="mt-14 text-center">
+            <Link href="/projects">
+              <Button size="lg" className="rounded-xl">
+                Explore All Projects <Layers className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );

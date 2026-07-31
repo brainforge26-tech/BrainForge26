@@ -7,11 +7,15 @@ import { PricingSection }  from '@/features/homepage/PricingSection';
 import { TeamSection }     from '@/features/homepage/TeamSection';
 import { CTASection }      from '@/features/homepage/CTASection';
 import { SectionStack }    from '@/components/layout/SectionStack';
-import { fetchHomepageContent, fetchPricingPlans } from '@/features/homepage/homepage.actions';
+import { fetchHomepageContent, fetchPricingPlans, fetchSpecializedServices, fetchPublicProjects } from '@/features/homepage/homepage.actions';
 
 export default async function HomePage() {
-  const content = await fetchHomepageContent();
-  const pricingPlans = await fetchPricingPlans();
+  const [content, pricingPlans, services, projects] = await Promise.all([
+    fetchHomepageContent(),
+    fetchPricingPlans(),
+    fetchSpecializedServices(),
+    fetchPublicProjects(),
+  ]);
 
   return (
     <div className="relative bg-[#09090B]">
@@ -24,7 +28,7 @@ export default async function HomePage() {
       </SectionStack>
 
       <SectionStack id="services">
-        <ServicesSection />
+        <ServicesSection initialServices={services} />
       </SectionStack>
 
       <SectionStack id="features">
@@ -32,7 +36,7 @@ export default async function HomePage() {
       </SectionStack>
 
       <SectionStack id="projects" disableSticky>
-        <ProjectsSection />
+        <ProjectsSection projects={projects} />
       </SectionStack>
 
       <SectionStack id="pricing" disableSticky>
