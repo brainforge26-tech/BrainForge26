@@ -1,0 +1,21 @@
+# Documentation & Markdown files
+*.md
+!README.md
+docs/
+DOCUMENTATION/
+*.pdf
+*.docx
+
+# Environment & local secrets
+.env
+.env.production
+.env.local
+.env.*.local
+
+# Build & Logs
+node_modules/
+.next/
+dist/
+build/
+*.log
+.DS_Store
