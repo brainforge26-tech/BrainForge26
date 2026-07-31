@@ -93,7 +93,7 @@ jobs:
             # -------------------------------------------------------------------
             echo "📦 [Backend] Installing dependencies with npm ci..."
             cd "$APP_DIR/backend"
-            npm ci --no-audit --prefer-offline
+            npm install --no-audit
 
             echo "🗄️  [Backend] Generating Prisma ORM Client..."
             npx prisma generate
@@ -110,7 +110,7 @@ jobs:
             # -------------------------------------------------------------------
             echo "📦 [Frontend] Installing dependencies with npm ci..."
             cd "$APP_DIR/frontend"
-            npm ci --no-audit --prefer-offline
+            npm install --no-audit
 
             echo "⚡ [Frontend] Building Next.js Production Bundle..."
             npm run build
@@ -197,13 +197,13 @@ jobs:
 
               echo "📦 Rebuilding Backend from commit $PREV_COMMIT..."
               cd "$APP_DIR/backend"
-              npm ci --no-audit --prefer-offline
+              npm install --no-audit
               npx prisma generate
               npm run build
 
               echo "⚡ Rebuilding Frontend from commit $PREV_COMMIT..."
               cd "$APP_DIR/frontend"
-              npm ci --no-audit --prefer-offline
+              npm install --no-audit
               npm run build
 
               echo "🔄 Reloading PM2 Services to restored working version..."
