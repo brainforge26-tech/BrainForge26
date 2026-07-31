@@ -30,27 +30,29 @@ interface ServicesSectionProps {
 export function ServicesSection({ initialServices = [] }: ServicesSectionProps) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
-  const [services, setServices] = useState<Service[]>(initialServices);
+  const [services, setServices] = useState<Service[]>(Array.isArray(initialServices) ? initialServices : []);
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (initialServices.length > 0) {
+    if (Array.isArray(initialServices) && initialServices.length > 0) {
       setServices(initialServices);
       return;
     }
     const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000/api/v1';
-    fetch(`${BASE}/homepage/services`, { cache: 'no-store' })
+    fetch(`${BASE}/services?active=true`, { cache: 'no-store' })
       .then(r => r.json())
       .then(json => {
-        const list: Service[] = json?.data ?? [];
+        const data = json?.data;
+        const list: Service[] = Array.isArray(data) ? data : (Array.isArray(data?.services) ? data.services : []);
         setServices(list);
       })
       .catch(() => setServices([]));
   }, [initialServices]);
 
-  const total = services.length;
+  const safeList = Array.isArray(services) ? services : [];
+  const total = safeList.length;
 
   function prev() { if (total > 0) setCurrent(c => (c - 1 + total) % total); }
   function next() { if (total > 0) setCurrent(c => (c + 1) % total); }
@@ -97,12 +99,13 @@ export function ServicesSection({ initialServices = [] }: ServicesSectionProps) 
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          {services.map(({ id, icon, title, features }, i) => {
+          {safeList.map(({ id, icon, title, features }, i) => {
             const Icon = getIcon(icon);
-            const isActive = i === current % services.length;
+            const isActive = i === current % safeList.length;
             const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const safeFeatures = Array.isArray(features) ? features : [];
             return (
-              <Link key={id} href={`/services/${slug}`}>
+              <Link key={id || i} href={`/services/${slug}`}>
                 <motion.div
                   initial={{ opacity: 0, y: 28 }}
                   animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -120,7 +123,7 @@ export function ServicesSection({ initialServices = [] }: ServicesSectionProps) 
                   </div>
                   <h3 className="font-bold text-white text-lg relative z-10">{title}</h3>
                   <ul className="space-y-2 flex-1 relative z-10">
-                    {features.map((f, idx) => (
+                    {safeFeatures.map((f, idx) => (
                       <li key={idx} className="flex items-start gap-2 text-sm text-[#AAB3C5]">
                         <CheckCircle2 className="w-4 h-4 text-[#C02C54] shrink-0 mt-0.5" />
                         {f}
@@ -153,11 +156,12 @@ export function ServicesSection({ initialServices = [] }: ServicesSectionProps) 
             className="rounded-[24px] bg-[rgba(20,20,25,0.85)] backdrop-blur-xl border border-[rgba(166,28,67,0.18)] p-7 flex flex-col gap-4"
           >
             {(() => {
-              const item = services[current];
+              const item = safeList[current];
               if (!item) return null;
               const { icon, title, features } = item;
               const Icon = getIcon(icon);
               const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+              const safeFeatures = Array.isArray(features) ? features : [];
               return (
                 <Link href={`/services/${slug}`}>
                   <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[rgba(166,28,67,0.08)] border border-[rgba(166,28,67,0.18)] mb-3">
@@ -165,7 +169,7 @@ export function ServicesSection({ initialServices = [] }: ServicesSectionProps) 
                   </div>
                   <h3 className="font-bold text-white text-lg mb-3">{title}</h3>
                   <ul className="space-y-2 mb-4">
-                    {features.map((f, idx) => (
+                    {safeFeatures.map((f, idx) => (
                       <li key={idx} className="flex items-start gap-2 text-sm text-[#AAB3C5]">
                         <CheckCircle2 className="w-4 h-4 text-[#C02C54] shrink-0 mt-0.5" />
                         {f}
@@ -185,7 +189,7 @@ export function ServicesSection({ initialServices = [] }: ServicesSectionProps) 
               <ChevronLeft className="w-5 h-5" />
             </button>
             <div className="flex gap-2 items-center">
-              {services.map((_, i) => (
+              {safeList.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => { setCurrent(i); setIsPaused(false); }}

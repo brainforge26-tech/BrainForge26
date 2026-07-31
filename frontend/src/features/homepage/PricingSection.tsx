@@ -4,7 +4,6 @@ import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { CheckCircle2, ArrowRight, Zap } from 'lucide-react';
 import Link from 'next/link';
-import { ROUTES } from '@/constants/routes';
 
 interface PricingSectionProps {
   plans?: any[];
@@ -13,8 +12,9 @@ interface PricingSectionProps {
 export function PricingSection({ plans = [] }: PricingSectionProps) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
+  const safePlans = Array.isArray(plans) ? plans : [];
 
-  if (plans.length === 0) {
+  if (safePlans.length === 0) {
     return null;
   }
 
@@ -37,8 +37,9 @@ export function PricingSection({ plans = [] }: PricingSectionProps) {
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8 items-stretch">
-          {plans.map((plan, i) => {
+          {safePlans.map((plan, i) => {
             const isPopular = plan.isPopular;
+            const safeFeatures = Array.isArray(plan.features) ? plan.features : [];
             return (
               <motion.div
                 key={plan.id || i}
@@ -71,7 +72,7 @@ export function PricingSection({ plans = [] }: PricingSectionProps) {
                   </div>
 
                   <ul className="space-y-3 mb-8">
-                    {(plan.features || []).map((f: string, idx: number) => (
+                    {safeFeatures.map((f: string, idx: number) => (
                       <li key={idx} className="flex items-start gap-2.5 text-sm text-[#AAB3C5]">
                         <CheckCircle2 className="w-4 h-4 text-[#C02C54] shrink-0 mt-0.5" />
                         <span>{f}</span>
