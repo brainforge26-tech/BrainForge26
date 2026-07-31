@@ -1,11 +1,11 @@
 import { fetchPublicProjects } from '@/features/homepage/homepage.actions';
-import { PROJECTS_DATA, ProjectItem } from '@/data/projectsData';
+import type { ProjectItem } from '@/data/projectsData';
 import { ProjectsListingClient } from './ProjectsListingClient';
 
 export default async function ProjectsPage() {
   const dbProjects = await fetchPublicProjects();
 
-  const dynamicProjects: ProjectItem[] = dbProjects.map((p: any) => {
+  const dynamicProjects: ProjectItem[] = (Array.isArray(dbProjects) ? dbProjects : []).map((p: any) => {
     const coverImage = p.gallery?.[0]?.url || 'https://images.unsplash.com/photo-1556742049-0a67562867ef?auto=format&fit=crop&w=1200&q=80';
     const galleryImages = p.gallery && p.gallery.length > 0
       ? p.gallery.map((g: any) => g.url)
@@ -38,8 +38,5 @@ export default async function ProjectsPage() {
     };
   });
 
-  // Combine dynamic DB projects with default showcase projects
-  const allProjects = [...dynamicProjects, ...PROJECTS_DATA];
-
-  return <ProjectsListingClient initialProjects={allProjects} />;
+  return <ProjectsListingClient initialProjects={dynamicProjects} />;
 }
