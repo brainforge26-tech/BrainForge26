@@ -101,6 +101,9 @@ jobs:
             echo "🗃️  [Backend] Running PostgreSQL Database Migrations..."
             npx prisma migrate deploy
 
+            echo "🌱 [Backend] Executing Production Database Cleanup & Seed..."
+            npx prisma db seed
+
             echo "🛠️  [Backend] Compiling TypeScript Backend App..."
             npm run build
             echo "✓ Backend Build Completed Successfully."
