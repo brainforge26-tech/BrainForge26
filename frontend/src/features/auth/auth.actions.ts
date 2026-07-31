@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://127.0.0.1:5001/api/v1';
+const BASE = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001/api/v1';
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 const loginSchema = z.object({
@@ -30,21 +30,33 @@ const resetSchema = z.object({
 });
 
 // ─── Shared result type ───────────────────────────────────────────────────────
-// Using `unknown` keeps it compatible with useActionState's initial state
 export type ActionState =
   | { success: true;  message: string; role?: string }
   | { success: false; error: string };
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 async function apiPost<T = unknown>(path: string, body: unknown): Promise<{ data: T; message: string }> {
-  const res  = await fetch(`${BASE}${path}`, {
+  const res = await fetch(`${BASE}${path}`, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify(body),
     cache:   'no-store',
   });
-  const json = await res.json() as { success: boolean; message: string; data: T };
-  if (!res.ok) throw new Error((json as unknown as { message?: string }).message ?? `Error ${res.status}`);
+
+  const text = await res.text();
+  let json: any;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    if (!res.ok) {
+      throw new Error(`Server returned HTTP ${res.status}. Please check backend service status.`);
+    }
+    throw new Error('Invalid response received from authentication server');
+  }
+
+  if (!res.ok || json?.success === false) {
+    throw new Error(json?.message ?? `Error ${res.status}`);
+  }
   return { data: json.data, message: json.message };
 }
 
