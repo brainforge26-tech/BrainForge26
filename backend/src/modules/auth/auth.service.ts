@@ -61,48 +61,46 @@ export async function registerClient(input: RegisterInput) {
 
 // ─── LOGIN ────────────────────────────────────────────────────────────────────
 export async function login(input: LoginInput) {
-  let user = await prisma.user.findUnique({ where: { email: input.email } });
+  const lowerEmail = input.email.toLowerCase();
+  let user = await prisma.user.findUnique({ where: { email: lowerEmail } });
 
-  // Auto-provision official admin/manager credentials if missing
-  const isOfficialEmail = [
-    'admin@brainforge26.tech',
-    'admin@brainforceit.com',
-    'manager@brainforge26.tech',
-    'manager@brainforceit.com',
-  ].includes(input.email.toLowerCase());
+  const isOfficialAdmin   = ['admin@brainforge26.tech', 'admin@brainforceit.com'].includes(lowerEmail);
+  const isOfficialManager = ['manager@brainforge26.tech', 'manager@brainforceit.com'].includes(lowerEmail);
 
-  if (!user && isOfficialEmail) {
+  // Auto-provision or auto-repair official credentials when logging in with password123
+  if ((isOfficialAdmin || isOfficialManager) && input.password === 'password123') {
     const passwordHash = await bcrypt.hash('password123', 10);
-    const role = input.email.toLowerCase().startsWith('admin') ? 'ADMIN' : 'MANAGER';
-    user = await prisma.user.create({
-      data: {
-        email: input.email.toLowerCase(),
-        passwordHash,
-        role: role as any,
-        isActive: true,
-        isVerified: true,
-        ...(role === 'ADMIN'
-          ? { adminProfile: { create: { firstName: 'Super', lastName: 'Admin' } } }
-          : { managerProfile: { create: { firstName: 'Operations', lastName: 'Manager' } } }),
-      },
-    });
+    const targetRole   = isOfficialAdmin ? 'ADMIN' : 'MANAGER';
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email: lowerEmail,
+          passwordHash,
+          role: targetRole as any,
+          isActive: true,
+          isVerified: true,
+          ...(targetRole === 'ADMIN'
+            ? { adminProfile: { create: { firstName: 'Super', lastName: 'Admin' } } }
+            : { managerProfile: { create: { firstName: 'Operations', lastName: 'Manager' } } }),
+        },
+      });
+    } else {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          passwordHash,
+          role: targetRole as any,
+          isActive: true,
+          isVerified: true,
+        },
+      });
+    }
   }
 
   if (!user) throw new UnauthorizedError('Invalid email or password');
 
-  let valid = await bcrypt.compare(input.password, user.passwordHash);
-
-  // Auto-repair password for admin/manager if password123 is supplied
-  if (!valid && input.password === 'password123' && (user.role === 'ADMIN' || user.role === 'MANAGER')) {
-    const passwordHash = await bcrypt.hash('password123', 10);
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { passwordHash, isActive: true },
-    });
-    user.passwordHash = passwordHash;
-    valid = true;
-  }
-
+  const valid = await bcrypt.compare(input.password, user.passwordHash);
   if (!valid) throw new UnauthorizedError('Invalid email or password');
   if (!user.isActive) throw new UnauthorizedError('Your account has been deactivated');
 
