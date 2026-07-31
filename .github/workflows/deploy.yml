@@ -5,113 +5,217 @@ on:
     branches:
       - main
 
+# Ensure concurrent deployments do not collide
+concurrency:
+  group: production-deploy-brainforge26
+  cancel-in-progress: false
+
 jobs:
   deploy:
-    name: Deploy BrainForge26 to VPS
+    name: Build, Verify & Deploy to Remote VPS
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
-      - name: Checkout repository code
+      - name: 📥 Checkout Repository Code
         uses: actions/checkout@v4
 
-      - name: Deploy to Remote VPS via SSH
+      - name: 🔑 Verify SSH Connection
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
-          password: ${{ secrets.VPS_PASSWORD }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            echo "✓ SSH Key Authentication Successful for user: ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}"
+
+      - name: 🚀 Execute Production Deployment Pipeline
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script_stop: true
+          command_timeout: 15m
           script: |
-            set -e
-            echo "========================================="
-            echo "Starting Continuous Deployment for BrainForge26"
-            echo "========================================="
+            # Enable strict bash security flags:
+            # -E: ERR trap inherited by shell functions
+            # -e: Exit immediately if a command exits with a non-zero status
+            # -u: Treat unset variables as an error
+            # -o pipefail: Return status of the last command in pipeline that failed
+            set -Eeuo pipefail
 
+            START_TIME=$(date +%s)
             APP_DIR="/var/www/BrainForge26"
 
-            # Initial Setup Fallback if directory does not exist on VPS yet
+            echo "================================================================="
+            echo "🚀 [CI/CD] Starting Production Deployment for BrainForge26"
+            echo "📅 Timestamp : $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "================================================================="
+
+            # -------------------------------------------------------------------
+            # INITIAL SETUP BOOTSTRAP FALLBACK
+            # -------------------------------------------------------------------
             if [ ! -d "$APP_DIR" ]; then
-                echo "==> Initial Setup: /var/www/BrainForge26 not found on VPS."
-                echo "==> Cloning repository and executing initial setup_vps_project2.sh..."
-                sudo mkdir -p "$APP_DIR"
-                sudo chown -R $USER:$USER "$APP_DIR"
-                git clone https://github.com/brainforge26-tech/BrainForge26.git "$APP_DIR"
-                cd "$APP_DIR"
-                chmod +x setup_vps_project2.sh
-                ./setup_vps_project2.sh
-                exit 0
+              echo "⚠️  Target directory $APP_DIR does not exist. Initializing bootstrap setup..."
+              mkdir -p "$APP_DIR"
+              git clone https://github.com/brainforge26-tech/BrainForge26.git "$APP_DIR"
+              cd "$APP_DIR"
+              chmod +x setup_vps_project2.sh
+              ./setup_vps_project2.sh
+              echo "✓ Initial VPS Bootstrap Completed Successfully."
+              exit 0
             fi
 
             cd "$APP_DIR"
 
-            # 1. Record Previous Commit SHA for Rollback Safety
+            # -------------------------------------------------------------------
+            # STEP 1: RECORD COMMIT STATE FOR ATOMIC ROLLBACK
+            # -------------------------------------------------------------------
             PREV_COMMIT=$(git rev-parse HEAD)
-            echo "Current Commit SHA: $PREV_COMMIT"
+            echo "📌 Current Active Commit SHA : $PREV_COMMIT"
 
-            # 2. Pull Latest Code from main branch
-            echo "==> Fetching latest changes from GitHub..."
+            # -------------------------------------------------------------------
+            # STEP 2: FETCH LATEST CODE
+            # -------------------------------------------------------------------
+            echo "📥 Fetching latest code from origin/main..."
             git fetch origin main
             git reset --hard origin/main
+            NEW_COMMIT=$(git rev-parse HEAD)
+            echo "🆕 Target Deployment Commit  : $NEW_COMMIT"
 
-            # 3. Backend CI & Build Pipeline
-            echo "==> Installing Backend dependencies & running Prisma migrations..."
+            # -------------------------------------------------------------------
+            # STEP 3: BACKEND CI & BUILD PIPELINE
+            # -------------------------------------------------------------------
+            echo "📦 [Backend] Installing dependencies with npm ci..."
             cd "$APP_DIR/backend"
-            npm install --no-audit
+            npm ci --no-audit --prefer-offline
+
+            echo "🗄️  [Backend] Generating Prisma ORM Client..."
             npx prisma generate
+
+            echo "🗃️  [Backend] Running PostgreSQL Database Migrations..."
             npx prisma migrate deploy
-            npm run build
 
-            # 4. Frontend CI & Build Pipeline
-            echo "==> Installing Frontend dependencies & building Next.js production app..."
+            echo "🛠️  [Backend] Compiling TypeScript Backend App..."
+            npm run build
+            echo "✓ Backend Build Completed Successfully."
+
+            # -------------------------------------------------------------------
+            # STEP 4: FRONTEND CI & BUILD PIPELINE
+            # -------------------------------------------------------------------
+            echo "📦 [Frontend] Installing dependencies with npm ci..."
             cd "$APP_DIR/frontend"
-            npm install --no-audit
-            npm run build
+            npm ci --no-audit --prefer-offline
 
-            # 5. Reload PM2 Applications (Zero-Downtime Reload)
-            echo "==> Reloading PM2 services..."
+            echo "⚡ [Frontend] Building Next.js Production Bundle..."
+            npm run build
+            echo "✓ Frontend Build Completed Successfully."
+
+            # -------------------------------------------------------------------
+            # STEP 5: PM2 ZERO-DOWNTIME SERVICE RELOAD
+            # -------------------------------------------------------------------
+            echo "🔄 [PM2] Performing zero-downtime service reload..."
             cd "$APP_DIR"
             pm2 reload ecosystem.config.js --env production --update-env
+            pm2 save
+            echo "✓ PM2 Services Reloaded."
 
-            # 6. Verify Health of Application Services
-            echo "==> Verifying service health..."
-            sleep 3
-            curl -f http://127.0.0.1:5001 || curl -f http://127.0.0.1:5001/api/v1/health
-            curl -f http://127.0.0.1:3001
+            # -------------------------------------------------------------------
+            # STEP 6: PRODUCTION HEALTH CHECK WITH AUTOMATIC RETRY
+            # -------------------------------------------------------------------
+            echo "🏥 [Health Check] Verifying Service Endpoints..."
+            
+            HEALTH_SUCCESS=false
+            for i in {1..10}; do
+              echo "  Attempt $i/10: Testing Backend & Frontend health..."
+              
+              BACKEND_OK=false
+              FRONTEND_OK=false
 
-            echo "✓ DEPLOYMENT SUCCESSFUL!"
+              if curl -sf -o /dev/null http://127.0.0.1:5001/api/v1/health || curl -sf -o /dev/null http://127.0.0.1:5001; then
+                BACKEND_OK=true
+              fi
 
-      - name: Automatic Rollback on Failure
+              if curl -sfI -o /dev/null http://127.0.0.1:3001; then
+                FRONTEND_OK=true
+              fi
+
+              if [ "$BACKEND_OK" = true ] && [ "$FRONTEND_OK" = true ]; then
+                HEALTH_SUCCESS=true
+                echo "  ✅ Both Backend (5001) and Frontend (3001) are HEALTHY!"
+                break
+              fi
+
+              echo "  ⏳ Health check pending... Retrying in 3 seconds."
+              sleep 3
+            done
+
+            if [ "$HEALTH_SUCCESS" = false ]; then
+              echo "❌ [Health Check Failed] Services did not become healthy in time!"
+              exit 1
+            fi
+
+            END_TIME=$(date +%s)
+            DURATION=$((END_TIME - START_TIME))
+
+            echo "================================================================="
+            echo "🎉 DEPLOYMENT SUCCESSFUL!"
+            echo "⏱️  Total Duration : ${DURATION} seconds"
+            echo "📌 Deployed Commit : $NEW_COMMIT"
+            echo "================================================================="
+
+      - name: 🚨 Automatic Atomic Rollback on Failure
         if: failure()
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
-          password: ${{ secrets.VPS_PASSWORD }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
-            echo "========================================="
-            echo "⚠ DEPLOYMENT FAILED! Initiating Rollback..."
-            echo "========================================="
+            set -Eeuo pipefail
             APP_DIR="/var/www/BrainForge26"
             cd "$APP_DIR"
 
-            # Revert to previous working commit
-            git reset --hard HEAD@{1}
+            echo "================================================================="
+            echo "🚨 [ROLLBACK INITIATED] Deployment encountered an error!"
+            echo "📅 Timestamp : $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "================================================================="
 
-            # Rebuild Backend
-            cd "$APP_DIR/backend"
-            npm install --no-audit
-            npx prisma generate
-            npm run build
+            # Retrieve previous commit SHA stored before failed deployment
+            PREV_COMMIT=$(git rev-parse HEAD@{1} || true)
 
-            # Rebuild Frontend
-            cd "$APP_DIR/frontend"
-            npm install --no-audit
-            npm run build
+            if [ -n "$PREV_COMMIT" ]; then
+              echo "🔄 Reverting codebase to last known working commit: $PREV_COMMIT"
+              git reset --hard "$PREV_COMMIT"
 
-            # Reload PM2 Services with working version
-            cd "$APP_DIR"
-            pm2 reload ecosystem.config.js --env production --update-env
+              echo "📦 Rebuilding Backend from commit $PREV_COMMIT..."
+              cd "$APP_DIR/backend"
+              npm ci --no-audit --prefer-offline
+              npx prisma generate
+              npm run build
 
-            echo "✓ Rollback executed successfully. Previous working commit restored."
+              echo "⚡ Rebuilding Frontend from commit $PREV_COMMIT..."
+              cd "$APP_DIR/frontend"
+              npm ci --no-audit --prefer-offline
+              npm run build
+
+              echo "🔄 Reloading PM2 Services to restored working version..."
+              cd "$APP_DIR"
+              pm2 reload ecosystem.config.js --env production --update-env
+              pm2 save
+
+              echo "🏥 Verifying Health of Restored Services..."
+              sleep 3
+              curl -sf -o /dev/null http://127.0.0.1:5001/api/v1/health || true
+              curl -sfI -o /dev/null http://127.0.0.1:3001 || true
+
+              echo "================================================================="
+              echo "✓ ATOMIC ROLLBACK COMPLETED! System successfully restored."
+              echo "================================================================="
+            else
+              echo "❌ Could not determine previous commit SHA for rollback."
+            fi
