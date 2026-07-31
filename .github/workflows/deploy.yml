@@ -124,6 +124,7 @@ jobs:
             # -------------------------------------------------------------------
             echo "🔄 [PM2] Performing zero-downtime service reload..."
             cd "$APP_DIR"
+            fuser -k 5001/tcp || true
             pm2 startOrReload ecosystem.config.js --env production --update-env || pm2 start ecosystem.config.js --env production
             pm2 save
             echo "✓ PM2 Services Reloaded."
