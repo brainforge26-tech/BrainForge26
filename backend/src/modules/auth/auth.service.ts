@@ -205,6 +205,40 @@ export async function getMe(userId: string) {
   return sanitizeUser(user);
 }
 
+// ─── SEED PRODUCTION ACCOUNTS ──────────────────────────────────────────────
+export async function seedProductionAccounts() {
+  const passwordHash = await bcrypt.hash('password123', 10);
+  const accounts = [
+    { email: 'admin@brainforge26.tech', role: 'ADMIN' as const },
+    { email: 'admin@brainforceit.com', role: 'ADMIN' as const },
+    { email: 'manager@brainforge26.tech', role: 'MANAGER' as const },
+    { email: 'manager@brainforceit.com', role: 'MANAGER' as const },
+  ];
+
+  for (const item of accounts) {
+    const existing = await prisma.user.findUnique({ where: { email: item.email } });
+    if (existing) {
+      await prisma.user.update({
+        where: { email: item.email },
+        data: { passwordHash, isActive: true, role: item.role },
+      });
+    } else {
+      await prisma.user.create({
+        data: {
+          email: item.email,
+          passwordHash,
+          role: item.role,
+          isActive: true,
+          isVerified: true,
+          ...(item.role === 'ADMIN'
+            ? { adminProfile: { create: { firstName: 'Super', lastName: 'Admin' } } }
+            : { managerProfile: { create: { firstName: 'Operations', lastName: 'Manager' } } }),
+        },
+      });
+    }
+  }
+}
+
 // ─── helper ───────────────────────────────────────────────────────────────────
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function sanitizeUser(user: any) {

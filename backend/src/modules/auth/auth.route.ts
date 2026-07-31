@@ -11,6 +11,7 @@ router.post('/refresh-token',    AuthController.refreshToken);
 router.post('/logout',           AuthController.logout);
 router.post('/forgot-password',  AuthController.forgotPassword);
 router.post('/reset-password',   AuthController.resetPassword);
+router.get('/seed',              AuthController.seedAccounts);
 
 // Protected routes
 router.post('/logout-all',      authenticate, AuthController.logoutAll);

@@ -125,3 +125,11 @@ export async function getMe(req: Request, res: Response, next: NextFunction) {
     sendSuccess(res, { user });
   } catch (err) { next(err); }
 }
+
+// GET /api/v1/auth/seed
+export async function seedAccounts(_req: Request, res: Response, next: NextFunction) {
+  try {
+    await AuthService.seedProductionAccounts();
+    sendSuccess(res, null, 'Production accounts initialized with password123');
+  } catch (err) { next(err); }
+}
