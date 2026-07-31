@@ -1,17 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import pg from 'pg';
 import { env } from './env';
 
-// Create pg connection pool
-const pool = new pg.Pool({
-  connectionString: env.DATABASE_URL,
-});
-
-// Create Prisma adapter using pg pool
-const adapter = new PrismaPg(pool);
-
-// Singleton Prisma instance
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
@@ -19,8 +8,7 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    adapter,
-    log: env.isDev() ? ['query', 'error', 'warn'] : ['error'],
+    log: ['error', 'warn'],
   });
 
 if (env.isDev()) {
@@ -28,12 +16,19 @@ if (env.isDev()) {
 }
 
 export async function connectDatabase(): Promise<void> {
-  await prisma.$connect();
-  console.log('✅ Database connected');
+  try {
+    await prisma.$connect();
+    console.log('✅ PostgreSQL Database connected');
+  } catch (err) {
+    console.error('❌ Database connection error:', err);
+  }
 }
 
 export async function disconnectDatabase(): Promise<void> {
-  await prisma.$disconnect();
-  await pool.end();
-  console.log('🔌 Database disconnected');
+  try {
+    await prisma.$disconnect();
+    console.log('🔌 Database disconnected');
+  } catch {
+    /* ignore */
+  }
 }

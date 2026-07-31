@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 
 import { env } from '../config/env';
+import { prisma } from '../config/database';
 import { errorHandler, notFoundHandler } from '../middlewares/errorHandler';
 import authRouter      from '../modules/auth/auth.route';
 import adminRouter     from '../modules/admin/admin.route';
@@ -27,7 +28,7 @@ export function createApp(): Application {
   // ─── CORS ───────────────────────────────────────────────────────────────────
   app.use(
     cors({
-      origin: env.CLIENT_URL,
+      origin: true,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
@@ -49,11 +50,22 @@ export function createApp(): Application {
   }
 
   // ─── Health Check ────────────────────────────────────────────────────────────
-  app.get('/api/health', (_req: Request, res: Response) => {
+  app.get('/api/health', async (_req: Request, res: Response) => {
+    let dbStatus = 'disconnected';
+    let dbError = null;
+    try {
+      const userCount = await prisma.user.count();
+      dbStatus = `connected (${userCount} users)`;
+    } catch (err: any) {
+      dbError = err.message;
+    }
+
     res.status(200).json({
       success: true,
       message: 'BrainForceIT API is running',
       environment: env.NODE_ENV,
+      database: dbStatus,
+      ...(dbError && { dbError }),
       timestamp: new Date().toISOString(),
     });
   });
