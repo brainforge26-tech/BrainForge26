@@ -98,6 +98,10 @@ jobs:
             fi
             npm install --no-audit
 
+            echo "🔑 [Database] Setting up PostgreSQL superuser & database on VPS..."
+            sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '123456';" || true
+            sudo -u postgres psql -c "CREATE DATABASE brainforge26;" || true
+
             echo "🗄️  [Backend] Generating Prisma ORM Client..."
             npx prisma generate
 
