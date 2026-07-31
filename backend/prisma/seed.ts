@@ -4,143 +4,171 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../src/config/database';
 
 async function main() {
-  console.log('🌱 Starting database seed...');
+  console.log('🧹 [Production Seed] Purging all demo data...');
 
-  const passwordHash = await bcrypt.hash('password123', 10);
+  // 1. Wipe all demo records
+  await prisma.message.deleteMany();
+  await prisma.conversation.deleteMany();
+  await prisma.projectFile.deleteMany();
+  await prisma.progressUpdate.deleteMany();
+  await prisma.milestone.deleteMany();
+  await prisma.timelineStage.deleteMany();
+  await prisma.projectDeveloper.deleteMany();
+  await prisma.project.deleteMany();
+  await prisma.hiringApplication.deleteMany();
+  await prisma.payment.deleteMany();
+  await prisma.adminProfile.deleteMany();
+  await prisma.managerProfile.deleteMany();
+  await prisma.developerProfile.deleteMany();
+  await prisma.clientProfile.deleteMany();
+  await prisma.user.deleteMany();
 
-  // 1. Admin
-  const adminEmail = 'admin@brainforceit.com';
-  const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
-  if (!existingAdmin) {
-    await prisma.user.create({
-      data: {
-        email: adminEmail,
-        passwordHash,
-        role: Role.ADMIN,
-        isActive: true,
-        adminProfile: {
-          create: {
-            firstName: 'Super',
-            lastName: 'Admin',
-          },
+  console.log('✅ Demo data purged.');
+
+  const defaultPasswordHash = await bcrypt.hash('password123', 10);
+
+  // 2. Create Super Admin Account
+  const adminEmail = 'admin@brainforge26.tech';
+  await prisma.user.create({
+    data: {
+      email: adminEmail,
+      passwordHash: defaultPasswordHash,
+      role: Role.ADMIN,
+      isActive: true,
+      isVerified: true,
+      adminProfile: {
+        create: {
+          firstName: 'Super',
+          lastName: 'Admin',
         },
       },
-    });
-    console.log('✅ Created Admin user');
-  } else {
-    console.log('ℹ️ Admin user already exists');
-  }
+    },
+  });
+  console.log(`✅ Super Admin created: ${adminEmail}`);
 
-  // 2. Manager
-  const managerEmail = 'manager@brainforceit.com';
-  const existingManager = await prisma.user.findUnique({ where: { email: managerEmail } });
-  if (!existingManager) {
-    await prisma.user.create({
-      data: {
-        email: managerEmail,
-        passwordHash,
-        role: Role.MANAGER,
-        isActive: true,
-        managerProfile: {
-          create: {
-            firstName: 'Project',
-            lastName: 'Manager',
-            department: 'Engineering',
-          },
+  // 3. Create Manager Account
+  const managerEmail = 'manager@brainforge26.tech';
+  await prisma.user.create({
+    data: {
+      email: managerEmail,
+      passwordHash: defaultPasswordHash,
+      role: Role.MANAGER,
+      isActive: true,
+      isVerified: true,
+      managerProfile: {
+        create: {
+          firstName: 'Operations',
+          lastName: 'Manager',
+          department: 'Engineering',
         },
       },
-    });
-    console.log('✅ Created Manager user');
-  } else {
-    console.log('ℹ️ Manager user already exists');
-  }
+    },
+  });
+  console.log(`✅ Manager created: ${managerEmail}`);
 
-  // 3. Developer
-  const devEmail = 'developer@brainforceit.com';
-  const existingDev = await prisma.user.findUnique({ where: { email: devEmail } });
-  if (!existingDev) {
-    await prisma.user.create({
-      data: {
-        email: devEmail,
-        passwordHash,
-        role: Role.DEVELOPER,
-        isActive: true,
-        developerProfile: {
-          create: {
-            firstName: 'Alex',
-            lastName: 'Carter',
-            title: 'Full-Stack Developer',
-            skills: ['React', 'Next.js', 'Node.js', 'PostgreSQL'],
-          },
-        },
-      },
-    });
-    console.log('✅ Created Developer user');
-  } else {
-    console.log('ℹ️ Developer user already exists');
-  }
-
-  // 4. Client
-  const clientEmail = 'client@brainforceit.com';
-  const existingClient = await prisma.user.findUnique({ where: { email: clientEmail } });
-  if (!existingClient) {
-    await prisma.user.create({
-      data: {
-        email: clientEmail,
-        passwordHash,
-        role: Role.CLIENT,
-        isActive: true,
-        clientProfile: {
-          create: {
-            companyName: 'Acme Corp',
-            contactPerson: 'John Doe',
-          },
-        },
-      },
-    });
-    console.log('✅ Created Client user');
-  } else {
-    console.log('ℹ️ Client user already exists');
-  }
-
-  // 5. Seed Pricing Plans
-  console.log('Seeding Pricing Plans...');
-  await prisma.pricingPlan.deleteMany(); // Reset for clean seed
+  // 4. Seed Production Baseline Pricing Plans
+  await prisma.pricingPlan.deleteMany();
   await prisma.pricingPlan.createMany({
     data: [
       {
-        name: 'Starter',
-        description: 'Perfect for small projects and MVPs',
-        price: 999,
+        name: 'MVP Launch',
+        description: 'For startups looking to validate their core product idea rapidly.',
+        price: 1499,
         billingCycle: 'one-time',
-        features: ['UI/UX Design', 'Frontend Development', 'Basic Backend API', '1 Month Support'],
+        features: [
+          'Custom UI/UX Prototype',
+          'Responsive Next.js Frontend',
+          'Express & Node.js Backend API',
+          'PostgreSQL Database Architecture',
+          '1 Month Dedicated Maintenance',
+        ],
         isPopular: false,
         order: 1,
       },
       {
-        name: 'Professional',
-        description: 'Ideal for growing businesses and startups',
-        price: 2499,
+        name: 'Growth Solution',
+        description: 'Ideal for scaling businesses requiring robust web and API infrastructure.',
+        price: 3499,
         billingCycle: 'one-time',
-        features: ['Advanced UI/UX', 'Full-Stack Development', 'Cloud Architecture', '3 Months Support', 'SEO Optimization'],
+        features: [
+          'Custom Design System & UI',
+          'Full-Stack Cloud Solution',
+          'Realtime WebSockets & Notifications',
+          'CI/CD Automated Deployment',
+          'SEO & Performance Optimization',
+          '3 Months Dedicated Support',
+        ],
         isPopular: true,
         order: 2,
       },
       {
-        name: 'Enterprise',
-        description: 'For large scale custom applications',
-        price: 4999,
+        name: 'Enterprise Scale',
+        description: 'High-availability microservices and custom software architecture.',
+        price: 6999,
         billingCycle: 'monthly',
-        features: ['Dedicated Team', 'Microservices Architecture', 'SLA Guarantee', '24/7 Priority Support', 'DevOps & CI/CD'],
+        features: [
+          'Dedicated Development Team',
+          'Scalable Microservices Architecture',
+          'Custom Security & Compliance SLA',
+          '24/7 Priority Support & Monitoring',
+          'DevOps Infrastructure Engineering',
+        ],
         isPopular: false,
         order: 3,
-      }
-    ]
+      },
+    ],
   });
-  console.log('✅ Created Pricing Plans');
+  console.log('✅ Baseline Pricing Plans seeded.');
 
-  // 6. Seed Homepage Content
-  console.log('Seeding Homepage Content...');
+  // 5. Seed Production Baseline Services
+  await prisma.specializedService.deleteMany();
+  await prisma.specializedService.createMany({
+    data: [
+      {
+        icon: 'Globe',
+        title: 'Web Application Development',
+        features: [
+          'Custom Next.js & React Architectures',
+          'High Performance & SEO Optimized',
+          'Scalable RESTful & GraphQL APIs',
+        ],
+        order: 1,
+      },
+      {
+        icon: 'Smartphone',
+        title: 'Mobile App Development',
+        features: [
+          'Cross-Platform iOS & Android Apps',
+          'Native Performance & UI Animations',
+          'Offline Sync & Cloud Backends',
+        ],
+        order: 2,
+      },
+      {
+        icon: 'Cpu',
+        title: 'Cloud Architecture & DevOps',
+        features: [
+          'AWS & VPS Infrastructure Setup',
+          'CI/CD Pipeline Automation',
+          'Containerization & Kubernetes',
+        ],
+        order: 3,
+      },
+      {
+        icon: 'ShieldCheck',
+        title: 'Enterprise Software Engineering',
+        features: [
+          'Custom ERP & CRM Platforms',
+          'High Security & Compliance Assurance',
+          'Legacy Migration & Refactoring',
+        ],
+        order: 4,
+      },
+    ],
+  });
+  console.log('✅ Baseline Specialized Services seeded.');
+
+  // 6. Seed Baseline Homepage CMS Content
   await prisma.homepageContent.deleteMany();
   await prisma.homepageContent.createMany({
     data: [
@@ -148,111 +176,27 @@ async function main() {
         section: 'hero',
         content: {
           title: 'Transforming Ideas into Digital Excellence',
-          subtitle: 'We build world-class software solutions for ambitious brands, from concept to deployment.',
-          primaryCTA: 'Start a Project',
-          secondaryCTA: 'View Our Work'
-        }
+          subtitle: 'We engineer high-performance web applications, cloud architectures, and digital products for ambitious enterprises.',
+          primaryCTA: 'Start Your Project',
+          secondaryCTA: 'Explore Services',
+        },
       },
       {
         section: 'about',
         content: {
           title: 'Who We Are',
-          description: 'BrainForceIT is a premium agency dedicated to delivering high-performance, scalable software solutions.'
-        }
-      }
-    ]
-  });
-  console.log('✅ Created Homepage Content');
-
-  // 7. Seed Testimonials
-  console.log('Seeding Testimonials...');
-  await prisma.testimonial.deleteMany();
-  await prisma.testimonial.createMany({
-    data: [
-      {
-        clientName: 'Sarah Jenkins',
-        company: 'TechStart Inc.',
-        text: 'BrainForceIT completely revolutionized our internal tools. The team is professional, fast, and incredibly talented.',
-        rating: 5,
-        order: 1
+          description: 'BrainForge26 is a premium technology studio delivering scalable software, modern user interfaces, and robust cloud systems.',
+        },
       },
-      {
-        clientName: 'David Chen',
-        company: 'Global Retail',
-        text: 'The best agency we have ever worked with. They delivered our e-commerce platform ahead of schedule.',
-        rating: 5,
-        order: 2
-      }
-    ]
+    ],
   });
-  console.log('✅ Created Testimonials');
+  console.log('✅ Baseline Homepage CMS content seeded.');
 
-  // 8. Seed Projects
-  console.log('Seeding Projects...');
-  const clientUser = await prisma.user.findUnique({ where: { email: clientEmail }, include: { clientProfile: true } });
-  const managerUser = await prisma.user.findUnique({ where: { email: managerEmail } });
-  const devUser = await prisma.user.findUnique({ where: { email: devEmail } });
-  
-  if (clientUser && managerUser && devUser) {
-    await prisma.project.create({
-      data: {
-        name: 'E-Commerce Platform Rebuild',
-        description: 'A complete overhaul of the existing e-commerce platform.',
-        status: 'ACTIVE',
-        completionPercent: 65,
-        priority: 'HIGH',
-        clientId: clientUser.clientProfile.id,
-        managerId: managerUser.id,
-        budget: 15000,
-        estimatedDelivery: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000), // +30 days
-        technologies: ['Next.js', 'PostgreSQL', 'TailwindCSS'],
-        developers: {
-          create: [
-            { userId: devUser.id }
-          ]
-        }
-      }
-    });
-
-    await prisma.project.create({
-      data: {
-        name: 'Mobile Application MVP',
-        description: 'First version of the mobile app for iOS and Android.',
-        status: 'PENDING',
-        completionPercent: 10,
-        priority: 'MEDIUM',
-        clientId: clientUser.clientProfile.id,
-        managerId: managerUser.id,
-        budget: 20000,
-        estimatedDelivery: new Date(new Date().getTime() + 60 * 24 * 60 * 60 * 1000), // +60 days
-        technologies: ['React Native', 'Node.js', 'MongoDB'],
-      }
-    });
-
-    await prisma.project.create({
-      data: {
-        name: 'Landing Page Redesign',
-        description: 'High-converting landing page for new product launch.',
-        status: 'COMPLETED',
-        completionPercent: 100,
-        priority: 'LOW',
-        clientId: clientUser.clientProfile.id,
-        managerId: managerUser.id,
-        budget: 5000,
-        estimatedDelivery: new Date(),
-        technologies: ['Framer Motion', 'React'],
-      }
-    });
-    console.log('✅ Created Projects');
-  }
-
-  console.log('🎉 Seeding complete!');
   console.log('----------------------------------------------------');
-  console.log('Credentials (Password for all: password123)');
-  console.log(`Admin:     ${adminEmail}`);
-  console.log(`Manager:   ${managerEmail}`);
-  console.log(`Developer: ${devEmail}`);
-  console.log(`Client:    ${clientEmail}`);
+  console.log('🎉 Production Seed Complete!');
+  console.log('Admin:   admin@brainforge26.tech   (password: password123)');
+  console.log('Manager: manager@brainforge26.tech (password: password123)');
+  console.log('----------------------------------------------------');
 }
 
 main()

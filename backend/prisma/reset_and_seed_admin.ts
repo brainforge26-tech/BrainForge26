@@ -1,12 +1,12 @@
 import 'dotenv/config';
+import { Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../src/config/database';
-import { Role } from '@prisma/client';
 
 async function resetAndSeedAdmin() {
-  console.log('🧹 Clearing all demo data from database...');
+  console.log('🧹 [Production Cleanup] Purging all demo data...');
 
-  // Delete all dependent records in cascading sequence
+  // 1. Delete all dependent records in cascading sequence
   await prisma.message.deleteMany();
   await prisma.conversation.deleteMany();
   await prisma.projectFile.deleteMany();
@@ -15,9 +15,7 @@ async function resetAndSeedAdmin() {
   await prisma.timelineStage.deleteMany();
   await prisma.projectDeveloper.deleteMany();
   await prisma.project.deleteMany();
-  await prisma.jobApplication.deleteMany();
-  await prisma.jobPosting.deleteMany();
-  await prisma.invoice.deleteMany();
+  await prisma.hiringApplication.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.adminProfile.deleteMany();
   await prisma.managerProfile.deleteMany();
@@ -25,32 +23,51 @@ async function resetAndSeedAdmin() {
   await prisma.clientProfile.deleteMany();
   await prisma.user.deleteMany();
 
-  console.log('✅ All demo data successfully deleted!');
+  console.log('✅ Demo data purged successfully.');
 
-  // Create Single Official Production Admin User
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@brainforge26.tech';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'AdminPassword2026!';
-  const passwordHash = await bcrypt.hash(adminPassword, 10);
+  const passwordHash = await bcrypt.hash('password123', 10);
 
+  // 2. Super Admin Account
+  const adminEmail = 'admin@brainforge26.tech';
   await prisma.user.create({
     data: {
       email: adminEmail,
       passwordHash,
       role: Role.ADMIN,
       isActive: true,
+      isVerified: true,
       adminProfile: {
         create: {
-          firstName: 'BrainForge',
+          firstName: 'Super',
           lastName: 'Admin',
         },
       },
     },
   });
 
+  // 3. Manager Account
+  const managerEmail = 'manager@brainforge26.tech';
+  await prisma.user.create({
+    data: {
+      email: managerEmail,
+      passwordHash,
+      role: Role.MANAGER,
+      isActive: true,
+      isVerified: true,
+      managerProfile: {
+        create: {
+          firstName: 'Operations',
+          lastName: 'Manager',
+          department: 'Engineering',
+        },
+      },
+    },
+  });
+
   console.log('==================================================');
-  console.log('🎉 Clean Single Admin Created Successfully!');
-  console.log(`Email:    ${adminEmail}`);
-  console.log(`Password: ${adminPassword}`);
+  console.log('🎉 Production Setup Complete!');
+  console.log(`Admin:   ${adminEmail} (password: password123)`);
+  console.log(`Manager: ${managerEmail} (password: password123)`);
   console.log('==================================================');
 }
 

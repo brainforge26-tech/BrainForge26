@@ -156,3 +156,14 @@ export async function deleteManagerAction(id: string): Promise<ActionState> {
     return { success: false, error: (err as Error).message };
   }
 }
+
+// ─── Toggle user active status ─────────────────────────────────────────────
+export async function toggleUserStatusAction(id: string): Promise<ActionState> {
+  try {
+    await apiFetch(`/admin/managers/${id}/deactivate`, { method: 'PATCH' });
+    revalidatePath('/admin/managers');
+    return { success: true, message: 'User status updated' };
+  } catch (err) {
+    return { success: false, error: (err as Error).message };
+  }
+}
