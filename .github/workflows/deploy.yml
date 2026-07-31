@@ -93,6 +93,9 @@ jobs:
             # -------------------------------------------------------------------
             echo "📦 [Backend] Installing dependencies with npm ci..."
             cd "$APP_DIR/backend"
+            if [ ! -f "$APP_DIR/backend/.env" ]; then
+              cp "$APP_DIR/backend/.env.production" "$APP_DIR/backend/.env" || true
+            fi
             npm install --no-audit
 
             echo "🗄️  [Backend] Generating Prisma ORM Client..."
