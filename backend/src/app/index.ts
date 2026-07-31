@@ -49,7 +49,14 @@ export function createApp(): Application {
     app.use(morgan('combined'));
   }
 
-  // ─── Health Check ────────────────────────────────────────────────────────────
+  // ─── Root & Health Check ───────────────────────────────────────────────────
+  app.get('/', (_req: Request, res: Response) => {
+    res.status(200).json({
+      success: true,
+      message: 'BrainForceIT API Server is online',
+    });
+  });
+
   app.get('/api/health', async (_req: Request, res: Response) => {
     let dbStatus = 'disconnected';
     let dbError = null;

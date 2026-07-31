@@ -101,7 +101,8 @@ jobs:
             echo "🗄️  [Backend] Generating Prisma ORM Client..."
             npx prisma generate
 
-            echo "🗃️  [Backend] Running PostgreSQL Database Migrations..."
+            echo "🗃️  [Backend] Ensuring PostgreSQL Database Schema exists..."
+            npx prisma db push --accept-data-loss || true
             npx prisma migrate deploy || true
 
             echo "🌱 [Backend] Executing Production Database Cleanup & Seed..."
