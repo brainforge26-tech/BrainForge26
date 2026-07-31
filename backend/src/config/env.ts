@@ -7,9 +7,12 @@ function getEnv(key: string, fallback: string): string {
   return process.env[key] || fallback;
 }
 
+const rawPort = process.env.PORT;
+const port = (rawPort === '5000' && process.env.NODE_ENV === 'production') ? 5001 : parseInt(rawPort || '5001', 10);
+
 export const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: parseInt(process.env.PORT || '5001', 10),
+  PORT: port,
 
   DATABASE_URL: getEnv('DATABASE_URL', 'postgresql://postgres:123456@localhost:5432/brainforge26?schema=public'),
 

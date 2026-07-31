@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
-const BASE = process.env.INTERNAL_API_URL || 'http://127.0.0.1:5001/api/v1';
+const BASE = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001/api/v1';
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 const loginSchema = z.object({
@@ -36,28 +36,44 @@ export type ActionState =
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 async function apiPost<T = unknown>(path: string, body: unknown): Promise<{ data: T; message: string }> {
-  const res = await fetch(`${BASE}${path}`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify(body),
-    cache:   'no-store',
-  });
+  const targetUrls = Array.from(new Set([
+    `${BASE}${path}`,
+    `http://127.0.0.1:5001/api/v1${path}`,
+    `https://api.brainforge26.tech/api/v1${path}`,
+  ]));
 
-  const text = await res.text();
-  let json: any;
-  try {
-    json = JSON.parse(text);
-  } catch {
-    if (!res.ok) {
-      throw new Error(`Server returned HTTP ${res.status}. Please check backend service status.`);
+  let lastError: Error = new Error('Failed to connect to authentication service');
+
+  for (const url of targetUrls) {
+    try {
+      const res = await fetch(url, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(body),
+        cache:   'no-store',
+      });
+
+      const text = await res.text();
+      let json: any;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        if (!res.ok) {
+          throw new Error(`Server returned HTTP ${res.status}. Please check backend service status.`);
+        }
+        throw new Error('Invalid response received from authentication server');
+      }
+
+      if (!res.ok || json?.success === false) {
+        throw new Error(json?.message ?? `Error ${res.status}`);
+      }
+      return { data: json.data, message: json.message };
+    } catch (err: any) {
+      lastError = err;
     }
-    throw new Error('Invalid response received from authentication server');
   }
 
-  if (!res.ok || json?.success === false) {
-    throw new Error(json?.message ?? `Error ${res.status}`);
-  }
-  return { data: json.data, message: json.message };
+  throw lastError;
 }
 
 // ─── LOGIN ────────────────────────────────────────────────────────────────────
