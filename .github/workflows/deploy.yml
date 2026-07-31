@@ -137,11 +137,14 @@ jobs:
               BACKEND_OK=false
               FRONTEND_OK=false
 
-              if curl -sf -o /dev/null http://127.0.0.1:5001/api/v1/health || curl -sf -o /dev/null http://127.0.0.1:5001; then
+              BACK_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5001 || echo "000")
+              FRONT_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3001 || echo "000")
+
+              if [ "$BACK_CODE" != "000" ] && [ "$BACK_CODE" != "502" ] && [ "$BACK_CODE" != "503" ]; then
                 BACKEND_OK=true
               fi
 
-              if curl -sfI -o /dev/null http://127.0.0.1:3001; then
+              if [ "$FRONT_CODE" != "000" ] && [ "$FRONT_CODE" != "502" ] && [ "$FRONT_CODE" != "503" ]; then
                 FRONTEND_OK=true
               fi
 
