@@ -11,16 +11,21 @@ import { fetchHomepageContent, fetchPricingPlans, fetchSpecializedServices, fetc
 
 export default async function HomePage() {
   const [content, pricingPlans, services, projects] = await Promise.all([
-    fetchHomepageContent(),
-    fetchPricingPlans(),
-    fetchSpecializedServices(),
-    fetchPublicProjects(),
+    fetchHomepageContent().catch(() => ({})),
+    fetchPricingPlans().catch(() => []),
+    fetchSpecializedServices().catch(() => []),
+    fetchPublicProjects().catch(() => []),
   ]);
+
+  const safeContent = content || {};
+  const safePricingPlans = Array.isArray(pricingPlans) ? pricingPlans : [];
+  const safeServices = Array.isArray(services) ? services : [];
+  const safeProjects = Array.isArray(projects) ? projects : [];
 
   return (
     <div className="relative bg-[#09090B]">
       <SectionStack isHero>
-        <HeroSection content={content.hero} />
+        <HeroSection content={safeContent.hero} />
       </SectionStack>
 
       <SectionStack>
@@ -28,7 +33,7 @@ export default async function HomePage() {
       </SectionStack>
 
       <SectionStack id="services">
-        <ServicesSection initialServices={services} />
+        <ServicesSection initialServices={safeServices} />
       </SectionStack>
 
       <SectionStack id="features">
@@ -36,11 +41,11 @@ export default async function HomePage() {
       </SectionStack>
 
       <SectionStack id="projects" disableSticky>
-        <ProjectsSection projects={projects} />
+        <ProjectsSection projects={safeProjects} />
       </SectionStack>
 
       <SectionStack id="pricing" disableSticky>
-        <PricingSection plans={pricingPlans} />
+        <PricingSection plans={safePricingPlans} />
       </SectionStack>
 
       <SectionStack id="team">
