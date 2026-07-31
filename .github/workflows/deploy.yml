@@ -123,7 +123,7 @@ jobs:
             echo "✓ Frontend Build Completed Successfully."
 
             # -------------------------------------------------------------------
-            # STEP 5: PM2 ZERO-DOWNTIME SERVICE RELOAD
+            # STEP 5: PM2 ZERO-DOWNTIME SERVICE RELOAD & NGINX SSL SYNC
             # -------------------------------------------------------------------
             echo "🔄 [PM2] Performing zero-downtime service reload..."
             cd "$APP_DIR"
@@ -131,6 +131,54 @@ jobs:
             pm2 startOrReload ecosystem.config.js --env production --update-env || pm2 start ecosystem.config.js --env production
             pm2 save
             echo "✓ PM2 Services Reloaded."
+
+            echo "🌐 [Nginx] Syncing Nginx reverse proxy & SSL for api.brainforge26.tech..."
+            sudo tee /etc/nginx/sites-available/brainforge26.tech > /dev/null <<'EOF'
+server {
+    listen 80;
+    listen [::]:80;
+    server_name brainforge26.tech www.brainforge26.tech;
+
+    client_max_body_size 50M;
+
+    location / {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name api.brainforge26.tech;
+
+    client_max_body_size 50M;
+
+    location / {
+        proxy_pass http://127.0.0.1:5001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+EOF
+
+            sudo ln -sf /etc/nginx/sites-available/brainforge26.tech /etc/nginx/sites-enabled/
+            sudo nginx -t && sudo systemctl reload nginx || true
+            sudo certbot --nginx -d brainforge26.tech -d www.brainforge26.tech -d api.brainforge26.tech --non-interactive --agree-tos -m admin@brainforge26.tech --redirect || true
+            sudo systemctl reload nginx || true
 
             # -------------------------------------------------------------------
             # STEP 6: PRODUCTION HEALTH CHECK WITH AUTOMATIC RETRY
