@@ -3,31 +3,29 @@ import path from 'path';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
-function requireEnv(key: string): string {
-  const value = process.env[key];
-  if (!value) throw new Error(`Missing required environment variable: ${key}`);
-  return value;
+function getEnv(key: string, fallback: string): string {
+  return process.env[key] || fallback;
 }
 
 export const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: parseInt(process.env.PORT || '5000', 10),
+  PORT: parseInt(process.env.PORT || '5001', 10),
 
-  DATABASE_URL: requireEnv('DATABASE_URL'),
+  DATABASE_URL: getEnv('DATABASE_URL', 'postgresql://postgres:123456@localhost:5432/brainforge26?schema=public'),
 
   // JWT
-  JWT_ACCESS_SECRET:      requireEnv('JWT_ACCESS_SECRET'),
-  JWT_ACCESS_EXPIRES_IN:  process.env.JWT_ACCESS_EXPIRES_IN  || '15m',
-  JWT_REFRESH_SECRET:     requireEnv('JWT_REFRESH_SECRET'),
+  JWT_ACCESS_SECRET:      getEnv('JWT_ACCESS_SECRET', 'brainforge26_jwt_access_secret_key_2026_xyz'),
+  JWT_ACCESS_EXPIRES_IN:  process.env.JWT_ACCESS_EXPIRES_IN  || '1d',
+  JWT_REFRESH_SECRET:     getEnv('JWT_REFRESH_SECRET', 'brainforge26_jwt_refresh_secret_key_2026_xyz'),
   JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
 
   // Cookie
-  COOKIE_SECRET: requireEnv('COOKIE_SECRET'),
+  COOKIE_SECRET: getEnv('COOKIE_SECRET', 'brainforge26_cookie_secret_key_2026_xyz'),
 
   // Password reset
-  RESET_PASS_TOKEN:         requireEnv('RESET_PASS_TOKEN'),
+  RESET_PASS_TOKEN:         getEnv('RESET_PASS_TOKEN', 'brainforge26_reset_pass_token_2026_xyz'),
   RESET_PASS_TOKEN_EXPIRES: process.env.RESET_PASS_TOKEN_EXPIRES_IN || '5m',
-  RESET_PASSWORD_LINK:      process.env.RESET_PASSWORD_LINK || 'http://localhost:3000/reset-password',
+  RESET_PASSWORD_LINK:      process.env.RESET_PASSWORD_LINK || 'https://brainforge26.tech/reset-password',
 
   // Email
   EMAIL_USER: process.env.EMAIL_USER || '',
@@ -39,7 +37,7 @@ export const env = {
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || '',
 
   // Frontend
-  CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:3000',
+  CLIENT_URL: process.env.CLIENT_URL || 'https://brainforge26.tech',
 
   isDev():  boolean { return this.NODE_ENV === 'development'; },
   isProd(): boolean { return this.NODE_ENV === 'production';  },
