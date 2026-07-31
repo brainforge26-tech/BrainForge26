@@ -1,8 +1,9 @@
 export * from './routes';
 
 // ─── API ──────────────────────────────────────────────────────────────────────
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000/api/v1';
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://127.0.0.1:5001/api/v1';
+export const API_BASE_URL = API_URL;
 
 // ─── App meta ─────────────────────────────────────────────────────────────────
 export const APP_NAME        = 'BrainForceIT';
