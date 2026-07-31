@@ -33,7 +33,7 @@ export function errorHandler(
 
   res.status(500).json({
     success: false,
-    message: env.isDev() ? err.message : 'Something went wrong',
+    message: err.message || 'Something went wrong',
     ...(env.isDev() && { stack: err.stack }),
   });
 }
