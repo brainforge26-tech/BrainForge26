@@ -4,69 +4,68 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../src/config/database';
 
 async function main() {
-  console.log('🧹 [Production Seed] Purging all demo data...');
+  console.log('🌱 [Production Seed] Seeding official Admin & Manager accounts...');
 
-  // 1. Wipe all demo records
-  await prisma.message.deleteMany();
-  await prisma.conversation.deleteMany();
-  await prisma.projectFile.deleteMany();
-  await prisma.progressUpdate.deleteMany();
-  await prisma.milestone.deleteMany();
-  await prisma.timelineStage.deleteMany();
-  await prisma.projectDeveloper.deleteMany();
-  await prisma.project.deleteMany();
-  await prisma.hiringApplication.deleteMany();
-  await prisma.payment.deleteMany();
-  await prisma.adminProfile.deleteMany();
-  await prisma.managerProfile.deleteMany();
-  await prisma.developerProfile.deleteMany();
-  await prisma.clientProfile.deleteMany();
-  await prisma.user.deleteMany();
+  const passwordHash = await bcrypt.hash('password123', 10);
 
-  console.log('✅ Demo data purged.');
-
-  const defaultPasswordHash = await bcrypt.hash('password123', 10);
-
-  // 2. Create Super Admin Account
-  const adminEmail = 'admin@brainforge26.tech';
-  await prisma.user.create({
-    data: {
-      email: adminEmail,
-      passwordHash: defaultPasswordHash,
-      role: Role.ADMIN,
-      isActive: true,
-      isVerified: true,
-      adminProfile: {
-        create: {
-          firstName: 'Super',
-          lastName: 'Admin',
+  // 1. Super Admin (brainforge26.tech & brainforceit.com)
+  const adminEmails = ['admin@brainforge26.tech', 'admin@brainforceit.com'];
+  for (const email of adminEmails) {
+    await prisma.user.upsert({
+      where: { email },
+      update: {
+        passwordHash,
+        role: Role.ADMIN,
+        isActive: true,
+        isVerified: true,
+      },
+      create: {
+        email,
+        passwordHash,
+        role: Role.ADMIN,
+        isActive: true,
+        isVerified: true,
+        adminProfile: {
+          create: {
+            firstName: 'Super',
+            lastName: 'Admin',
+          },
         },
       },
-    },
-  });
-  console.log(`✅ Super Admin created: ${adminEmail}`);
+    });
+    console.log(`✅ Admin account initialized: ${email}`);
+  }
 
-  // 3. Create Manager Account
-  const managerEmail = 'manager@brainforge26.tech';
-  await prisma.user.create({
-    data: {
-      email: managerEmail,
-      passwordHash: defaultPasswordHash,
-      role: Role.MANAGER,
-      isActive: true,
-      isVerified: true,
-      managerProfile: {
-        create: {
-          firstName: 'Operations',
-          lastName: 'Manager',
-          department: 'Engineering',
+  // 2. Manager (brainforge26.tech & brainforceit.com)
+  const managerEmails = ['manager@brainforge26.tech', 'manager@brainforceit.com'];
+  for (const email of managerEmails) {
+    await prisma.user.upsert({
+      where: { email },
+      update: {
+        passwordHash,
+        role: Role.MANAGER,
+        isActive: true,
+        isVerified: true,
+      },
+      create: {
+        email,
+        passwordHash,
+        role: Role.MANAGER,
+        isActive: true,
+        isVerified: true,
+        managerProfile: {
+          create: {
+            firstName: 'Operations',
+            lastName: 'Manager',
+            department: 'Engineering',
+          },
         },
       },
-    },
-  });
-  console.log(`✅ Manager created: ${managerEmail}`);
+    });
+    console.log(`✅ Manager account initialized: ${email}`);
+  }
 
-  // 4. Seed Production Baseline Pricing Plans
+  // 3. Seed Pricing Plans
   await prisma.pricingPlan.deleteMany();
   await prisma.pricingPlan.createMany({
     data: [
@@ -118,9 +117,8 @@ async function main() {
       },
     ],
   });
-  console.log('✅ Baseline Pricing Plans seeded.');
 
-  // 5. Seed Production Baseline Services
+  // 4. Seed Specialized Services
   await prisma.specializedService.deleteMany();
   await prisma.specializedService.createMany({
     data: [
@@ -166,9 +164,8 @@ async function main() {
       },
     ],
   });
-  console.log('✅ Baseline Specialized Services seeded.');
 
-  // 6. Seed Baseline Homepage CMS Content
+  // 5. Seed Baseline Homepage Content
   await prisma.homepageContent.deleteMany();
   await prisma.homepageContent.createMany({
     data: [
@@ -190,12 +187,12 @@ async function main() {
       },
     ],
   });
-  console.log('✅ Baseline Homepage CMS content seeded.');
 
   console.log('----------------------------------------------------');
   console.log('🎉 Production Seed Complete!');
-  console.log('Admin:   admin@brainforge26.tech   (password: password123)');
-  console.log('Manager: manager@brainforge26.tech (password: password123)');
+  console.log('Admin Emails:   admin@brainforge26.tech / admin@brainforceit.com');
+  console.log('Manager Emails: manager@brainforge26.tech / manager@brainforceit.com');
+  console.log('Password for all: password123');
   console.log('----------------------------------------------------');
 }
 
