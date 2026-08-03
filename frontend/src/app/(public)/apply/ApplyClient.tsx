@@ -1,22 +1,60 @@
 'use client';
 
 import * as React from 'react';
-import { Loader2, Upload, FileText, CheckCircle2, User, Mail, Phone, Linkedin, Globe, Sparkles } from 'lucide-react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import {
+  User,
+  Mail,
+  Phone,
+  Briefcase,
+  Sparkles,
+  Linkedin,
+  Globe,
+  FileText,
+  Upload,
+  FileCheck,
+  Check,
+  Loader2,
+  CheckCircle2,
+  ArrowRight,
+  ShieldCheck,
+  ChevronLeft,
+} from 'lucide-react';
 import apiClient from '@/lib/axios';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+const POPULAR_SKILLS = [
+  'React',
+  'Next.js',
+  'TypeScript',
+  'Node.js',
+  'Python',
+  'PostgreSQL',
+  'Docker',
+  'AWS',
+  'Flutter',
+  'TailwindCSS',
+];
 
 export function ApplyClient() {
+  const searchParams = useSearchParams();
   const router = useRouter();
+
+  const jobId = searchParams.get('jobId') || undefined;
+  const jobTitle = searchParams.get('job') || searchParams.get('title') || undefined;
+
   const [firstName, setFirstName] = React.useState('');
   const [lastName, setLastName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [phone, setPhone] = React.useState('');
-  const [experience, setExperience] = React.useState('1-3 Years');
+  const [experience, setExperience] = React.useState('3-5 Years');
   const [skills, setSkills] = React.useState('');
   const [linkedinUrl, setLinkedinUrl] = React.useState('');
   const [portfolioUrl, setPortfolioUrl] = React.useState('');
   const [coverLetter, setCoverLetter] = React.useState('');
 
+  // Resume Upload
   const [resumeFile, setResumeFile] = React.useState<File | null>(null);
   const [resumeUrl, setResumeUrl] = React.useState('');
   const [uploadingResume, setUploadingResume] = React.useState(false);
@@ -27,10 +65,18 @@ export function ApplyClient() {
 
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
+  const handleAddSkill = (skill: string) => {
+    const current = skills.split(',').map((s) => s.trim()).filter(Boolean);
+    if (!current.includes(skill)) {
+      setSkills(current.concat(skill).join(', '));
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setResumeFile(file);
+
       setUploadingResume(true);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -46,7 +92,7 @@ export function ApplyClient() {
     setError('');
 
     if (!firstName.trim() || !lastName.trim() || !email.trim()) {
-      setError('Please fill in your name and email address.');
+      setError('Please fill in your full name and email address.');
       return;
     }
 
@@ -55,6 +101,7 @@ export function ApplyClient() {
       const skillsArray = skills.split(',').map((s) => s.trim()).filter(Boolean);
 
       const payload = {
+        jobId,
         firstName,
         lastName,
         email,
@@ -78,199 +125,303 @@ export function ApplyClient() {
 
   if (submitted) {
     return (
-      <div className="p-12 rounded-3xl bg-[#090D16] border border-orange-500/30 text-center space-y-4 shadow-2xl">
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(249,115,22,0.5)]">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="p-8 sm:p-14 rounded-3xl bg-[#07090F] border border-orange-500/30 text-center space-y-5 shadow-2xl relative overflow-hidden"
+      >
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center mx-auto shadow-[0_0_35px_rgba(249,115,22,0.5)]">
           <CheckCircle2 className="w-10 h-10 text-white" />
         </div>
-        <h3 className="text-2xl font-extrabold text-white">Application Submitted!</h3>
-        <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
-          Thank you for applying to <strong className="text-orange-400">BrainForge26</strong>. Our recruitment team will review your resume and contact you via email.
+        <h3 className="text-3xl font-black text-white">Application Submitted Successfully!</h3>
+        <p className="text-base text-slate-300 max-w-lg mx-auto leading-relaxed">
+          Thank you for applying to <strong className="text-orange-400">BrainForge26</strong>. Our recruitment team will review your resume and reach out to you via email.
         </p>
-        <button
-          onClick={() => router.push('/')}
-          className="mt-4 px-8 py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl hover:scale-105 transition-all"
-        >
-          Return to Home
-        </button>
-      </div>
+        <div className="pt-4 flex items-center justify-center gap-4">
+          <Link href="/careers">
+            <button className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl hover:scale-105 transition-all">
+              Return to Open Careers
+            </button>
+          </Link>
+        </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="p-8 rounded-3xl bg-[#090D16] border border-white/[0.12] shadow-2xl text-slate-100 space-y-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-8">
+      {/* Top Navigation Back Link */}
+      <div className="flex items-center justify-between">
+        <Link
+          href="/careers"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.1] text-xs font-bold text-slate-300 hover:text-white transition-all"
+        >
+          <ChevronLeft className="w-4 h-4 text-orange-400" />
+          Back to Positions
+        </Link>
+
+        {jobTitle && (
+          <span className="px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold">
+            Applying for: <strong className="text-white">{jobTitle}</strong>
+          </span>
+        )}
+      </div>
+
+      {/* Main Standalone Application Form Box */}
+      <form
+        onSubmit={handleSubmit}
+        className="p-6 sm:p-10 rounded-3xl bg-[#07090F] border border-white/[0.12] shadow-2xl text-slate-100 space-y-8 relative overflow-hidden"
+      >
+        {/* Glow accent */}
+        <div className="absolute top-0 right-0 w-96 h-40 bg-gradient-to-l from-orange-500/15 via-amber-500/10 to-transparent blur-3xl pointer-events-none" />
+
         {error && (
-          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-semibold">
+          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-semibold">
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-orange-400" /> First Name *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="John"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50"
-            />
+        {/* ── Section 1: Candidate Identity ─────────────────────────────────── */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 border-b border-white/[0.08] pb-2">
+            <div className="w-6 h-6 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center text-xs font-bold">1</div>
+            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">Candidate Contact Information</h3>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-orange-400" /> Last Name *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="Doe"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50"
-            />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-orange-400" /> First Name *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="Alex"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 focus:bg-white/[0.05] transition-all"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-orange-400" /> Last Name *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="Vance"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 focus:bg-white/[0.05] transition-all"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-orange-400" /> Email Address *
+              </label>
+              <input
+                type="email"
+                required
+                placeholder="alex.vance@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 focus:bg-white/[0.05] transition-all"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5 text-orange-400" /> Phone Number
+              </label>
+              <input
+                type="tel"
+                placeholder="+880 1818 000 000"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 focus:bg-white/[0.05] transition-all"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-orange-400" /> Email *
-            </label>
-            <input
-              type="email"
-              required
-              placeholder="john@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50"
-            />
+        {/* ── Section 2: Experience & Skills ────────────────────────────────── */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 border-b border-white/[0.08] pb-2">
+            <div className="w-6 h-6 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center text-xs font-bold">2</div>
+            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">Professional Profile & Tech Skills</h3>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-              <Phone className="w-3.5 h-3.5 text-orange-400" /> Phone
-            </label>
-            <input
-              type="tel"
-              placeholder="+880 1818 000 000"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50"
-            />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <Briefcase className="w-3.5 h-3.5 text-orange-400" /> Years of Experience *
+              </label>
+              <select
+                value={experience}
+                onChange={(e) => setExperience(e.target.value)}
+                className="w-full px-4 py-3.5 rounded-2xl bg-[#0B0D16] border border-white/[0.1] text-sm text-white focus:outline-none focus:border-orange-500/60 transition-all cursor-pointer"
+              >
+                <option value="Fresh Graduate / < 1 Year" className="bg-[#080A12] text-white py-2">Fresh Graduate / &lt; 1 Year</option>
+                <option value="1-3 Years" className="bg-[#080A12] text-white py-2">1-3 Years</option>
+                <option value="3-5 Years" className="bg-[#080A12] text-white py-2">3-5 Years</option>
+                <option value="5-8 Years" className="bg-[#080A12] text-white py-2">5-8 Years</option>
+                <option value="8+ Years Senior Architect" className="bg-[#080A12] text-white py-2">8+ Years Senior Architect</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-orange-400" /> Primary Skills (Comma separated)
+              </label>
+              <input
+                type="text"
+                placeholder="React, Next.js, Node.js, PostgreSQL"
+                value={skills}
+                onChange={(e) => setSkills(e.target.value)}
+                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 focus:bg-white/[0.05] transition-all"
+              />
+            </div>
+          </div>
+
+          {/* Quick Skill Tags */}
+          <div className="space-y-1.5 pt-1">
+            <span className="text-[11px] font-bold text-slate-400 block">Click to Add Popular Tech Skills:</span>
+            <div className="flex flex-wrap gap-1.5">
+              {POPULAR_SKILLS.map((sk) => (
+                <button
+                  key={sk}
+                  type="button"
+                  onClick={() => handleAddSkill(sk)}
+                  className="px-2.5 py-1 rounded-xl bg-white/[0.04] hover:bg-orange-500/20 hover:border-orange-500/30 text-xs font-medium text-slate-300 hover:text-orange-300 border border-white/[0.08] transition-all"
+                >
+                  + {sk}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <Linkedin className="w-3.5 h-3.5 text-orange-400" /> LinkedIn Profile URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://linkedin.com/in/username"
+                value={linkedinUrl}
+                onChange={(e) => setLinkedinUrl(e.target.value)}
+                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-all"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 text-orange-400" /> Portfolio / GitHub URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://github.com/username"
+                value={portfolioUrl}
+                onChange={(e) => setPortfolioUrl(e.target.value)}
+                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-all"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">Years of Experience</label>
-            <select
-              value={experience}
-              onChange={(e) => setExperience(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-[#0C0F18] border border-white/[0.1] text-sm text-white focus:outline-none cursor-pointer"
+        {/* ── Section 3: Resume PDF Upload & Cover Letter ──────────────────── */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 border-b border-white/[0.08] pb-2">
+            <div className="w-6 h-6 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center text-xs font-bold">3</div>
+            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">Resume PDF Document & Cover Letter</h3>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-orange-400" /> Upload Resume / CV Document (PDF, DOC, DOCX) *
+              </span>
+              <span className="text-[10px] text-slate-400 font-normal">Max 15MB</span>
+            </label>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".pdf,.doc,.docx"
+              className="hidden"
+            />
+
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="p-6 rounded-2xl border-2 border-dashed border-white/[0.15] hover:border-orange-500/60 bg-white/[0.02] hover:bg-white/[0.05] transition-all cursor-pointer flex flex-col items-center justify-center text-center space-y-2.5 group"
             >
-              <option value="Fresh Graduate / < 1 Year" className="bg-[#080A12] text-white py-2">Fresh Graduate / &lt; 1 Year</option>
-              <option value="1-3 Years" className="bg-[#080A12] text-white py-2">1-3 Years</option>
-              <option value="3-5 Years" className="bg-[#080A12] text-white py-2">3-5 Years</option>
-              <option value="5-8 Years" className="bg-[#080A12] text-white py-2">5-8 Years</option>
-              <option value="8+ Years Senior" className="bg-[#080A12] text-white py-2">8+ Years Senior</option>
-            </select>
+              {uploadingResume ? (
+                <div className="flex items-center gap-2 text-xs font-bold text-orange-400 py-2">
+                  <Loader2 className="w-5 h-5 animate-spin" /> Processing Document...
+                </div>
+              ) : resumeFile ? (
+                <div className="flex items-center gap-4 py-1">
+                  <div className="w-12 h-12 rounded-2xl bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center shrink-0">
+                    <FileCheck className="w-6 h-6" />
+                  </div>
+                  <div className="text-left">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white text-sm block truncate max-w-md">{resumeFile.name}</span>
+                      <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                    </div>
+                    <span className="text-xs text-slate-400 block mt-0.5">
+                      {(resumeFile.size / (1024 * 1024)).toFixed(2)} MB • Ready for submission (Click to replace file)
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.08] text-slate-400 group-hover:text-orange-400 group-hover:scale-110 flex items-center justify-center transition-all">
+                    <Upload className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-bold text-white block">Click or Drag & Drop your Resume PDF file here</span>
+                    <span className="text-xs text-slate-400 block mt-0.5">Supports PDF, DOC, DOCX documents</span>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
+
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">Skills (comma separated)</label>
-            <input
-              type="text"
-              placeholder="React, Node.js, Python"
-              value={skills}
-              onChange={(e) => setSkills(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none"
+            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-orange-400" /> Cover Letter & Personal Statement (Optional)
+            </label>
+            <textarea
+              rows={4}
+              placeholder="Share details about your recent projects, engineering accomplishments, and why you want to join BrainForge26..."
+              value={coverLetter}
+              onChange={(e) => setCoverLetter(e.target.value)}
+              className="w-full px-4 py-3 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-all leading-relaxed"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">LinkedIn URL</label>
-            <input
-              type="url"
-              placeholder="https://linkedin.com/in/username"
-              value={linkedinUrl}
-              onChange={(e) => setLinkedinUrl(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">Portfolio / GitHub URL</label>
-            <input
-              type="url"
-              placeholder="https://github.com/username"
-              value={portfolioUrl}
-              onChange={(e) => setPortfolioUrl(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white"
-            />
-          </div>
-        </div>
-
-        {/* Resume PDF Dropzone */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-            <FileText className="w-3.5 h-3.5 text-orange-400" /> Upload Resume (PDF / DOC)
-          </label>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept=".pdf,.doc,.docx"
-            className="hidden"
-          />
-
-          <div
-            onClick={() => fileInputRef.current?.click()}
-            className="p-5 rounded-2xl border-2 border-dashed border-white/[0.15] hover:border-orange-500/50 bg-white/[0.02] hover:bg-white/[0.05] transition-all cursor-pointer flex flex-col items-center justify-center text-center space-y-2 group"
+        <div className="pt-4 border-t border-white/[0.08] flex items-center justify-end">
+          <button
+            type="submit"
+            disabled={loading || uploadingResume}
+            className="w-full sm:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-black text-xs tracking-wider uppercase shadow-[0_0_30px_rgba(249,115,22,0.45)] transition-all hover:scale-[1.02] flex items-center justify-center gap-2.5"
           >
-            {uploadingResume ? (
-              <div className="flex items-center gap-2 text-xs font-bold text-orange-400">
-                <Loader2 className="w-4 h-4 animate-spin" /> Processing File...
-              </div>
-            ) : resumeFile ? (
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <span className="font-bold text-white text-xs block truncate max-w-xs">{resumeFile.name}</span>
-                  <span className="text-[10px] text-slate-400">{(resumeFile.size / (1024 * 1024)).toFixed(2)} MB • Click to change</span>
-                </div>
-              </div>
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Submitting Application...
+              </>
             ) : (
               <>
-                <Upload className="w-6 h-6 text-slate-400 group-hover:text-orange-400 transition-all" />
-                <span className="text-xs font-bold text-slate-300">Click or drag resume PDF file here</span>
+                <span>Submit Job Application</span>
+                <ArrowRight className="w-4 h-4" />
               </>
             )}
-          </div>
+          </button>
         </div>
-
-        {/* Cover Letter */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-slate-300">Cover Letter (Optional)</label>
-          <textarea
-            rows={3}
-            placeholder="Tell us why you want to join..."
-            value={coverLetter}
-            onChange={(e) => setCoverLetter(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading || uploadingResume}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl transition-all flex items-center justify-center gap-2"
-        >
-          {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting Application...</> : 'Submit Application'}
-        </button>
       </form>
     </div>
   );
