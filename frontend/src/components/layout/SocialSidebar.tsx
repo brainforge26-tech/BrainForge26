@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { Github, Twitter, Linkedin, Facebook, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -12,6 +13,14 @@ const SOCIAL_ITEMS = [
 ];
 
 export function SocialSidebar() {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
     <motion.aside
       initial={{ opacity: 0, x: -30 }}
