@@ -44,7 +44,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed max-w-sm">
-              BrainForge26 is an AI-fueled corporate software engineering agency building scalable web platforms, AI solutions, and enterprise systems.
+              BrainForge26 Software Ltd. is an AI-fueled corporate software engineering agency building scalable web platforms, AI solutions, and enterprise systems.
             </p>
             <div className="flex gap-3 mt-6">
               {SOCIALS.map(({ icon: Icon, href, label }) => (
@@ -87,7 +87,7 @@ export function Footer() {
         {/* Bottom row */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8">
           <p className="text-xs text-slate-400">
-            © {new Date().getFullYear()} BrainForge26 Tech. All rights reserved. Managed by Admin.
+            © {new Date().getFullYear()} BrainForge26 Software Ltd. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Link href="/login" className="text-xs text-slate-400 hover:text-orange-400 transition-colors">
