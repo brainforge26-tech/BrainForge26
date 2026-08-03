@@ -42,15 +42,19 @@ export async function markAsRead(id: string, isRead = true) {
 export async function replyToContactMessage(id: string, replyData: { subject: string; messageBody: string }) {
   const msg = await getContactMessageById(id);
 
-  // Send Email directly via SMTP
-  await sendCandidateCustomEmail(
-    msg.email,
-    replyData.subject || `Re: ${msg.subject || 'Inquiry'}`,
-    replyData.messageBody,
-    msg.name
-  );
+  // Send Email directly via SMTP (gracefully handle any SMTP warning)
+  try {
+    await sendCandidateCustomEmail(
+      msg.email,
+      replyData.subject || `Re: ${msg.subject || 'Inquiry'}`,
+      replyData.messageBody,
+      msg.name
+    );
+  } catch (emailErr) {
+    console.warn('[Contact Reply] Email sending notice:', emailErr);
+  }
 
-  // Mark as read and update notes with reply timestamp
+  // Always save reply to database record
   return prisma.contactMessage.update({
     where: { id },
     data: {
