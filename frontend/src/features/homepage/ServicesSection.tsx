@@ -21,7 +21,6 @@ import {
   Star,
   Sparkles,
 } from 'lucide-react';
-import { FloatingShapes3D } from '@/components/ui/FloatingShapes3D';
 
 const CATEGORY_ICONS: Record<string, any> = {
   'website-development': Globe,
@@ -61,9 +60,6 @@ export function ServicesSection({ categories = [], initialServices = [] }: Servi
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Interactive Three.js 3D Floating Geometric Shapes */}
-        <FloatingShapes3D />
-
         {/* Section Header */}
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-16">
           <div>
@@ -87,7 +83,7 @@ export function ServicesSection({ categories = [], initialServices = [] }: Servi
           </Link>
         </div>
 
-        {/* Categories Grid (EXACT SAME CARD UI DESIGN) */}
+        {/* Categories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {displayItems.map((item: any, idx: number) => {
             const isCategory = !!item.slug && hasCategories;
@@ -97,7 +93,6 @@ export function ServicesSection({ categories = [], initialServices = [] }: Servi
               ? item.description || `Enterprise grade ${cleanCategoryName(item.name)} solutions tailored for scalable business growth.`
               : item.overview;
             
-            // Extract sample sub-service names for badges if category item
             const subServices = isCategory && Array.isArray(item.services)
               ? item.services.slice(0, 3).map((s: any) => s.title)
               : item.technologies || [];
