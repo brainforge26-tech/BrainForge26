@@ -98,6 +98,17 @@ export async function updateApplicationStatus(req: Request, res: Response, next:
   }
 }
 
+export async function sendCandidateEmail(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = req.params.id as string;
+    const { subject, message, status } = req.body;
+    const data = await hiringService.sendEmailToCandidate(id, subject, message, status);
+    res.json({ success: true, data, message: 'Candidate email processed' });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function deleteApplication(req: Request, res: Response, next: NextFunction) {
   try {
     const id = req.params.id as string;

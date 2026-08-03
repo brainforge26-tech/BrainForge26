@@ -1,5 +1,6 @@
 import { prisma } from '../../config/database';
 import { NotFoundError } from '../../errors/AppError';
+import { sendCandidateCustomEmail } from '../../utils/email';
 
 // ─── JOBS ───────────────────────────────────────────────────────────────────
 
@@ -72,6 +73,36 @@ export async function updateJobApplicationStatus(id: string, status: any, notes?
     where: { id },
     data: { status, ...(notes !== undefined && { notes }) },
   });
+}
+
+export async function sendEmailToCandidate(id: string, subject: string, message: string, newStatus?: any) {
+  const app = await getJobApplicationById(id);
+  const candidateName = `${app.firstName} ${app.lastName}`;
+
+  // Try direct SMTP dispatch
+  const sent = await sendCandidateCustomEmail(app.email, subject, message, candidateName);
+
+  const updatedNotes = app.notes
+    ? `${app.notes}\n\n[Emailed ${new Date().toLocaleDateString()}]: ${subject}`
+    : `[Emailed ${new Date().toLocaleDateString()}]: ${subject}`;
+
+  const updatedData: any = {
+    notes: updatedNotes,
+  };
+  if (newStatus) {
+    updatedData.status = newStatus;
+  }
+
+  const updatedApp = await prisma.jobApplication.update({
+    where: { id },
+    data: updatedData,
+  });
+
+  return {
+    application: updatedApp,
+    emailSent: sent,
+    recipient: app.email,
+  };
 }
 
 export async function deleteJobApplication(id: string) {

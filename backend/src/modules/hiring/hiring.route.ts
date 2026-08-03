@@ -21,6 +21,7 @@ router.delete('/jobs/:id', authenticate, authorize('ADMIN'), hiringController.de
 router.get('/applications', authenticate, authorize('ADMIN'), hiringController.getAllApplications);
 router.get('/applications/:id', authenticate, authorize('ADMIN'), hiringController.getApplication);
 router.patch('/applications/:id/status', authenticate, authorize('ADMIN'), hiringController.updateApplicationStatus);
+router.post('/applications/:id/send-email', authenticate, authorize('ADMIN'), hiringController.sendCandidateEmail);
 router.delete('/applications/:id', authenticate, authorize('ADMIN'), hiringController.deleteApplication);
 
 export default router;
