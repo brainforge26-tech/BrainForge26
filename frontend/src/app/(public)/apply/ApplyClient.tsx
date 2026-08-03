@@ -168,13 +168,13 @@ export function ApplyClient() {
             <select
               value={experience}
               onChange={(e) => setExperience(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-[#0C0F18] border border-white/[0.1] text-sm text-white focus:outline-none"
+              className="w-full px-4 py-3 rounded-xl bg-[#0C0F18] border border-white/[0.1] text-sm text-white focus:outline-none cursor-pointer"
             >
-              <option value="Fresh Graduate / < 1 Year">Fresh Graduate / &lt; 1 Year</option>
-              <option value="1-3 Years">1-3 Years</option>
-              <option value="3-5 Years">3-5 Years</option>
-              <option value="5-8 Years">5-8 Years</option>
-              <option value="8+ Years Senior">8+ Years Senior</option>
+              <option value="Fresh Graduate / < 1 Year" className="bg-[#080A12] text-white py-2">Fresh Graduate / &lt; 1 Year</option>
+              <option value="1-3 Years" className="bg-[#080A12] text-white py-2">1-3 Years</option>
+              <option value="3-5 Years" className="bg-[#080A12] text-white py-2">3-5 Years</option>
+              <option value="5-8 Years" className="bg-[#080A12] text-white py-2">5-8 Years</option>
+              <option value="8+ Years Senior" className="bg-[#080A12] text-white py-2">8+ Years Senior</option>
             </select>
           </div>
           <div className="space-y-1.5">

@@ -310,13 +310,13 @@ export function JobApplicationModal({
                         <select
                           value={experience}
                           onChange={(e) => setExperience(e.target.value)}
-                          className="w-full px-4 py-3 rounded-2xl bg-[#0B0D16] border border-white/[0.1] text-sm text-white focus:outline-none focus:border-orange-500/60 transition-all"
+                          className="w-full px-4 py-3 rounded-2xl bg-[#0B0D16] border border-white/[0.1] text-sm text-white focus:outline-none focus:border-orange-500/60 transition-all cursor-pointer"
                         >
-                          <option value="Fresh Graduate / < 1 Year">Fresh Graduate / &lt; 1 Year</option>
-                          <option value="1-3 Years">1-3 Years</option>
-                          <option value="3-5 Years">3-5 Years</option>
-                          <option value="5-8 Years">5-8 Years</option>
-                          <option value="8+ Years Senior Architect">8+ Years Senior Architect</option>
+                          <option value="Fresh Graduate / < 1 Year" className="bg-[#080A12] text-white py-2">Fresh Graduate / &lt; 1 Year</option>
+                          <option value="1-3 Years" className="bg-[#080A12] text-white py-2">1-3 Years</option>
+                          <option value="3-5 Years" className="bg-[#080A12] text-white py-2">3-5 Years</option>
+                          <option value="5-8 Years" className="bg-[#080A12] text-white py-2">5-8 Years</option>
+                          <option value="8+ Years Senior Architect" className="bg-[#080A12] text-white py-2">8+ Years Senior Architect</option>
                         </select>
                       </div>
 
