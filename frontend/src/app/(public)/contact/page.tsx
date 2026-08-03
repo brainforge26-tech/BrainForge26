@@ -18,7 +18,7 @@ export default async function ContactPage() {
   return (
     <div className="min-h-screen bg-[#050608] text-slate-100 pt-36 pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        
+
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-extrabold bg-orange-500/10 text-orange-400 border border-orange-500/20 uppercase tracking-widest">
@@ -33,7 +33,7 @@ export default async function ContactPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start max-w-6xl mx-auto">
-          
+
           {/* Dynamic Contact Details */}
           <div className="space-y-8 lg:col-span-1">
             <div className="p-8 rounded-3xl bg-[#0B1224] border border-white/[0.08] shadow-2xl space-y-6">
@@ -75,7 +75,7 @@ export default async function ContactPage() {
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Headquarters</h4>
                   <p className="text-sm font-semibold text-white leading-relaxed mt-0.5">
-                    {address}
+                    315 No House ,13 No Road,Savar DOHS ,Savar Dhaka
                   </p>
                 </div>
               </div>
