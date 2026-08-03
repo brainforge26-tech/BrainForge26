@@ -94,7 +94,7 @@ export default function AdminContactMessagesPage() {
       }, 4000);
     } catch (err: any) {
       alert(err.response?.data?.message || 'ইমেইল উত্তর পাঠাতে সমস্যা হয়েছে');
-    } font-semibold {
+    } finally {
       setSendingReply(false);
     }
   };
