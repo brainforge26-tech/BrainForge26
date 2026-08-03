@@ -27,7 +27,14 @@ export default function AdminContactMessagesPage() {
     try {
       setLoading(true);
       const { data } = await apiClient.get('/contact-messages');
-      setMessages(data.data || []);
+      const loadedMsgs = data.data || [];
+      setMessages(loadedMsgs);
+
+      // Keep selected message in sync if updated
+      if (selectedMsg) {
+        const updated = loadedMsgs.find((m: any) => m.id === selectedMsg.id);
+        if (updated) setSelectedMsg(updated);
+      }
     } catch (err) {
       console.error('Failed to load contact messages:', err);
     } finally {
@@ -55,9 +62,6 @@ export default function AdminContactMessagesPage() {
     try {
       await apiClient.patch(`/contact-messages/${id}/read`, { isRead: !currentRead });
       loadMessages();
-      if (selectedMsg && selectedMsg.id === id) {
-        setSelectedMsg((prev: any) => prev ? { ...prev, isRead: !currentRead } : null);
-      }
     } catch (err) {
       console.error('Failed to toggle read status:', err);
     }
@@ -82,13 +86,17 @@ export default function AdminContactMessagesPage() {
 
     try {
       setSendingReply(true);
-      await apiClient.post(`/contact-messages/${selectedMsg.id}/reply`, {
+      const res = await apiClient.post(`/contact-messages/${selectedMsg.id}/reply`, {
         subject: replySubject,
         messageBody: replyBody,
       });
 
       setReplySuccess(true);
+      if (res.data?.data) {
+        setSelectedMsg(res.data.data);
+      }
       loadMessages();
+      setReplyBody('');
       setTimeout(() => {
         setReplySuccess(false);
       }, 4000);
@@ -177,10 +185,10 @@ export default function AdminContactMessagesPage() {
           {/* 2-Column Split View */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
-            {/* Left Column: Original Message */}
+            {/* Left Column: Original Message & Sent Reply History */}
             <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1224] border border-white/[0.08] shadow-2xl space-y-6 flex flex-col justify-between">
-              <div>
-                <div className="border-b border-white/[0.08] pb-4 mb-6">
+              <div className="space-y-6">
+                <div className="border-b border-white/[0.08] pb-4">
                   <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     Original Message
                   </h3>
@@ -190,7 +198,7 @@ export default function AdminContactMessagesPage() {
                 </div>
 
                 {/* Sender Info Card */}
-                <div className="p-4 rounded-2xl bg-[#07090F] border border-white/[0.08] flex items-start gap-4 mb-6">
+                <div className="p-4 rounded-2xl bg-[#07090F] border border-white/[0.08] flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-cyan-950/60 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-extrabold text-sm shrink-0 shadow-md">
                     {getInitials(selectedMsg.name)}
                   </div>
@@ -209,10 +217,27 @@ export default function AdminContactMessagesPage() {
                 {/* Message Body */}
                 <div className="space-y-2">
                   <span className="text-xs font-bold text-slate-400 block uppercase tracking-wider">Message Content:</span>
-                  <div className="p-5 rounded-2xl bg-[#07090F] border border-white/[0.08] text-sm text-slate-200 leading-relaxed min-h-[160px] whitespace-pre-wrap">
+                  <div className="p-5 rounded-2xl bg-[#07090F] border border-white/[0.08] text-sm text-slate-200 leading-relaxed min-h-[140px] whitespace-pre-wrap">
                     {selectedMsg.message}
                   </div>
                 </div>
+
+                {/* Sent Email Reply History (Shows Left Side as Requested!) */}
+                {selectedMsg.notes && selectedMsg.notes.includes('[REPLIED:') && (
+                  <div className="p-5 rounded-2xl bg-emerald-950/30 border border-emerald-500/40 space-y-3 shadow-xl">
+                    <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+                      <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                        <CheckCircle className="w-4 h-4" /> Sent Email Reply History
+                      </span>
+                      <span className="text-[10px] font-extrabold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                        ✓ Replied via Email
+                      </span>
+                    </div>
+                    <div className="p-4 rounded-xl bg-[#060910] border border-emerald-500/20 text-xs text-slate-200 leading-relaxed whitespace-pre-wrap font-medium">
+                      {selectedMsg.notes.replace(/\[REPLIED:\s*[^\]]+\]\s*/, '')}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {selectedMsg.phone && (
@@ -244,7 +269,7 @@ export default function AdminContactMessagesPage() {
               {replySuccess && (
                 <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 shrink-0" />
-                  Email reply sent successfully!
+                  Email reply sent successfully and saved to history on left!
                 </div>
               )}
 
