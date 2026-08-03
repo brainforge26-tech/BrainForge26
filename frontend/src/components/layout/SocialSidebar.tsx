@@ -25,14 +25,14 @@ export function SocialSidebar() {
     <motion.aside
       initial={{ opacity: 0, x: -30 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
-      className="hidden xl:flex fixed left-6 top-1/2 -translate-y-1/2 flex-col items-center gap-3.5 z-40 pointer-events-auto"
+      transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
+      className="hidden lg:flex fixed left-5 inset-y-0 my-auto h-fit flex-col items-center gap-2.5 z-40 pointer-events-auto"
     >
       {/* Top Ambient Glow Line */}
-      <div className="w-[1.5px] h-16 bg-gradient-to-b from-transparent via-orange-500/50 to-orange-400 shadow-[0_0_10px_#FF4D00]" />
+      <div className="w-[1.5px] h-10 bg-gradient-to-b from-transparent via-orange-500/50 to-orange-400 shadow-[0_0_10px_#FF4D00]" />
 
       {/* Social Icons Container */}
-      <div className="p-2 rounded-full bg-[#08090E]/90 border border-white/[0.12] backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex flex-col gap-3">
+      <div className="p-2 rounded-full bg-[#08090E]/90 border border-white/[0.12] backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex flex-col gap-2.5">
         {SOCIAL_ITEMS.map((item) => {
           const Icon = item.icon;
           return (
@@ -42,12 +42,12 @@ export function SocialSidebar() {
               target="_blank"
               rel="noopener noreferrer"
               title={item.label}
-              className="relative group flex items-center justify-center w-10 h-10 rounded-full bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:text-white hover:border-orange-500/50 hover:bg-gradient-to-br hover:from-orange-500 hover:to-amber-500 transition-all duration-300 shadow-md hover:scale-110"
+              className="relative group flex items-center justify-center w-9 h-9 rounded-full bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:text-white hover:border-orange-500/50 hover:bg-gradient-to-br hover:from-orange-500 hover:to-amber-500 transition-all duration-300 shadow-md hover:scale-110"
             >
               <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />
 
               {/* Tooltip on hover */}
-              <span className="absolute left-14 px-3 py-1 rounded-xl bg-[#0C0E18] border border-orange-500/30 text-orange-300 font-bold text-[10px] whitespace-nowrap opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all pointer-events-none shadow-xl">
+              <span className="absolute left-12 px-3 py-1 rounded-xl bg-[#0C0E18] border border-orange-500/30 text-orange-300 font-bold text-[10px] whitespace-nowrap opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all pointer-events-none shadow-xl">
                 {item.label}
               </span>
             </a>
@@ -56,7 +56,7 @@ export function SocialSidebar() {
       </div>
 
       {/* Bottom Ambient Glow Line */}
-      <div className="w-[1.5px] h-16 bg-gradient-to-t from-transparent via-orange-500/50 to-orange-400 shadow-[0_0_10px_#FF4D00]" />
+      <div className="w-[1.5px] h-10 bg-gradient-to-t from-transparent via-orange-500/50 to-orange-400 shadow-[0_0_10px_#FF4D00]" />
     </motion.aside>
   );
 }
