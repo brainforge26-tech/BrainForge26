@@ -1,150 +1,149 @@
+import { serverFetch } from '@/lib/api';
 import {
-  Users, FolderKanban, UserCheck, TrendingUp,
-  Shield, ArrowUpRight,
+  Globe, FolderKanban, Users, FileCheck, Mail, Briefcase,
+  BookOpen, Quote, Cpu, Award, ArrowUpRight, ShieldCheck
 } from 'lucide-react';
 import Link from 'next/link';
-import { PageHeader }  from '@/components/dashboard/PageHeader';
-import { StatCard }    from '@/components/common/StatCard';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Badge }       from '@/components/ui/Badge';
-import { fetchAdminStats, fetchManagers } from '@/features/admin/admin.actions';
-import { fetchProjects } from '@/features/manager/manager.actions';
 
-export default async function AdminDashboardPage() {
-  const stats = await fetchAdminStats().catch(() => ({
-    totalManagers: 0,
-    totalDevelopers: 0,
+export const dynamic = 'force-dynamic';
+
+export default async function AdminDashboardOverviewPage() {
+  let stats: any = {
+    totalServices: 0,
+    totalPortfolioProjects: 0,
+    totalTeamMembers: 0,
+    totalJobApplications: 0,
+    unreadContactMessages: 0,
+    totalActiveJobs: 0,
+    totalBlogs: 0,
+    totalTestimonials: 0,
+    totalTechnologies: 0,
     totalClients: 0,
-    totalProjects: 0,
-    activeProjects: 0,
-    completedProjects: 0,
-    totalRevenue: 0,
-  }));
+    recentApplications: [],
+    recentMessages: [],
+  };
 
-  const managersData = await fetchManagers(1, '').catch(() => ({
-    managers: [],
-    pagination: { total: 0, page: 1, limit: 10, totalPages: 0 },
-  }));
+  try {
+    const res = await serverFetch<any>('/admin/stats');
+    if (res?.data) stats = res.data;
+  } catch (err) {
+    console.error('Failed to fetch admin stats:', err);
+  }
 
-  const projectsData = await fetchProjects(1).catch(() => ({
-    projects: [],
-    pagination: { total: 0, page: 1, limit: 10, totalPages: 0 },
-  }));
-
-  const STAT_CARDS = [
-    { title: 'Total Managers',    value: String(stats.totalManagers),   icon: Users,        iconColor: '#730E27', desc: 'System administrators' },
-    { title: 'Active Projects',   value: String(stats.activeProjects),  icon: FolderKanban, iconColor: '#8B1532', desc: `${stats.totalProjects} total projects` },
-    { title: 'Total Developers',  value: String(stats.totalDevelopers), icon: UserCheck,    iconColor: '#00D26A', desc: 'Active engineer roster' },
-    { title: 'Total Revenue',     value: `$${stats.totalRevenue.toLocaleString()}`, icon: TrendingUp, iconColor: '#22C55E', desc: 'Completed milestone pay' },
+  const METRIC_CARDS = [
+    { title: 'Services',             value: stats.totalServices,          href: '/admin/services',         icon: Globe,        color: 'from-blue-600 to-cyan-500' },
+    { title: 'Portfolio Projects',   value: stats.totalPortfolioProjects, href: '/admin/portfolio',        icon: FolderKanban, color: 'from-indigo-600 to-purple-600' },
+    { title: 'Team Members',         value: stats.totalTeamMembers,       href: '/admin/team',             icon: Users,        color: 'from-emerald-600 to-teal-500' },
+    { title: 'Job Applications',     value: stats.totalJobApplications,   href: '/admin/job-applications', icon: FileCheck,    color: 'from-amber-600 to-orange-500' },
+    { title: 'Unread Messages',      value: stats.unreadContactMessages,  href: '/admin/contact-messages', icon: Mail,         color: 'from-rose-600 to-pink-500' },
+    { title: 'Active Jobs',          value: stats.totalActiveJobs,        href: '/admin/jobs',             icon: Briefcase,    color: 'from-cyan-600 to-blue-600' },
+    { title: 'Blogs',                value: stats.totalBlogs,             href: '/admin/blogs',            icon: BookOpen,     color: 'from-violet-600 to-indigo-600' },
+    { title: 'Technologies',         value: stats.totalTechnologies,      href: '/admin/technologies',     icon: Cpu,          color: 'from-teal-600 to-cyan-600' },
   ];
 
   return (
-    <div className="animate-fade-up space-y-8">
-      <PageHeader
-        title="Admin Dashboard"
-        description="System-wide overview of BrainForgeIT operations and live backend metrics."
-        action={
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[rgba(115,14,39,0.12)] border border-[rgba(115,14,39,0.25)]">
-            <Shield className="w-4 h-4 text-[#8B1532]" />
-            <span className="text-xs font-bold text-[#8B1532]">Live Admin Control</span>
-          </div>
-        }
-      />
-
-      {/* ── Dynamic Stats row ────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-        {STAT_CARDS.map((s) => (
-          <StatCard key={s.title} {...s} description={s.desc} />
-        ))}
+    <div className="space-y-8 text-slate-100">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#090D16] p-6 rounded-2xl border border-white/[0.08] shadow-xl">
+        <div>
+          <h1 className="text-2xl font-extrabold text-white flex items-center gap-3">
+            <ShieldCheck className="w-7 h-7 text-cyan-400" />
+            Admin Master Dashboard
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">BrainForge26 Corporate CMS Control Center</p>
+        </div>
+        <div className="px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-cyan-400 text-xs font-bold tracking-wide uppercase">
+          Role: Admin (Single Role System)
+        </div>
       </div>
 
-      {/* ── Middle row: Managers & Recent Projects ──────────────────────────── */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {METRIC_CARDS.map((card) => {
+          const Icon = card.icon;
+          return (
+            <Link
+              key={card.title}
+              href={card.href}
+              className="group p-5 rounded-2xl bg-[#0B1224] border border-white/[0.08] hover:border-cyan-500/40 transition-all shadow-lg hover:shadow-cyan-500/10 hover:-translate-y-0.5 flex flex-col justify-between"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{card.title}</span>
+                <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform`}>
+                  <Icon className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-3xl font-extrabold text-white tracking-tight">{card.value}</span>
+                <span className="text-xs text-cyan-400 group-hover:translate-x-1 transition-transform flex items-center gap-0.5 font-bold">
+                  Manage <ArrowUpRight className="w-3.5 h-3.5" />
+                </span>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
 
-        {/* Manager list (Dynamic API) */}
-        <Card variant="default" padding="none" className="lg:col-span-2 overflow-hidden">
-          <CardHeader className="px-6 pt-6 pb-4 border-b border-white/[0.06]">
-            <div className="flex items-center justify-between">
-              <CardTitle>System Managers</CardTitle>
-              <Link href="/admin/managers" className="flex items-center gap-1 text-xs text-[#8B1532] hover:text-white transition-colors font-bold">
-                View all ({managersData.pagination.total}) <ArrowUpRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <table className="premium-table">
-              <thead>
-                <tr>
-                  <th>Manager</th>
-                  <th>Department</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {managersData.managers.map((m) => {
-                  const name = m.managerProfile ? `${m.managerProfile.firstName} ${m.managerProfile.lastName}` : m.email.split('@')[0];
-                  return (
-                    <tr key={m.id}>
-                      <td>
-                        <div>
-                          <p className="text-sm font-medium text-white">{name}</p>
-                          <p className="text-xs text-[#7A8499]">{m.email}</p>
-                        </div>
-                      </td>
-                      <td>
-                        <span className="text-sm font-semibold text-[#AAB3C5]">
-                          {m.managerProfile?.department || 'Operations'}
-                        </span>
-                      </td>
-                      <td>
-                        <Badge
-                          variant={m.isActive ? 'success' : 'muted'}
-                          size="sm" dot>
-                          {m.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {managersData.managers.length === 0 && (
-                  <tr>
-                    <td colSpan={3} className="text-center py-8 text-sm text-[#7A8499]">
-                      No managers registered yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
-
-        {/* Live Projects Feed (Dynamic API) */}
-        <Card variant="default" padding="md">
-          <CardHeader>
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
-              <CardTitle>Recent Projects</CardTitle>
-              <Link href="/admin/projects" className="flex items-center gap-1 text-xs text-[#8B1532] hover:text-white transition-colors font-bold">
-                All Projects <ArrowUpRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3 mt-3">
-            {projectsData.projects.slice(0, 5).map((p) => (
-              <Link key={p.id} href={`/admin/projects/${p.id}`} className="block p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-white/[0.12] hover:bg-white/[0.04] transition-all">
+      {/* Recent Submissions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        {/* Recent Contact Messages */}
+        <div className="p-6 rounded-2xl bg-[#0B1224] border border-white/[0.08] shadow-xl">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.08]">
+            <h3 className="font-bold text-white text-base flex items-center gap-2">
+              <Mail className="w-5 h-5 text-rose-400" />
+              Recent Contact Inquiries
+            </h3>
+            <Link href="/admin/contact-messages" className="text-xs font-bold text-cyan-400 hover:underline">
+              View All ({stats.unreadContactMessages} Unread)
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {stats.recentMessages?.map((msg: any) => (
+              <div key={msg.id} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04]">
                 <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-bold text-white truncate">{p.name}</p>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[rgba(115,14,39,0.15)] text-[#8B1532]">
-                    {p.status}
+                  <span className="font-bold text-white text-sm">{msg.name}</span>
+                  <span className="text-[10px] text-slate-400">{new Date(msg.createdAt).toLocaleDateString()}</span>
+                </div>
+                <p className="text-xs text-cyan-400 font-medium mb-1">{msg.email} {msg.service ? `• ${msg.service}` : ''}</p>
+                <p className="text-xs text-slate-300 truncate">{msg.message}</p>
+              </div>
+            ))}
+            {(!stats.recentMessages || stats.recentMessages.length === 0) && (
+              <p className="text-xs text-slate-400 text-center py-6">No contact messages received yet.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Recent Job Applications */}
+        <div className="p-6 rounded-2xl bg-[#0B1224] border border-white/[0.08] shadow-xl">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.08]">
+            <h3 className="font-bold text-white text-base flex items-center gap-2">
+              <FileCheck className="w-5 h-5 text-amber-400" />
+              Recent Candidate Applications
+            </h3>
+            <Link href="/admin/job-applications" className="text-xs font-bold text-cyan-400 hover:underline">
+              View All Applications
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {stats.recentApplications?.map((app: any) => (
+              <div key={app.id} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-white text-sm">{app.firstName} {app.lastName}</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300">
+                    {app.status}
                   </span>
                 </div>
-                <p className="text-xs text-[#7A8499]">Client: {p.client?.companyName || 'N/A'}</p>
-              </Link>
+                <p className="text-xs text-cyan-400 font-medium">{app.email} • Role: {app.job?.title || 'General'}</p>
+              </div>
             ))}
-            {projectsData.projects.length === 0 && (
-              <p className="text-xs text-[#7A8499] text-center py-6">No projects found in database.</p>
+            {(!stats.recentApplications || stats.recentApplications.length === 0) && (
+              <p className="text-xs text-slate-400 text-center py-6">No candidate job applications submitted yet.</p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+
       </div>
     </div>
   );

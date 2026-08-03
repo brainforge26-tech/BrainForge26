@@ -21,25 +21,25 @@ export function ProjectsSection({ projects = [] }: ProjectsSectionProps) {
   }
 
   return (
-    <section id="projects" ref={ref} className="relative py-24 overflow-hidden">
-      <div className="absolute left-0 top-1/3 w-[500px] h-[500px] bg-[#730E27] opacity-[0.03] rounded-full blur-[120px] pointer-events-none" />
+    <section id="projects" ref={ref} className="relative py-24 overflow-hidden bg-[#06070a]">
+      <div className="absolute right-0 top-1/3 w-[500px] h-[500px] bg-orange-600 opacity-[0.05] rounded-full blur-[140px] pointer-events-none" />
 
-      <div className="section-wrapper relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div className="section-label justify-center mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-[#8B1532]" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-extrabold uppercase tracking-widest mb-3">
+            <Sparkles className="w-3.5 h-3.5 fill-current text-orange-400" />
             Our Portfolio
           </div>
-          <h2 className="text-[clamp(2rem,4.5vw,3.25rem)] font-extrabold tracking-tight">
-            Projects We&apos;re <span className="gradient-text">Proud Of</span>
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
+            Case Studies We&apos;re <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-400 to-orange-500">Proud Of</span>
           </h2>
-          <p className="mt-4 text-[#AAB3C5] max-w-xl mx-auto text-balance">
-            Explore our latest web applications, AI integrations, and mobile solutions crafted with precision and craft.
+          <p className="mt-4 text-slate-400 max-w-xl mx-auto text-base">
+            Explore our latest enterprise web applications, AI integrations, and mobile platforms engineered for market leaders.
           </p>
         </motion.div>
 
@@ -52,29 +52,28 @@ export function ProjectsSection({ projects = [] }: ProjectsSectionProps) {
                 initial={{ opacity: 0, y: 28 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="group glass-card overflow-hidden rounded-[28px] border border-white/[0.08] hover:border-[rgba(115,14,39,0.35)] hover:shadow-[0_20px_50px_rgba(115,14,39,0.2)] transition-all duration-300 flex flex-col"
+                className="group rounded-3xl bg-[#0B1224] border border-white/[0.08] hover:border-orange-500/40 transition-all duration-300 flex flex-col overflow-hidden shadow-xl"
               >
-                <div className="relative h-60 w-full overflow-hidden bg-[#111114]">
-                  <Image
+                <div className="relative h-64 w-full overflow-hidden bg-[#090D16]">
+                  <img
                     src={project.coverImage || 'https://images.unsplash.com/photo-1556742049-0a67562867ef?auto=format&fit=crop&w=1200&q=80'}
                     alt={project.title || project.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#09090B] via-transparent to-transparent opacity-80" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B1224] via-transparent to-transparent opacity-90" />
                   <div className="absolute top-4 right-4">
-                    <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full bg-black/60 backdrop-blur-md text-[#C02C54] border border-[#A61C43]/30">
-                      {project.status || 'Featured'}
+                    <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full bg-orange-500/20 backdrop-blur-md text-orange-300 border border-orange-500/30">
+                      {project.industry || 'Featured'}
                     </span>
                   </div>
                 </div>
 
-                <div className="p-7 flex-1 flex flex-col justify-between">
+                <div className="p-8 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="text-xl font-bold text-white group-hover:text-[#C02C54] transition-colors mb-2">
+                    <h3 className="text-xl font-extrabold text-white group-hover:text-orange-400 transition-colors mb-2">
                       {project.title || project.name}
                     </h3>
-                    <p className="text-sm text-[#AAB3C5] line-clamp-2 leading-relaxed mb-6">
+                    <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed mb-6">
                       {project.description}
                     </p>
                   </div>
@@ -83,17 +82,18 @@ export function ProjectsSection({ projects = [] }: ProjectsSectionProps) {
                     {safeTech.map((tech: string, idx: number) => (
                       <span
                         key={idx}
-                        className="px-2.5 py-1 text-xs font-medium rounded-lg bg-white/[0.04] border border-white/[0.06] text-zinc-300"
+                        className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-white/[0.04] border border-white/[0.08] text-slate-300"
                       >
                         {tech}
                       </span>
                     ))}
                   </div>
 
-                  <Link href={`/projects/${project.id}`} className="mt-auto">
-                    <Button variant="outline" className="w-full justify-center group-hover:border-[#A61C43]">
-                      View Case Study <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
+                  <Link href={`/portfolio`} className="mt-auto">
+                    <button className="w-full py-3 px-4 rounded-xl bg-orange-500/10 hover:bg-orange-500 text-orange-300 hover:text-white font-bold text-xs flex items-center justify-center gap-2 border border-orange-500/20 transition-all">
+                      <span>View Case Study</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
                   </Link>
                 </div>
               </motion.div>
@@ -103,10 +103,11 @@ export function ProjectsSection({ projects = [] }: ProjectsSectionProps) {
 
         {safeProjects.length > 4 && (
           <div className="mt-14 text-center">
-            <Link href="/projects">
-              <Button size="lg" className="rounded-xl">
-                Explore All Projects <Layers className="w-4 h-4 ml-2" />
-              </Button>
+            <Link href="/portfolio">
+              <button className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-black text-xs shadow-lg flex items-center gap-2 mx-auto">
+                <span>Explore All Projects</span>
+                <Layers className="w-4 h-4" />
+              </button>
             </Link>
           </div>
         )}

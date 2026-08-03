@@ -1,99 +1,112 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { Github, Linkedin, ExternalLink } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Github, Linkedin, ExternalLink, Mail } from 'lucide-react';
 import Link from 'next/link';
 
-interface TeamSectionProps {
-  members?: { name: string; role: string; skills?: string[]; avatar?: string; exp?: string }[];
+interface TeamMember {
+  id: string;
+  name: string;
+  position: string;
+  avatar?: string;
+  bio?: string;
+  skills?: string[];
+  experience?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  email?: string;
+  portfolioLinks?: string[];
 }
 
-export function TeamSection({ members = [] }: TeamSectionProps) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
+interface TeamSectionProps {
+  teamMembers?: TeamMember[];
+}
 
-  if (members.length === 0) {
-    return null;
-  }
+export function TeamSection({ teamMembers = [] }: TeamSectionProps) {
+  if (!teamMembers || teamMembers.length === 0) return null;
 
   return (
-    <section id="team" ref={ref} className="relative py-24 overflow-hidden">
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#7C5CFF] opacity-[0.03] rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="section-wrapper relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }} className="text-center mb-14">
-          <div className="section-label justify-center mb-3">Our Team</div>
-          <h2 className="text-[clamp(1.875rem,4vw,3rem)] font-extrabold tracking-tight">
-            Meet the <span className="gradient-text">Experts</span>
+    <section id="team" className="py-24 relative overflow-hidden bg-[#060910]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-xs font-extrabold uppercase tracking-widest text-orange-400">Engineering Talent</span>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2 tracking-tight">
+            Meet Our <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-400 to-orange-500">Engineering Experts</span>
           </h2>
-          <p className="mt-4 text-[#AAB3C5] max-w-xl mx-auto text-balance">
-            Senior developers with years of real-world product experience, ready to join your project.
+          <p className="mt-4 text-slate-400 text-base">
+            Our company team consists of elite software architects, AI researchers, and full-stack engineers crafting high-performance systems.
           </p>
-        </motion.div>
+        </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {members.map(({ name, role, skills = [], avatar, exp }, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {teamMembers.map((member, i) => (
             <motion.div
-              key={name || i}
-              initial={{ opacity: 0, y: 28 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.45, delay: i * 0.08 }}
-              className="group glass-card p-6 flex flex-col items-center text-center gap-4">
-
-              <div className="relative">
-                <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg transition-transform duration-200 group-hover:scale-110 bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 border border-cyan-500/30">
-                  {avatar || name.substring(0, 2).toUpperCase()}
+              key={member.id || i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: i * 0.1 }}
+              viewport={{ once: true }}
+              className="group relative rounded-3xl bg-[#0B1224] border border-white/[0.08] hover:border-orange-500/40 p-6 flex flex-col items-center text-center backdrop-blur-xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+            >
+              <div className="relative mb-5">
+                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-orange-500/40 p-1 shadow-lg bg-orange-950/20">
+                  {member.avatar ? (
+                    <img src={member.avatar} alt={member.name} className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform" />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-2xl font-bold text-white">
+                      {member.name.charAt(0)}
+                    </div>
+                  )}
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#22C55E] border-2 border-[#050816]" />
+                {member.experience && (
+                  <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md border border-orange-400/40 whitespace-nowrap">
+                    {member.experience}
+                  </span>
+                )}
               </div>
 
-              <div>
-                <h3 className="font-semibold text-white text-base">{name}</h3>
-                <p className="text-sm text-[#7A8499] mt-0.5">{role}</p>
-              </div>
+              <h3 className="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">{member.name}</h3>
+              <p className="text-xs font-semibold text-orange-400 mt-1 mb-3">{member.position}</p>
+              {member.bio && (
+                <p className="text-xs text-slate-400 leading-relaxed mb-4 line-clamp-2">{member.bio}</p>
+              )}
 
-              {skills.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-1.5">
-                  {skills.map(s => (
-                    <span key={s}
-                      className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-white/[0.05] border border-white/[0.08] text-[#AAB3C5]">
-                      {s}
+              {member.skills && member.skills.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-1.5 mb-6">
+                  {member.skills.slice(0, 4).map((skill) => (
+                    <span key={skill} className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-orange-500/10 text-orange-300 border border-orange-500/20">
+                      {skill}
                     </span>
                   ))}
                 </div>
               )}
 
-              <div className="flex items-center justify-between w-full pt-3 border-t border-white/[0.06]">
-                <span className="text-xs text-[#7A8499]">{exp || 'Experienced'}</span>
-                <div className="flex gap-2">
-                  <button className="w-7 h-7 rounded-lg bg-white/[0.05] hover:bg-white/[0.10] transition-colors flex items-center justify-center text-[#7A8499] hover:text-white">
-                    <Github className="w-3.5 h-3.5" />
-                  </button>
-                  <button className="w-7 h-7 rounded-lg bg-white/[0.05] hover:bg-white/[0.10] transition-colors flex items-center justify-center text-[#7A8499] hover:text-white">
-                    <Linkedin className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+              <div className="mt-auto pt-4 border-t border-white/[0.08] w-full flex items-center justify-center gap-3">
+                {member.githubUrl && (
+                  <a href={member.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-white/[0.05] hover:bg-orange-500/30 text-slate-300 hover:text-white transition-all">
+                    <Github className="w-4 h-4" />
+                  </a>
+                )}
+                {member.linkedinUrl && (
+                  <a href={member.linkedinUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-white/[0.05] hover:bg-orange-500/30 text-slate-300 hover:text-white transition-all">
+                    <Linkedin className="w-4 h-4" />
+                  </a>
+                )}
+                {member.email && (
+                  <a href={`mailto:${member.email}`} className="p-2 rounded-lg bg-white/[0.05] hover:bg-orange-500/30 text-slate-300 hover:text-white transition-all">
+                    <Mail className="w-4 h-4" />
+                  </a>
+                )}
               </div>
             </motion.div>
           ))}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.6 }}
-          className="mt-14 p-8 rounded-[24px] bg-gradient-to-r from-[rgba(79,125,255,0.08)] to-[rgba(124,92,255,0.06)] border border-[rgba(79,125,255,0.15)] text-center">
-          <h3 className="text-xl font-bold text-white mb-2">Want to join the team?</h3>
-          <p className="text-[#AAB3C5] text-sm mb-5">
-            We&apos;re always looking for talented developers. Apply to our hiring program.
-          </p>
-          <Link href="/apply" className="btn-primary inline-flex items-center gap-2">
-            View Open Positions <ExternalLink className="w-4 h-4" />
+        <div className="mt-16 text-center">
+          <Link href="/team" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-sm font-bold text-white transition-all shadow-lg">
+            View All Team Profiles <ExternalLink className="w-4 h-4 text-orange-400" />
           </Link>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

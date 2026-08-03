@@ -101,7 +101,15 @@ export async function loginAction(
       secure:   process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path:     '/',
-      maxAge:   15 * 60,
+      maxAge:   30 * 24 * 60 * 60,
+    });
+    // Non-httpOnly token for client-side Axios requests
+    cookieStore.set('authToken', data.accessToken, {
+      httpOnly: false,
+      secure:   process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path:     '/',
+      maxAge:   30 * 24 * 60 * 60,
     });
     cookieStore.set('userRole', data.user.role, {
       httpOnly: false,
@@ -194,6 +202,7 @@ export async function logoutAction(): Promise<void> {
   }
 
   cookieStore.delete('accessToken');
+  cookieStore.delete('authToken');
   cookieStore.delete('userRole');
   redirect('/login');
 }

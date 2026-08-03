@@ -1,7 +1,0 @@
-import { fetchServices } from '@/features/manager/manager.actions';
-import { ServicesClient } from '@/features/manager/ServicesClient';
-
-export default async function ManagerServicesPage() {
-  const services = await fetchServices();
-  return <ServicesClient initialServices={services} />;
-}

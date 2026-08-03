@@ -17,7 +17,6 @@ interface ServiceDetail {
   faqs?: { question: string; answer: string }[];
 }
 
-// Map slug to icon name fallback
 function getIconComponent(iconName?: string) {
   switch (iconName?.toLowerCase()) {
     case 'smartphone':
@@ -33,39 +32,41 @@ function getIconComponent(iconName?: string) {
 
 async function getServiceBySlug(slug: string): Promise<ServiceDetail | null> {
   try {
-    const res = await publicFetch<{ data: any[] }>('/homepage/services');
-    const services = res?.data || [];
+    const res = await publicFetch<{ data: any }>('/services/public');
+    const services = Array.isArray(res?.data) ? res.data : [];
     
-    // Find service matching title slug or ID
+    // Find service matching slug or title slug or ID
     const found = services.find(
       (s: any) =>
         s.id === slug ||
-        s.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slug
+        s.slug === slug ||
+        s.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slug ||
+        slug.includes(s.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'))
     );
 
     if (found) {
       return {
         id: found.id,
-        slug: found.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        slug: found.slug || found.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         title: found.title,
         subtitle: `Enterprise ${found.title} Solutions`,
-        description: `${found.title} engineered with Next.js 15, Node.js, and modern cloud architectures for maximum performance, security, and scalability.`,
+        description: found.overview || `${found.title} engineered with Next.js, Node.js, and modern cloud architectures.`,
         icon: found.icon,
-        features: found.features || [
+        features: found.features && found.features.length > 0 ? found.features : [
           'High Performance & SEO Optimized Architecture',
           'Scalable Microservices & RESTful API Infrastructure',
           'Zero-Downtime CI/CD Deployment Integration',
           '24/7 Security Assurance & Maintenance Support',
         ],
-        technologies: ['Next.js 15', 'React 19', 'TypeScript', 'Node.js', 'Express', 'PostgreSQL', 'Prisma', 'Docker'],
+        technologies: found.technologies && found.technologies.length > 0 ? found.technologies : ['Next.js 15', 'React 19', 'TypeScript', 'Node.js', 'PostgreSQL'],
         process: [
           { step: 1, title: 'Discovery & Architecture Design', desc: 'Requirements analysis, API schema modeling, and UI wireframing.' },
           { step: 2, title: 'Agile Full-Stack Development', desc: 'Modular coding with Server Components, automated testing, and code audits.' },
           { step: 3, title: 'Staging & QA Security Audit', desc: 'End-to-end testing, performance benchmarking, and vulnerability checks.' },
           { step: 4, title: 'Production Deployment & Monitoring', desc: 'Zero-downtime PM2 reload, SSL cert installation, and 24/7 monitoring.' },
         ],
-        faqs: [
-          { question: 'What is the estimated delivery timeline?', answer: 'Typical projects range between 2 to 6 weeks depending on custom feature scope and third-party integrations.' },
+        faqs: Array.isArray(found.faq) && found.faq.length > 0 ? found.faq : [
+          { question: 'What is the estimated delivery timeline?', answer: 'Typical projects range between 2 to 6 weeks depending on custom feature scope.' },
           { question: 'Do you provide post-launch maintenance support?', answer: 'Yes, every tier includes dedicated SLA monitoring, bug fixes, and infrastructure optimization.' },
         ],
       };
@@ -88,12 +89,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${service.title} | BrainForge26 Technology Studio`,
     description: service.description,
-    openGraph: {
-      title: `${service.title} | BrainForge26`,
-      description: service.description,
-      type: 'article',
-      url: `https://brainforge26.tech/services/${service.slug}`,
-    },
   };
 }
 
@@ -105,48 +100,28 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Service',
-    name: service.title,
-    provider: {
-      '@type': 'Organization',
-      name: 'BrainForge26',
-      url: 'https://brainforge26.tech',
-    },
-    description: service.description,
-  };
-
   return (
-    <div className="min-h-screen bg-[#09090B] text-zinc-100 py-12 px-4 sm:px-6 lg:px-8">
-      {/* Schema.org Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-
+    <div className="min-h-screen bg-[#060910] text-slate-100 pt-32 pb-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Breadcrumb Navigation */}
-        <nav className="flex items-center space-x-2 text-sm text-zinc-400 mb-8">
+        <nav className="flex items-center space-x-2 text-sm text-slate-400 mb-8">
           <Link href="/" className="hover:text-cyan-400 transition-colors flex items-center gap-1">
             <ArrowLeft className="w-4 h-4" /> Home
           </Link>
-          <ChevronRight className="w-4 h-4 text-zinc-600" />
-          <span className="text-zinc-500">Services</span>
-          <ChevronRight className="w-4 h-4 text-zinc-600" />
+          <ChevronRight className="w-4 h-4 text-slate-600" />
+          <Link href="/services" className="hover:text-cyan-400 transition-colors">Services</Link>
+          <ChevronRight className="w-4 h-4 text-slate-600" />
           <span className="text-cyan-400 font-medium">{service.title}</span>
         </nav>
 
-        {/* Large Hero Banner */}
-        <div className="relative rounded-3xl bg-gradient-to-br from-zinc-900 via-[#0D1117] to-zinc-950 p-8 md:p-12 border border-zinc-800/80 shadow-2xl mb-12 overflow-hidden">
-          <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
+        {/* Hero Banner */}
+        <div className="relative rounded-3xl bg-gradient-to-br from-[#0B1224] via-[#090D16] to-[#0B1224] p-8 md:p-12 border border-white/[0.08] shadow-2xl mb-12 overflow-hidden">
           <div className="flex items-center gap-4 mb-6">
-            <div className="p-3.5 rounded-2xl bg-zinc-800/80 border border-zinc-700/50 shadow-inner">
+            <div className="p-3.5 rounded-2xl bg-blue-600/20 border border-blue-500/30">
               {getIconComponent(service.icon)}
             </div>
-            <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-400 bg-cyan-950/60 border border-cyan-800/50 rounded-full">
-              Enterprise Solution
+            <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-400 bg-blue-500/10 border border-blue-500/20 rounded-full">
+              Enterprise Service
             </span>
           </div>
 
@@ -154,48 +129,40 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
             {service.title}
           </h1>
 
-          <p className="text-lg md:text-xl text-zinc-300 max-w-3xl leading-relaxed mb-8">
+          <p className="text-lg md:text-xl text-slate-300 max-w-3xl leading-relaxed mb-8">
             {service.description}
           </p>
 
           <div className="flex flex-wrap gap-4">
             <Link
-              href="/#contact"
-              className="inline-flex items-center justify-center px-6 py-3.5 text-sm font-semibold rounded-xl bg-cyan-500 text-zinc-950 hover:bg-cyan-400 transition-all duration-200 shadow-lg shadow-cyan-500/20"
+              href={`/contact?service=${encodeURIComponent(service.title)}`}
+              className="inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-lg transition-all"
             >
               Request a Consultation
               <Sparkles className="w-4 h-4 ml-2" />
-            </Link>
-            <Link
-              href="/#pricing"
-              className="inline-flex items-center justify-center px-6 py-3.5 text-sm font-semibold rounded-xl bg-zinc-800/90 text-white hover:bg-zinc-700 border border-zinc-700 transition-all duration-200"
-            >
-              View Pricing Packages
             </Link>
           </div>
         </div>
 
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-          {/* Key Features & Overview */}
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-zinc-900/60 rounded-2xl p-8 border border-zinc-800">
+            <div className="bg-[#0B1224] rounded-2xl p-8 border border-white/[0.08]">
               <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-cyan-400" />
                 Key Deliverables & Capabilities
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {service.features.map((feat, idx) => (
-                  <div key={idx} className="flex items-start gap-3 p-3.5 rounded-xl bg-zinc-950/60 border border-zinc-800/60">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-zinc-300 font-medium">{feat}</span>
+                  <div key={idx} className="flex items-start gap-3 p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                    <CheckCircle2 className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-slate-300 font-medium">{feat}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Workflow & Process Timeline */}
-            <div className="bg-zinc-900/60 rounded-2xl p-8 border border-zinc-800">
+            <div className="bg-[#0B1224] rounded-2xl p-8 border border-white/[0.08]">
               <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                 <Layers className="w-5 h-5 text-indigo-400" />
                 Engineering Execution Roadmap
@@ -203,12 +170,12 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
               <div className="space-y-6">
                 {service.process?.map((item) => (
                   <div key={item.step} className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-cyan-950 border border-cyan-700 text-cyan-400 flex items-center justify-center text-sm font-bold">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600/20 border border-blue-500/40 text-cyan-400 flex items-center justify-center text-sm font-bold">
                       {item.step}
                     </div>
                     <div>
                       <h3 className="text-base font-semibold text-white mb-1">{item.title}</h3>
-                      <p className="text-sm text-zinc-400 leading-relaxed">{item.desc}</p>
+                      <p className="text-sm text-slate-400 leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -216,10 +183,8 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-8">
-            {/* Tech Stack Badges */}
-            <div className="bg-zinc-900/60 rounded-2xl p-6 border border-zinc-800">
+            <div className="bg-[#0B1224] rounded-2xl p-6 border border-white/[0.08]">
               <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
                 <Zap className="w-4 h-4 text-amber-400" />
                 Technologies Supported
@@ -228,7 +193,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                 {service.technologies?.map((tech, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 text-xs font-semibold rounded-lg bg-zinc-800 text-zinc-200 border border-zinc-700/80"
+                    className="px-3 py-1 text-xs font-semibold rounded-lg bg-blue-500/10 text-cyan-300 border border-blue-500/20"
                   >
                     {tech}
                   </span>
@@ -236,36 +201,20 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
 
-            {/* CTA Box */}
-            <div className="bg-gradient-to-br from-cyan-950/40 to-indigo-950/40 rounded-2xl p-6 border border-cyan-800/40">
+            <div className="bg-gradient-to-br from-blue-950/40 to-indigo-950/40 rounded-2xl p-6 border border-blue-500/30">
               <h3 className="text-lg font-bold text-white mb-2">Ready to Build?</h3>
-              <p className="text-sm text-zinc-300 mb-6">
+              <p className="text-sm text-slate-300 mb-6">
                 Consult with our engineering team to architect your next digital platform.
               </p>
               <Link
-                href="/#contact"
-                className="w-full inline-flex items-center justify-center px-4 py-3 text-sm font-semibold rounded-xl bg-cyan-500 text-zinc-950 hover:bg-cyan-400 transition-colors shadow-md"
+                href={`/contact?service=${encodeURIComponent(service.title)}`}
+                className="w-full inline-flex items-center justify-center px-4 py-3 text-sm font-bold rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md hover:brightness-110 transition-all"
               >
                 Schedule Architecture Call
               </Link>
             </div>
           </div>
         </div>
-
-        {/* FAQs Section */}
-        {service.faqs && service.faqs.length > 0 && (
-          <div className="bg-zinc-900/60 rounded-2xl p-8 border border-zinc-800 mb-12">
-            <h2 className="text-xl font-bold text-white mb-6">Frequently Asked Questions</h2>
-            <div className="space-y-4">
-              {service.faqs.map((faq, idx) => (
-                <div key={idx} className="p-4 rounded-xl bg-zinc-950/80 border border-zinc-800">
-                  <h3 className="text-base font-semibold text-white mb-2">{faq.question}</h3>
-                  <p className="text-sm text-zinc-400 leading-relaxed">{faq.answer}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

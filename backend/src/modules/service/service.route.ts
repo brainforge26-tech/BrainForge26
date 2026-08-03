@@ -1,17 +1,26 @@
 import { Router } from 'express';
-import * as SC from './service.controller';
 import { authenticate, authorize } from '../../middlewares/authenticate';
+import * as serviceController from './service.controller';
 
 const router = Router();
 
-// Public — homepage reads active services
-router.get('/',          SC.listServices);
-router.get('/:id',       SC.getService);
+// Public routes
+router.get('/public', serviceController.getPublicServices);
+router.get('/categories', serviceController.getCategories);
+router.get('/slug/:id', serviceController.getService);
 
-// Manager / Admin — write operations
-router.post('/',         authenticate, authorize('MANAGER', 'ADMIN'), SC.createService);
-router.patch('/:id',     authenticate, authorize('MANAGER', 'ADMIN'), SC.updateService);
-router.delete('/:id',    authenticate, authorize('MANAGER', 'ADMIN'), SC.deleteService);
-router.post('/reorder',  authenticate, authorize('MANAGER', 'ADMIN'), SC.reorderServices);
+// Admin Service Categories management
+router.post('/categories', authenticate, authorize('ADMIN'), serviceController.createCategory);
+router.put('/categories/:id', authenticate, authorize('ADMIN'), serviceController.updateCategory);
+router.delete('/categories/:id', authenticate, authorize('ADMIN'), serviceController.deleteCategory);
+
+// Admin Services CRUD
+router.get('/', authenticate, authorize('ADMIN'), serviceController.getAllServices);
+router.get('/:id', serviceController.getService);
+router.post('/', authenticate, authorize('ADMIN'), serviceController.createService);
+router.put('/:id', authenticate, authorize('ADMIN'), serviceController.updateService);
+router.patch('/:id/toggle-feature', authenticate, authorize('ADMIN'), serviceController.toggleFeaturedService);
+router.patch('/:id', authenticate, authorize('ADMIN'), serviceController.updateService);
+router.delete('/:id', authenticate, authorize('ADMIN'), serviceController.deleteService);
 
 export default router;

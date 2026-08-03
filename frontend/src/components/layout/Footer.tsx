@@ -1,57 +1,51 @@
 import Link from 'next/link';
-import { Zap, Github, Twitter, Linkedin, Mail } from 'lucide-react';
+import { ShieldCheck, Github, Twitter, Linkedin, Mail } from 'lucide-react';
 
 const FOOTER_LINKS = {
-  Company:  [
-    { label: 'About',    href: '/#about' },
-    { label: 'Services', href: '/#services' },
-    { label: 'Projects', href: '/#projects' },
-    { label: 'Team',     href: '/#team' },
+  Company: [
+    { label: 'About Us',     href: '/about' },
+    { label: 'Services',     href: '/services' },
+    { label: 'Portfolio',    href: '/portfolio' },
+    { label: 'Our Team',     href: '/team' },
   ],
-  Services: [
-    { label: 'Web Development',    href: '/#services' },
-    { label: 'Mobile Apps',        href: '/#services' },
-    { label: 'UI/UX Design',       href: '/#services' },
-    { label: 'Cloud & DevOps',     href: '/#services' },
+  Solutions: [
+    { label: 'Web Systems',  href: '/services' },
+    { label: 'AI & Data',    href: '/services' },
+    { label: 'Mobile Apps',  href: '/services' },
+    { label: 'Careers',      href: '/careers' },
   ],
-  Resources: [
-    { label: 'Pricing',    href: '/#pricing' },
-    { label: 'FAQ',        href: '/#faq' },
-    { label: 'Contact',    href: '/#contact' },
-    { label: 'Client Login', href: '/login' },
+  QuickLinks: [
+    { label: 'Blogs',        href: '/blogs' },
+    { label: 'Contact Us',   href: '/contact' },
+    { label: 'Admin Login',  href: '/login' },
   ],
 };
 
 const SOCIALS = [
-  { icon: Github,   href: 'https://github.com',   label: 'GitHub' },
-  { icon: Twitter,  href: 'https://twitter.com',  label: 'Twitter' },
-  { icon: Linkedin, href: 'https://linkedin.com', label: 'LinkedIn' },
-  { icon: Mail,     href: 'mailto:hello@brainforge.com', label: 'Email' },
+  { icon: Github,   href: 'https://github.com/brainforge26',   label: 'GitHub' },
+  { icon: Twitter,  href: 'https://twitter.com/brainforge26',  label: 'Twitter' },
+  { icon: Linkedin, href: 'https://linkedin.com/company/brainforge26', label: 'LinkedIn' },
+  { icon: Mail,     href: 'mailto:contact@brainforge26.tech', label: 'Email' },
 ];
 
 export function Footer() {
   return (
-    <footer className="relative border-t border-white/[0.06] bg-[#09090B] pt-16 pb-8 overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-[#A61C43] opacity-[0.02] rounded-full blur-[80px] pointer-events-none" />
-
-      <div className="section-wrapper relative z-10">
-        {/* Top row */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-10 pb-12 border-b border-white/[0.06]">
+    <footer className="relative border-t border-white/[0.08] bg-[#050608] pt-16 pb-8 overflow-hidden text-slate-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-10 pb-12 border-b border-white/[0.08]">
           {/* Brand */}
-          <div className="col-span-2">
-            <Link href="/" className="flex items-center gap-2.5 mb-4">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-[#A61C43] to-[#851636]">
-                <Zap className="w-4 h-4 text-white" />
+          <div className="md:col-span-2">
+            <Link href="/" className="flex items-center gap-3 mb-4">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 shadow-[0_0_20px_rgba(249,115,22,0.4)]">
+                <ShieldCheck className="w-5 h-5 text-white" />
               </div>
-              <span className="font-bold text-lg text-white tracking-tight">
-                Brain<span className="text-[#C02C54]">Forge</span>
+              <span className="font-extrabold text-xl text-white tracking-tight">
+                Brain<span className="text-orange-400">Forge26</span>
               </span>
             </Link>
-            <p className="text-sm text-[#7A8499] leading-relaxed max-w-[260px]">
-              Premium IT agency delivering world-class software, talent, and project excellence.
+            <p className="text-sm text-slate-400 leading-relaxed max-w-sm">
+              BrainForge26 is an AI-fueled corporate software engineering agency building scalable web platforms, AI solutions, and enterprise systems.
             </p>
-            {/* Socials */}
             <div className="flex gap-3 mt-6">
               {SOCIALS.map(({ icon: Icon, href, label }) => (
                 <a
@@ -60,7 +54,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/[0.05] border border-white/[0.08] text-[#7A8499] hover:text-white hover:bg-white/[0.09] hover:border-[rgba(255,22,93,0.3)] transition-all"
+                  className="flex items-center justify-center w-9 h-9 rounded-full bg-white/[0.04] border border-white/[0.1] text-slate-400 hover:text-white hover:bg-orange-500/20 hover:border-orange-500/40 transition-all"
                 >
                   <Icon className="w-4 h-4" />
                 </a>
@@ -71,15 +65,15 @@ export function Footer() {
           {/* Link columns */}
           {Object.entries(FOOTER_LINKS).map(([group, links]) => (
             <div key={group}>
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#7A8499] mb-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-4">
                 {group}
               </p>
-              <ul className="space-y-2.5">
+              <ul className="space-y-3">
                 {links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-[#AAB3C5] hover:text-white transition-colors"
+                      className="text-sm text-slate-400 hover:text-white transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -92,15 +86,13 @@ export function Footer() {
 
         {/* Bottom row */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8">
-          <p className="text-sm text-[#7A8499]">
-            © {new Date().getFullYear()} BrainForge. All rights reserved.
+          <p className="text-xs text-slate-400">
+            © {new Date().getFullYear()} BrainForge26 Tech. All rights reserved. Managed by Admin.
           </p>
           <div className="flex gap-6">
-            {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((item) => (
-              <Link key={item} href="#" className="text-xs text-[#7A8499] hover:text-white transition-colors">
-                {item}
-              </Link>
-            ))}
+            <Link href="/login" className="text-xs text-slate-400 hover:text-orange-400 transition-colors">
+              Admin Portal Access
+            </Link>
           </div>
         </div>
       </div>

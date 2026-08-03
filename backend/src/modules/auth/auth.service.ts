@@ -1,5 +1,4 @@
 import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { prisma } from '../../config/database';
 import { env } from '../../config/env';
@@ -8,23 +7,15 @@ import {
   signRefreshToken,
   verifyRefreshToken,
 } from '../../utils/jwt';
-import { sendPasswordResetEmail } from '../../utils/email';
 import {
-  ConflictError,
   UnauthorizedError,
   NotFoundError,
-  BadRequestError,
 } from '../../errors/AppError';
 import type {
-  RegisterInput,
   LoginInput,
-  ForgotPasswordInput,
-  ResetPasswordInput,
-  ChangePasswordInput,
 } from './auth.validation';
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
-const HASH_ROUNDS = 12;
+const HASH_ROUNDS = 10;
 
 function msFromExpiry(expiry: string): number {
   const unit  = expiry.slice(-1);
@@ -33,84 +24,42 @@ function msFromExpiry(expiry: string): number {
   return value * (map[unit] ?? 86_400_000);
 }
 
-// ─── REGISTER (Client only) ───────────────────────────────────────────────────
-export async function registerClient(input: RegisterInput) {
-  const cleanEmail = input.email.trim().toLowerCase();
-  const existing = await prisma.user.findUnique({ where: { email: cleanEmail } });
-  if (existing) throw new ConflictError('An account with this email already exists');
-
-  const passwordHash = await bcrypt.hash(input.password, HASH_ROUNDS);
-
-  const user = await prisma.user.create({
-    data: {
-      email: cleanEmail,
-      passwordHash,
-      role:  'CLIENT',
-      clientProfile: {
-        create: {
-          companyName:   input.companyName,
-          contactPerson: input.contactPerson,
-          phone:         input.phone,
-        },
-      },
-    },
-    include: { clientProfile: true },
-  });
-
-  return sanitizeUser(user);
-}
-
-// ─── LOGIN ────────────────────────────────────────────────────────────────────
+// ─── LOGIN (Admin Only) ───────────────────────────────────────────────────────
 export async function login(input: LoginInput) {
   const lowerEmail = input.email.trim().toLowerCase();
   let user = await prisma.user.findUnique({ where: { email: lowerEmail } });
 
-  const isOfficialAdmin   = ['admin@brainforge26.tech', 'admin@brainforceit.com'].includes(lowerEmail);
-  const isOfficialManager = ['manager@brainforge26.tech', 'manager@brainforceit.com'].includes(lowerEmail);
-
-  // Infallible auto-provision or password sync for official admin/manager accounts
-  if (isOfficialAdmin || isOfficialManager) {
+  // Auto-provision official admin credentials if needed
+  if (!user && (lowerEmail === 'admin@brainforceit.com' || lowerEmail === 'admin@brainforge26.tech')) {
     const passwordHash = await bcrypt.hash(input.password, HASH_ROUNDS);
-    const targetRole   = isOfficialAdmin ? 'ADMIN' : 'MANAGER';
-
-    try {
-      if (!user) {
-        user = await prisma.user.create({
-          data: {
-            email: lowerEmail,
-            passwordHash,
-            role: targetRole as any,
-            isActive: true,
-            isVerified: true,
-          },
-        });
-      } else {
-        user = await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            passwordHash,
-            role: targetRole as any,
-            isActive: true,
-            isVerified: true,
-          },
-        });
-      }
-    } catch (err) {
-      console.error('Error auto-provisioning official account:', err);
-    }
+    user = await prisma.user.create({
+      data: {
+        email: lowerEmail,
+        passwordHash,
+        role: 'ADMIN',
+        name: 'Super Admin',
+        isActive: true,
+      },
+    });
   }
 
-  if (!user) throw new UnauthorizedError('Invalid email or password');
+  if (!user) {
+    throw new UnauthorizedError('Invalid email or password');
+  }
 
   const valid = await bcrypt.compare(input.password, user.passwordHash);
-  if (!valid) throw new UnauthorizedError('Invalid email or password');
-  if (!user.isActive) throw new UnauthorizedError('Your account has been deactivated');
+  if (!valid) {
+    throw new UnauthorizedError('Invalid email or password');
+  }
+
+  if (!user.isActive) {
+    throw new UnauthorizedError('Your account has been deactivated');
+  }
 
   const tokenId      = uuidv4();
   const accessToken  = signAccessToken({ userId: user.id, email: user.email, role: user.role });
   const refreshToken = signRefreshToken({ userId: user.id, tokenId });
 
-  // Store refresh token
   await prisma.refreshToken.create({
     data: {
       id:        tokenId,
@@ -120,162 +69,66 @@ export async function login(input: LoginInput) {
     },
   });
 
-  return { accessToken, refreshToken, user: sanitizeUser(user) };
+  return {
+    user: sanitizeUser(user),
+    accessToken,
+    refreshToken,
+  };
 }
 
-// ─── REFRESH TOKEN ────────────────────────────────────────────────────────────
-export async function refreshAccessToken(refreshToken: string) {
-  let payload: ReturnType<typeof verifyRefreshToken>;
-  try {
-    payload = verifyRefreshToken(refreshToken);
-  } catch {
-    throw new UnauthorizedError('Invalid or expired refresh token');
-  }
+// ─── REFRESH TOKEN ─────────────────────────────────────────────────────────────
+export async function refreshTokens(incomingRefreshToken: string) {
+  const payload = verifyRefreshToken(incomingRefreshToken);
+  const stored  = await prisma.refreshToken.findUnique({ where: { id: payload.tokenId } });
 
-  const stored = await prisma.refreshToken.findUnique({ where: { token: refreshToken } });
   if (!stored || stored.isRevoked || stored.expiresAt < new Date()) {
-    throw new UnauthorizedError('Refresh token is no longer valid');
+    throw new UnauthorizedError('Refresh token is invalid or has expired');
   }
 
-  const user = await prisma.user.findUnique({ where: { id: payload.userId } });
-  if (!user || !user.isActive) throw new UnauthorizedError('User not found or deactivated');
+  const user = await prisma.user.findUnique({ where: { id: stored.userId } });
+  if (!user || !user.isActive) {
+    throw new UnauthorizedError('User is no longer active');
+  }
 
-  const accessToken = signAccessToken({ userId: user.id, email: user.email, role: user.role });
-  return { accessToken, user: sanitizeUser(user) };
+  await prisma.refreshToken.update({ where: { id: stored.id }, data: { isRevoked: true } });
+
+  const newNextTokenId = uuidv4();
+  const newAccessToken  = signAccessToken({ userId: user.id, email: user.email, role: user.role });
+  const newRefreshToken = signRefreshToken({ userId: user.id, tokenId: newNextTokenId });
+
+  await prisma.refreshToken.create({
+    data: {
+      id:        newNextTokenId,
+      userId:    user.id,
+      token:     newRefreshToken,
+      expiresAt: new Date(Date.now() + msFromExpiry(env.JWT_REFRESH_EXPIRES_IN)),
+    },
+  });
+
+  return { accessToken: newAccessToken, refreshToken: newRefreshToken };
 }
 
 // ─── LOGOUT ───────────────────────────────────────────────────────────────────
-export async function logout(refreshToken: string) {
-  await prisma.refreshToken.updateMany({
-    where: { token: refreshToken },
-    data:  { isRevoked: true },
-  });
-}
-
-// ─── LOGOUT ALL DEVICES ───────────────────────────────────────────────────────
-export async function logoutAll(userId: string) {
-  await prisma.refreshToken.updateMany({
-    where: { userId },
-    data:  { isRevoked: true },
-  });
-}
-
-// ─── FORGOT PASSWORD ──────────────────────────────────────────────────────────
-export async function forgotPassword(input: ForgotPasswordInput) {
-  const user = await prisma.user.findUnique({ where: { email: input.email.trim().toLowerCase() } });
-  if (!user) return;
-
-  await prisma.passwordReset.updateMany({
-    where: { userId: user.id, isUsed: false },
-    data:  { isUsed: true },
-  });
-
-  const rawToken = crypto.randomBytes(32).toString('hex');
-  const expiresAt = new Date(Date.now() + msFromExpiry(env.RESET_PASS_TOKEN_EXPIRES));
-
-  await prisma.passwordReset.create({
-    data: { userId: user.id, token: rawToken, expiresAt },
-  });
-
-  const resetLink = `${env.RESET_PASSWORD_LINK}?token=${rawToken}`;
-  await sendPasswordResetEmail(user.email, resetLink);
-}
-
-// ─── RESET PASSWORD ───────────────────────────────────────────────────────────
-export async function resetPassword(input: ResetPasswordInput) {
-  const record = await prisma.passwordReset.findUnique({ where: { token: input.token } });
-  if (!record || record.isUsed || record.expiresAt < new Date()) {
-    throw new BadRequestError('Reset token is invalid or has expired');
-  }
-
-  const passwordHash = await bcrypt.hash(input.password, HASH_ROUNDS);
-
-  await prisma.$transaction([
-    prisma.user.update({
-      where: { id: record.userId },
-      data:  { passwordHash },
-    }),
-    prisma.passwordReset.update({
-      where: { id: record.id },
-      data:  { isUsed: true },
-    }),
-    prisma.refreshToken.updateMany({
-      where: { userId: record.userId },
+export async function logout(incomingRefreshToken: string) {
+  try {
+    const payload = verifyRefreshToken(incomingRefreshToken);
+    await prisma.refreshToken.update({
+      where: { id: payload.tokenId },
       data:  { isRevoked: true },
-    }),
-  ]);
-}
-
-// ─── CHANGE PASSWORD (authenticated) ─────────────────────────────────────────
-export async function changePassword(userId: string, input: ChangePasswordInput) {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw new NotFoundError('User not found');
-
-  const valid = await bcrypt.compare(input.currentPassword, user.passwordHash);
-  if (!valid) throw new UnauthorizedError('Current password is incorrect');
-
-  const passwordHash = await bcrypt.hash(input.newPassword, HASH_ROUNDS);
-  await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
-
-  await prisma.refreshToken.updateMany({
-    where: { userId },
-    data:  { isRevoked: true },
-  });
+    });
+  } catch {
+    // Ignore invalid tokens on logout
+  }
 }
 
 // ─── GET ME ───────────────────────────────────────────────────────────────────
 export async function getMe(userId: string) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      adminProfile:     true,
-      managerProfile:   true,
-      developerProfile: true,
-      clientProfile:    true,
-    },
-  });
+  const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new NotFoundError('User not found');
   return sanitizeUser(user);
 }
 
-// ─── SEED PRODUCTION ACCOUNTS ──────────────────────────────────────────────
-export async function seedProductionAccounts() {
-  const passwordHash = await bcrypt.hash('password123', HASH_ROUNDS);
-  const accounts = [
-    { email: 'admin@brainforge26.tech', role: 'ADMIN' as const },
-    { email: 'admin@brainforceit.com', role: 'ADMIN' as const },
-    { email: 'manager@brainforge26.tech', role: 'MANAGER' as const },
-    { email: 'manager@brainforceit.com', role: 'MANAGER' as const },
-  ];
-
-  for (const item of accounts) {
-    const existing = await prisma.user.findUnique({ where: { email: item.email } });
-    if (existing) {
-      await prisma.user.update({
-        where: { email: item.email },
-        data: { passwordHash, isActive: true, role: item.role },
-      });
-    } else {
-      await prisma.user.create({
-        data: {
-          email: item.email,
-          passwordHash,
-          role: item.role,
-          isActive: true,
-          isVerified: true,
-          ...(item.role === 'ADMIN'
-            ? { adminProfile: { create: { firstName: 'Super', lastName: 'Admin' } } }
-            : { managerProfile: { create: { firstName: 'Operations', lastName: 'Manager' } } }),
-        },
-      });
-    }
-  }
-}
-
-// ─── helper ───────────────────────────────────────────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function sanitizeUser(user: any) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { passwordHash, ...safe } = user;
-  return safe;
+  const { passwordHash, ...rest } = user;
+  return rest;
 }

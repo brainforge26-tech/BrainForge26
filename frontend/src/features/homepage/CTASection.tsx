@@ -3,58 +3,53 @@
 import Link from 'next/link';
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { ArrowRight, Calendar } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { ArrowRight, Sparkles } from 'lucide-react';
 
 export function CTASection() {
-  const ref    = useRef(null);
+  const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
 
   return (
-    <section ref={ref} className="relative py-28 overflow-hidden" id="contact">
-      <div className="section-wrapper relative z-10">
+    <section ref={ref} className="relative py-28 overflow-hidden bg-[#06070a]" id="contact">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="relative rounded-[28px] overflow-hidden"
+          className="relative rounded-3xl overflow-hidden bg-[#0B1224] border border-white/[0.12] p-8 md:p-16 text-center shadow-2xl"
         >
-          {/* Gradient background card */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#A61C43]/08 via-[#851636]/04 to-[rgba(166,28,67,0.01)]" />
-          <div className="absolute inset-0 border border-[rgba(166,28,67,0.12)] rounded-[28px]" />
-          <div className="absolute inset-0 bg-[#09090B]/60 backdrop-blur-sm" />
+          {/* Decorative orange glowing auras */}
+          <div className="absolute -top-24 -right-24 w-80 h-80 bg-orange-600/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-amber-600/10 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Decorative orbs */}
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#A61C43] rounded-full blur-[100px] opacity-05 pointer-events-none" />
-          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#851636] rounded-full blur-[100px] opacity-04 pointer-events-none" />
+          <div className="relative z-10 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-extrabold uppercase tracking-widest mb-4">
+              <Sparkles className="w-3.5 h-3.5 fill-current text-orange-400" />
+              Get Started Today
+            </div>
 
-          {/* Content */}
-          <div className="relative z-10 px-8 py-16 md:px-16 text-center">
-            <div className="section-label justify-center mb-4">Get Started Today</div>
-
-            <h2 className="text-[clamp(1.875rem,4vw,3.25rem)] font-extrabold tracking-tight max-w-2xl mx-auto text-balance">
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
               Ready to Build Something{' '}
-              <span className="gradient-text">Extraordinary?</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-400 to-orange-500">
+                Extraordinary?
+              </span>
             </h2>
 
-            <p className="mt-5 text-lg text-[#AAB3C5] max-w-xl mx-auto text-balance">
-              Tell us about your project and we&apos;ll get back to you within 24 hours
-              with a detailed proposal.
+            <p className="mt-5 text-base sm:text-lg text-slate-300 max-w-xl mx-auto leading-relaxed font-medium">
+              Tell us about your corporate project and we&apos;ll get back to you within 24 hours with a tailored engineering proposal.
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/register">
-                <Button variant="primary" size="lg" rightIcon={<ArrowRight className="w-5 h-5" />}>
-                  Start Your Project
-                </Button>
+              <Link href="/contact">
+                <button className="px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-black text-sm shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all hover:scale-105 flex items-center gap-2">
+                  <span>Start Your Project</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
               </Link>
-              <Button variant="secondary" size="lg" leftIcon={<Calendar className="w-4 h-4" />}>
-                Book a Free Call
-              </Button>
             </div>
 
-            <p className="mt-6 text-sm text-[#7A8499]">
-              No commitment required · Response within 24h · Free consultation
+            <p className="mt-6 text-xs text-slate-400">
+              No commitment required · Response within 24h · Free technical consultation
             </p>
           </div>
         </motion.div>

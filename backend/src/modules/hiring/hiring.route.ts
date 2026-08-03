@@ -1,19 +1,26 @@
 import { Router } from 'express';
-import * as HC from './hiring.controller';
 import { authenticate, authorize } from '../../middlewares/authenticate';
+import * as hiringController from './hiring.controller';
 
 const router = Router();
 
-// Public route for candidates to apply
-router.post('/apply', HC.apply);
+// Public routes
+router.get('/jobs/public', hiringController.getPublicJobs);
+router.get('/jobs/slug/:id', hiringController.getJob);
+router.post('/applications/apply', hiringController.submitApplication);
 
-// Developer route
-router.get('/my-applications', authenticate, authorize('DEVELOPER'), HC.getMyApplications);
+// Admin Jobs CRUD
+router.get('/jobs', authenticate, authorize('ADMIN'), hiringController.getAllJobs);
+router.get('/jobs/:id', hiringController.getJob);
+router.post('/jobs', authenticate, authorize('ADMIN'), hiringController.createJob);
+router.put('/jobs/:id', authenticate, authorize('ADMIN'), hiringController.updateJob);
+router.patch('/jobs/:id', authenticate, authorize('ADMIN'), hiringController.updateJob);
+router.delete('/jobs/:id', authenticate, authorize('ADMIN'), hiringController.deleteJob);
 
-// Manager/Admin routes
-router.use(authenticate, authorize('MANAGER', 'ADMIN'));
-router.get('/', HC.getApplications);
-router.get('/:id', HC.getApplication);
-router.patch('/:id/status', HC.updateStatus);
+// Admin Applications management
+router.get('/applications', authenticate, authorize('ADMIN'), hiringController.getAllApplications);
+router.get('/applications/:id', authenticate, authorize('ADMIN'), hiringController.getApplication);
+router.patch('/applications/:id/status', authenticate, authorize('ADMIN'), hiringController.updateApplicationStatus);
+router.delete('/applications/:id', authenticate, authorize('ADMIN'), hiringController.deleteApplication);
 
 export default router;

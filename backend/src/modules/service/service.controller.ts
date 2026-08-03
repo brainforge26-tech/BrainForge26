@@ -1,54 +1,109 @@
 import { Request, Response, NextFunction } from 'express';
-import * as ServiceSvc from './service.service';
-import { serviceSchema, updateServiceSchema } from './service.validation';
-import { sendSuccess, sendCreated } from '../../utils/response';
-import { BadRequestError } from '../../errors/AppError';
+import * as serviceService from './service.service';
 
-export async function listServices(req: Request, res: Response, next: NextFunction) {
+export async function getPublicServices(req: Request, res: Response, next: NextFunction) {
   try {
-    const activeOnly = req.query.active === 'true';
-    const services = await ServiceSvc.listServices(activeOnly);
-    sendSuccess(res, { services });
-  } catch (err) { next(err); }
+    const featured = req.query.featured === 'true';
+    const data = await serviceService.getAllServices(true, featured);
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getAllServices(_req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await serviceService.getAllServices(false);
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
 }
 
 export async function getService(req: Request, res: Response, next: NextFunction) {
   try {
-    const service = await ServiceSvc.getServiceById(req.params.id as string);
-    sendSuccess(res, { service });
-  } catch (err) { next(err); }
+    const id = req.params.id as string;
+    const data = await serviceService.getServiceBySlugOrId(id);
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
 }
 
 export async function createService(req: Request, res: Response, next: NextFunction) {
   try {
-    const parsed = serviceSchema.safeParse(req.body);
-    if (!parsed.success) throw new BadRequestError(parsed.error.issues[0].message);
-    const service = await ServiceSvc.createService(parsed.data);
-    sendCreated(res, { service }, 'Service created');
-  } catch (err) { next(err); }
+    const data = await serviceService.createService(req.body);
+    res.status(201).json({ success: true, data, message: 'Service created successfully' });
+  } catch (err) {
+    next(err);
+  }
 }
 
 export async function updateService(req: Request, res: Response, next: NextFunction) {
   try {
-    const parsed = updateServiceSchema.safeParse(req.body);
-    if (!parsed.success) throw new BadRequestError(parsed.error.issues[0].message);
-    const service = await ServiceSvc.updateService(req.params.id as string, parsed.data);
-    sendSuccess(res, { service }, 'Service updated');
-  } catch (err) { next(err); }
+    const id = req.params.id as string;
+    const data = await serviceService.updateService(id, req.body);
+    res.json({ success: true, data, message: 'Service updated successfully' });
+  } catch (err) {
+    next(err);
+  }
 }
 
 export async function deleteService(req: Request, res: Response, next: NextFunction) {
   try {
-    await ServiceSvc.deleteService(req.params.id as string);
-    sendSuccess(res, null, 'Service deleted');
-  } catch (err) { next(err); }
+    const id = req.params.id as string;
+    await serviceService.deleteService(id);
+    res.json({ success: true, message: 'Service deleted successfully' });
+  } catch (err) {
+    next(err);
+  }
 }
 
-export async function reorderServices(req: Request, res: Response, next: NextFunction) {
+export async function toggleFeaturedService(req: Request, res: Response, next: NextFunction) {
   try {
-    const { ids } = req.body as { ids: string[] };
-    if (!Array.isArray(ids)) throw new BadRequestError('ids must be an array');
-    await ServiceSvc.reorderServices(ids);
-    sendSuccess(res, null, 'Services reordered');
-  } catch (err) { next(err); }
+    const id = req.params.id as string;
+    const data = await serviceService.toggleFeaturedService(id);
+    res.json({ success: true, data, message: 'Service featured status updated' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// Categories
+export async function getCategories(_req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await serviceService.getAllServiceCategories();
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function createCategory(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await serviceService.createServiceCategory(req.body);
+    res.status(201).json({ success: true, data, message: 'Service category created' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateCategory(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = req.params.id as string;
+    const data = await serviceService.updateServiceCategory(id, req.body);
+    res.json({ success: true, data, message: 'Service category updated' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteCategory(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = req.params.id as string;
+    await serviceService.deleteServiceCategory(id);
+    res.json({ success: true, message: 'Service category deleted' });
+  } catch (err) {
+    next(err);
+  }
 }
