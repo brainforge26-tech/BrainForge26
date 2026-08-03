@@ -40,6 +40,17 @@ export async function markAsRead(req: Request, res: Response, next: NextFunction
   }
 }
 
+export async function replyMessage(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = req.params.id as string;
+    const { subject, messageBody } = req.body;
+    const data = await contactService.replyToContactMessage(id, { subject, messageBody });
+    res.json({ success: true, data, message: 'Reply sent successfully via email!' });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function deleteMessage(req: Request, res: Response, next: NextFunction) {
   try {
     const id = req.params.id as string;

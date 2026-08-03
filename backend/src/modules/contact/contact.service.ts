@@ -1,11 +1,12 @@
 import { prisma } from '../../config/database';
 import { NotFoundError } from '../../errors/AppError';
 import { sendTelegramContactAlert } from '../../utils/telegram';
+import { sendCandidateCustomEmail } from '../../utils/email';
 
 export async function submitContactMessage(data: any) {
   const createdMsg = await prisma.contactMessage.create({ data });
 
-  // Trigger instant Telegram alert asynchronously so it never blocks HTTP response
+  // Trigger instant Telegram alert asynchronously
   sendTelegramContactAlert({
     name: data.name,
     email: data.email,
@@ -35,6 +36,27 @@ export async function markAsRead(id: string, isRead = true) {
   return prisma.contactMessage.update({
     where: { id },
     data: { isRead },
+  });
+}
+
+export async function replyToContactMessage(id: string, replyData: { subject: string; messageBody: string }) {
+  const msg = await getContactMessageById(id);
+
+  // Send Email directly via SMTP
+  await sendCandidateCustomEmail(
+    msg.email,
+    replyData.subject || `Re: ${msg.subject || 'Inquiry'}`,
+    replyData.messageBody,
+    msg.name
+  );
+
+  // Mark as read and update notes with reply timestamp
+  return prisma.contactMessage.update({
+    where: { id },
+    data: {
+      isRead: true,
+      notes: `[REPLIED: ${new Date().toISOString()}] ${replyData.messageBody}`,
+    },
   });
 }
 
