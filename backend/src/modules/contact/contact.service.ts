@@ -1,8 +1,21 @@
 import { prisma } from '../../config/database';
 import { NotFoundError } from '../../errors/AppError';
+import { sendTelegramContactAlert } from '../../utils/telegram';
 
 export async function submitContactMessage(data: any) {
-  return prisma.contactMessage.create({ data });
+  const createdMsg = await prisma.contactMessage.create({ data });
+
+  // Trigger instant Telegram alert asynchronously so it never blocks HTTP response
+  sendTelegramContactAlert({
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    service: data.service,
+    subject: data.subject,
+    message: data.message,
+  }).catch((err) => console.error('[Contact Service] Telegram alert error:', err));
+
+  return createdMsg;
 }
 
 export async function getAllContactMessages() {

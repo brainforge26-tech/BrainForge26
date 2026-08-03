@@ -31,8 +31,13 @@ export const env = {
   RESET_PASSWORD_LINK:      process.env.RESET_PASSWORD_LINK || 'https://brainforge26.tech/reset-password',
 
   // Email
-  EMAIL_USER: process.env.EMAIL_USER || '',
-  EMAIL_PASS: process.env.EMAIL_PASS || '',
+  EMAIL_USER:  process.env.EMAIL_USER || '',
+  EMAIL_PASS:  process.env.EMAIL_PASS || '',
+  ADMIN_EMAIL: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'brainforge2@gmail.com',
+
+  // Telegram Notifications
+  TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '',
+  TELEGRAM_CHAT_ID:   process.env.TELEGRAM_CHAT_ID   || '',
 
   // Cloudinary
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
