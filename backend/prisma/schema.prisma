@@ -13,6 +13,9 @@ datasource db {
 
 enum Role {
   ADMIN
+  MANAGER
+  DEVELOPER
+  CLIENT
 }
 
 enum ApplicationStatus {
