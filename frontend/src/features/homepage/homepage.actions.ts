@@ -96,7 +96,27 @@ export async function fetchPublicClients() {
 export async function fetchSiteSettings() {
   try {
     const res = await publicFetch<any>('/site-settings/public');
-    return res?.data || {};
+    const raw = res?.data || {};
+
+    const general = raw.general || {};
+    const hero = raw.hero || {};
+
+    return {
+      raw,
+      general,
+      hero,
+      companyName: general.companyName || 'BrainForge26 Software Ltd.',
+      siteName: general.companyName || 'BrainForge26 Software Ltd.',
+      tagline: general.tagline || 'Enterprise Software & AI Solutions Company',
+      contactEmail: general.contactEmail || 'contact@brainforge26.tech',
+      contactPhone: general.contactPhone || '+880 1818 293 914',
+      address: general.address || 'Level 12, Enterprise Tower, Dhaka, Bangladesh',
+      workingHours: general.workingHours || '24/7 Technical Support',
+      heroHeading: hero.heading || 'Smarter Digital. Stronger Brands.',
+      heroSubheading: hero.subheading || 'We design, build, and scale enterprise web platforms, mobile applications, and artificial intelligence solutions.',
+      heroBadge: hero.badgeText || 'Elite Software Engineering Agency',
+      primaryCtaText: hero.primaryCtaText || 'Start Your Project',
+    };
   } catch (error) {
     console.error('Failed to fetch site settings:', error);
     return {};
