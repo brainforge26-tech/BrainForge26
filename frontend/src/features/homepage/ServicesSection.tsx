@@ -18,7 +18,6 @@ import {
   CreditCard,
   Building2,
   ArrowRight,
-  Star,
   Sparkles,
 } from 'lucide-react';
 
@@ -39,6 +38,51 @@ const CATEGORY_ICONS: Record<string, any> = {
   'industry-specific-solutions': Building2,
 };
 
+const DEFAULT_CATEGORIES = [
+  {
+    id: 'cat-1',
+    name: 'Website & Web Application Development',
+    slug: 'website-development',
+    description: 'High-performance Next.js, React & Node.js web applications engineered for speed, SEO, and global scalability.',
+    services: [{ title: 'Next.js 15 SSR' }, { title: 'Enterprise Web Apps' }, { title: 'Headless CMS' }],
+  },
+  {
+    id: 'cat-2',
+    name: 'Mobile App Development (iOS & Android)',
+    slug: 'mobile-app-development',
+    description: 'Native Flutter & React Native cross-platform mobile apps with seamless offline sync and biometric auth.',
+    services: [{ title: 'Flutter Apps' }, { title: 'React Native' }, { title: 'iOS & Android' }],
+  },
+  {
+    id: 'cat-3',
+    name: 'Custom Enterprise Software & ERP',
+    slug: 'custom-software-development',
+    description: 'Tailored enterprise workflow automation, SaaS platforms, and CRM systems engineered for high concurrency.',
+    services: [{ title: 'Microservices' }, { title: 'PostgreSQL Architecture' }, { title: 'Enterprise ERP' }],
+  },
+  {
+    id: 'cat-4',
+    name: 'AI Solutions & Machine Learning',
+    slug: 'ai-automation',
+    description: 'LLM integrations, custom AI agents, automated workflow bots, and predictive data analytics.',
+    services: [{ title: 'AI Agents' }, { title: 'OpenAI & LLMs' }, { title: 'Workflow Automation' }],
+  },
+  {
+    id: 'cat-5',
+    name: 'Cloud Architecture & DevOps',
+    slug: 'cloud-devops',
+    description: 'AWS, Docker & Kubernetes infrastructure setup with 99.99% uptime guarantees and CI/CD pipelines.',
+    services: [{ title: 'AWS Cloud' }, { title: 'Docker Containerization' }, { title: 'CI/CD Pipelines' }],
+  },
+  {
+    id: 'cat-6',
+    name: 'UI/UX Design & Product Strategy',
+    slug: 'ui-ux-design',
+    description: 'User-centric wireframing, high-fidelity Figma prototypes, and cohesive design system development.',
+    services: [{ title: 'Figma Systems' }, { title: 'UX Research' }, { title: 'Interactive Prototypes' }],
+  },
+];
+
 function cleanCategoryName(name?: string) {
   if (!name) return '';
   return name.replace(/^[^\x20-\x7E]+\s*/, '').trim() || name;
@@ -51,7 +95,8 @@ interface ServicesSectionProps {
 
 export function ServicesSection({ categories = [], initialServices = [] }: ServicesSectionProps) {
   const hasCategories = Array.isArray(categories) && categories.length > 0;
-  const displayItems = hasCategories ? categories : initialServices;
+  const hasServices = Array.isArray(initialServices) && initialServices.length > 0;
+  const displayItems = hasCategories ? categories : hasServices ? initialServices : DEFAULT_CATEGORIES;
 
   return (
     <section id="services" className="relative py-24 bg-[#060910]">
@@ -83,10 +128,10 @@ export function ServicesSection({ categories = [], initialServices = [] }: Servi
           </Link>
         </div>
 
-        {/* Categories Grid */}
+        {/* Categories Grid (Real Software Cards Guaranteed) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {displayItems.map((item: any, idx: number) => {
-            const isCategory = !!item.slug && hasCategories;
+            const isCategory = !!item.slug || hasCategories;
             const Icon = isCategory ? CATEGORY_ICONS[item.slug] || Globe : Globe;
             const title = isCategory ? cleanCategoryName(item.name) : item.title;
             const description = isCategory
