@@ -126,11 +126,11 @@ export function ApplyClient() {
   if (submitted) {
     return (
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="p-8 sm:p-14 rounded-3xl bg-[#07090F] border border-orange-500/30 text-center space-y-5 shadow-2xl relative overflow-hidden"
+        className="p-8 sm:p-14 rounded-2xl bg-[#0E121E] border border-[#1E2638] text-center space-y-5 shadow-xl"
       >
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center mx-auto shadow-[0_0_35px_rgba(249,115,22,0.5)]">
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center mx-auto shadow-lg">
           <CheckCircle2 className="w-10 h-10 text-white" />
         </div>
         <h3 className="text-3xl font-black text-white">Application Submitted Successfully!</h3>
@@ -139,7 +139,7 @@ export function ApplyClient() {
         </p>
         <div className="pt-4 flex items-center justify-center gap-4">
           <Link href="/careers">
-            <button className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl hover:scale-105 transition-all">
+            <button className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold text-xs tracking-wider uppercase shadow-md hover:scale-105 transition-all">
               Return to Open Careers
             </button>
           </Link>
@@ -149,48 +149,45 @@ export function ApplyClient() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Top Navigation Back Link */}
       <div className="flex items-center justify-between">
         <Link
           href="/careers"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.1] text-xs font-bold text-slate-300 hover:text-white transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0E121E] hover:bg-[#141A2B] border border-[#1E2638] text-xs font-bold text-slate-300 hover:text-white transition-all"
         >
           <ChevronLeft className="w-4 h-4 text-orange-400" />
           Back to Positions
         </Link>
 
         {jobTitle && (
-          <span className="px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold">
+          <span className="px-4 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold">
             Applying for: <strong className="text-white">{jobTitle}</strong>
           </span>
         )}
       </div>
 
-      {/* Main Standalone Application Form Box */}
+      {/* Main Standalone Solid Dark Application Form Box */}
       <form
         onSubmit={handleSubmit}
-        className="p-6 sm:p-10 rounded-3xl bg-[#07090F] border border-white/[0.12] shadow-2xl text-slate-100 space-y-8 relative overflow-hidden"
+        className="p-6 sm:p-10 rounded-2xl bg-[#0E121E] border border-[#1E2638] shadow-2xl text-slate-100 space-y-8"
       >
-        {/* Glow accent */}
-        <div className="absolute top-0 right-0 w-96 h-40 bg-gradient-to-l from-orange-500/15 via-amber-500/10 to-transparent blur-3xl pointer-events-none" />
-
         {error && (
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-semibold">
+          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold">
             {error}
           </div>
         )}
 
         {/* ── Section 1: Candidate Identity ─────────────────────────────────── */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2 border-b border-white/[0.08] pb-2">
-            <div className="w-6 h-6 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center text-xs font-bold">1</div>
+          <div className="flex items-center gap-2.5 border-b border-[#1E2638] pb-3">
+            <div className="w-7 h-7 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-black">1</div>
             <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">Candidate Contact Information</h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-orange-400" /> First Name *
               </label>
               <input
@@ -199,12 +196,12 @@ export function ApplyClient() {
                 placeholder="Alex"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 focus:bg-white/[0.05] transition-all"
+                className="w-full px-4 py-3.5 rounded-xl bg-[#141A2B] border border-[#252E44] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-orange-400" /> Last Name *
               </label>
               <input
@@ -213,12 +210,12 @@ export function ApplyClient() {
                 placeholder="Vance"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 focus:bg-white/[0.05] transition-all"
+                className="w-full px-4 py-3.5 rounded-xl bg-[#141A2B] border border-[#252E44] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-orange-400" /> Email Address *
               </label>
               <input
@@ -227,12 +224,12 @@ export function ApplyClient() {
                 placeholder="alex.vance@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 focus:bg-white/[0.05] transition-all"
+                className="w-full px-4 py-3.5 rounded-xl bg-[#141A2B] border border-[#252E44] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
                 <Phone className="w-3.5 h-3.5 text-orange-400" /> Phone Number
               </label>
               <input
@@ -240,7 +237,7 @@ export function ApplyClient() {
                 placeholder="+880 1818 000 000"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 focus:bg-white/[0.05] transition-all"
+                className="w-full px-4 py-3.5 rounded-xl bg-[#141A2B] border border-[#252E44] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all"
               />
             </div>
           </div>
@@ -248,31 +245,31 @@ export function ApplyClient() {
 
         {/* ── Section 2: Experience & Skills ────────────────────────────────── */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2 border-b border-white/[0.08] pb-2">
-            <div className="w-6 h-6 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center text-xs font-bold">2</div>
+          <div className="flex items-center gap-2.5 border-b border-[#1E2638] pb-3">
+            <div className="w-7 h-7 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-black">2</div>
             <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">Professional Profile & Tech Skills</h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
                 <Briefcase className="w-3.5 h-3.5 text-orange-400" /> Years of Experience *
               </label>
               <select
                 value={experience}
                 onChange={(e) => setExperience(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-2xl bg-[#0B0D16] border border-white/[0.1] text-sm text-white focus:outline-none focus:border-orange-500/60 transition-all cursor-pointer"
+                className="w-full px-4 py-3.5 rounded-xl bg-[#141A2B] border border-[#252E44] text-sm text-white focus:outline-none focus:border-orange-500 cursor-pointer transition-all"
               >
-                <option value="Fresh Graduate / < 1 Year" className="bg-[#080A12] text-white py-2">Fresh Graduate / &lt; 1 Year</option>
-                <option value="1-3 Years" className="bg-[#080A12] text-white py-2">1-3 Years</option>
-                <option value="3-5 Years" className="bg-[#080A12] text-white py-2">3-5 Years</option>
-                <option value="5-8 Years" className="bg-[#080A12] text-white py-2">5-8 Years</option>
-                <option value="8+ Years Senior Architect" className="bg-[#080A12] text-white py-2">8+ Years Senior Architect</option>
+                <option value="Fresh Graduate / < 1 Year" className="bg-[#141A2B] text-white py-2">Fresh Graduate / &lt; 1 Year</option>
+                <option value="1-3 Years" className="bg-[#141A2B] text-white py-2">1-3 Years</option>
+                <option value="3-5 Years" className="bg-[#141A2B] text-white py-2">3-5 Years</option>
+                <option value="5-8 Years" className="bg-[#141A2B] text-white py-2">5-8 Years</option>
+                <option value="8+ Years Senior Architect" className="bg-[#141A2B] text-white py-2">8+ Years Senior Architect</option>
               </select>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-orange-400" /> Primary Skills (Comma separated)
               </label>
               <input
@@ -280,21 +277,21 @@ export function ApplyClient() {
                 placeholder="React, Next.js, Node.js, PostgreSQL"
                 value={skills}
                 onChange={(e) => setSkills(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 focus:bg-white/[0.05] transition-all"
+                className="w-full px-4 py-3.5 rounded-xl bg-[#141A2B] border border-[#252E44] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all"
               />
             </div>
           </div>
 
           {/* Quick Skill Tags */}
           <div className="space-y-1.5 pt-1">
-            <span className="text-[11px] font-bold text-slate-400 block">Click to Add Popular Tech Skills:</span>
+            <span className="text-[11px] font-bold text-slate-400 block">Click to Add Tech Skills:</span>
             <div className="flex flex-wrap gap-1.5">
               {POPULAR_SKILLS.map((sk) => (
                 <button
                   key={sk}
                   type="button"
                   onClick={() => handleAddSkill(sk)}
-                  className="px-2.5 py-1 rounded-xl bg-white/[0.04] hover:bg-orange-500/20 hover:border-orange-500/30 text-xs font-medium text-slate-300 hover:text-orange-300 border border-white/[0.08] transition-all"
+                  className="px-3 py-1 rounded-lg bg-[#141A2B] hover:bg-orange-500/20 hover:border-orange-500/40 text-xs font-medium text-slate-300 hover:text-orange-300 border border-[#252E44] transition-all"
                 >
                   + {sk}
                 </button>
@@ -304,7 +301,7 @@ export function ApplyClient() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
                 <Linkedin className="w-3.5 h-3.5 text-orange-400" /> LinkedIn Profile URL
               </label>
               <input
@@ -312,12 +309,12 @@ export function ApplyClient() {
                 placeholder="https://linkedin.com/in/username"
                 value={linkedinUrl}
                 onChange={(e) => setLinkedinUrl(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-all"
+                className="w-full px-4 py-3.5 rounded-xl bg-[#141A2B] border border-[#252E44] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
                 <Globe className="w-3.5 h-3.5 text-orange-400" /> Portfolio / GitHub URL
               </label>
               <input
@@ -325,7 +322,7 @@ export function ApplyClient() {
                 placeholder="https://github.com/username"
                 value={portfolioUrl}
                 onChange={(e) => setPortfolioUrl(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-all"
+                className="w-full px-4 py-3.5 rounded-xl bg-[#141A2B] border border-[#252E44] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all"
               />
             </div>
           </div>
@@ -333,13 +330,13 @@ export function ApplyClient() {
 
         {/* ── Section 3: Resume PDF Upload & Cover Letter ──────────────────── */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2 border-b border-white/[0.08] pb-2">
-            <div className="w-6 h-6 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center text-xs font-bold">3</div>
-            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">Resume PDF Document & Cover Letter</h3>
+          <div className="flex items-center gap-2.5 border-b border-[#1E2638] pb-3">
+            <div className="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center text-xs font-black">3</div>
+            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">Resume Document & Cover Letter</h3>
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
+            <label className="text-xs font-bold text-slate-200 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5 text-orange-400" /> Upload Resume / CV Document (PDF, DOC, DOCX) *
               </span>
@@ -355,7 +352,7 @@ export function ApplyClient() {
 
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="p-6 rounded-2xl border-2 border-dashed border-white/[0.15] hover:border-orange-500/60 bg-white/[0.02] hover:bg-white/[0.05] transition-all cursor-pointer flex flex-col items-center justify-center text-center space-y-2.5 group"
+              className="p-6 rounded-xl border-2 border-dashed border-[#252E44] hover:border-orange-500 bg-[#141A2B] hover:bg-[#1A2238] transition-all cursor-pointer flex flex-col items-center justify-center text-center space-y-2.5 group"
             >
               {uploadingResume ? (
                 <div className="flex items-center gap-2 text-xs font-bold text-orange-400 py-2">
@@ -363,7 +360,7 @@ export function ApplyClient() {
                 </div>
               ) : resumeFile ? (
                 <div className="flex items-center gap-4 py-1">
-                  <div className="w-12 h-12 rounded-2xl bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center shrink-0">
                     <FileCheck className="w-6 h-6" />
                   </div>
                   <div className="text-left">
@@ -378,7 +375,7 @@ export function ApplyClient() {
                 </div>
               ) : (
                 <>
-                  <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.08] text-slate-400 group-hover:text-orange-400 group-hover:scale-110 flex items-center justify-center transition-all">
+                  <div className="w-12 h-12 rounded-xl bg-[#0E121E] border border-[#252E44] text-slate-400 group-hover:text-orange-400 group-hover:scale-110 flex items-center justify-center transition-all">
                     <Upload className="w-6 h-6" />
                   </div>
                   <div>
@@ -391,7 +388,7 @@ export function ApplyClient() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+            <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5 text-orange-400" /> Cover Letter & Personal Statement (Optional)
             </label>
             <textarea
@@ -399,16 +396,16 @@ export function ApplyClient() {
               placeholder="Share details about your recent projects, engineering accomplishments, and why you want to join BrainForge26..."
               value={coverLetter}
               onChange={(e) => setCoverLetter(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl bg-white/[0.03] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-all leading-relaxed"
+              className="w-full px-4 py-3.5 rounded-xl bg-[#141A2B] border border-[#252E44] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all leading-relaxed"
             />
           </div>
         </div>
 
-        <div className="pt-4 border-t border-white/[0.08] flex items-center justify-end">
+        <div className="pt-4 border-t border-[#1E2638] flex items-center justify-end">
           <button
             type="submit"
             disabled={loading || uploadingResume}
-            className="w-full sm:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-black text-xs tracking-wider uppercase shadow-[0_0_30px_rgba(249,115,22,0.45)] transition-all hover:scale-[1.02] flex items-center justify-center gap-2.5"
+            className="w-full sm:w-auto px-10 py-4 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-extrabold text-xs tracking-wider uppercase shadow-lg transition-all hover:scale-[1.02] flex items-center justify-center gap-2.5"
           >
             {loading ? (
               <>
