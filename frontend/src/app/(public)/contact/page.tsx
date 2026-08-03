@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default async function ContactPage() {
-  const settings = await fetchSiteSettings().catch(() => ({}));
+  const settings: any = await fetchSiteSettings().catch(() => ({}));
 
   const companyName = settings?.companyName || settings?.siteName || 'BrainForge26 Software Ltd.';
   const email = settings?.contactEmail || 'contact@brainforge26.tech';
