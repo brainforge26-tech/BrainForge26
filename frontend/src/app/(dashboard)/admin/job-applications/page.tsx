@@ -388,7 +388,7 @@ export default function AdminJobApplicationsPage() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl bg-[#090D16] border border-white/[0.15] rounded-3xl p-6 sm:p-8 space-y-6 text-white shadow-2xl relative"
+            className="w-full max-w-3xl max-h-[85vh] overflow-y-auto bg-[#090D16] border border-white/[0.15] rounded-3xl p-6 sm:p-8 space-y-6 text-white shadow-2xl relative"
           >
             <div className="flex items-center justify-between border-b border-white/[0.1] pb-4">
               <div>
@@ -486,7 +486,7 @@ export default function AdminJobApplicationsPage() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl bg-[#090D16] border border-white/[0.15] rounded-3xl p-6 sm:p-8 space-y-5 text-white shadow-2xl relative"
+            className="w-full max-w-3xl max-h-[85vh] overflow-y-auto bg-[#090D16] border border-white/[0.15] rounded-3xl p-6 sm:p-8 space-y-5 text-white shadow-2xl relative"
           >
             <div className="flex items-center justify-between border-b border-white/[0.1] pb-4">
               <div>

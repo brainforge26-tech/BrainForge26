@@ -127,7 +127,7 @@ export function JobApplicationModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md"
           onClick={handleResetAndClose}
         >
           <motion.div
@@ -135,26 +135,26 @@ export function JobApplicationModal({
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.95, y: 20 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl my-8 bg-[#090B12] border border-white/[0.15] rounded-3xl p-6 sm:p-8 shadow-2xl relative space-y-6 text-white overflow-hidden"
+            className="w-full max-w-4xl max-h-[85vh] overflow-y-auto bg-[#080A12] border border-white/[0.15] rounded-3xl p-6 sm:p-10 shadow-2xl relative space-y-6 text-white"
           >
             {/* Header glow accent */}
             <div className="absolute -top-24 -left-24 w-60 h-60 bg-orange-500/20 blur-[100px] rounded-full pointer-events-none" />
 
-            <div className="flex items-center justify-between border-b border-white/[0.1] pb-4 relative z-10">
+            <div className="flex items-center justify-between border-b border-white/[0.1] pb-5 relative z-10 sticky top-0 bg-[#080A12]/95 backdrop-blur-md pt-1 z-20">
               <div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[11px] font-bold uppercase tracking-wider mb-1">
-                  <Sparkles className="w-3 h-3" />
+                  <Sparkles className="w-3.5 h-3.5" />
                   Engineering Careers
                 </div>
-                <h2 className="text-2xl font-black text-white tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                   {jobTitle ? `Apply for ${jobTitle}` : 'Submit Job Application'}
                 </h2>
               </div>
               <button
                 onClick={handleResetAndClose}
-                className="p-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-400 hover:text-white transition-colors"
+                className="p-2.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-400 hover:text-white transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 
@@ -162,35 +162,36 @@ export function JobApplicationModal({
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="py-12 text-center space-y-4"
+                className="py-16 text-center space-y-4"
               >
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(249,115,22,0.5)]">
                   <CheckCircle2 className="w-10 h-10 text-white" />
                 </div>
-                <h3 className="text-2xl font-extrabold text-white">Application Submitted!</h3>
-                <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
+                <h3 className="text-3xl font-extrabold text-white">Application Submitted!</h3>
+                <p className="text-base text-slate-300 max-w-lg mx-auto leading-relaxed">
                   Thank you for applying to <strong className="text-orange-400">BrainForge26</strong>. Our recruitment team will review your resume and contact you via email shortly.
                 </p>
                 <button
                   onClick={handleResetAndClose}
-                  className="mt-4 px-8 py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl hover:scale-105 transition-all"
+                  className="mt-6 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl hover:scale-105 transition-all"
                 >
                   Close & Continue Browsing
                 </button>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
+              <form onSubmit={handleSubmit} className="space-y-6 relative z-10 pt-2">
                 {error && (
-                  <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-semibold">
+                  <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-semibold">
                     {error}
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* 2-Column Grid Layout for Spacious Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* First Name */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-orange-400" />
+                      <User className="w-4 h-4 text-orange-400" />
                       First Name *
                     </label>
                     <input
@@ -199,14 +200,14 @@ export function JobApplicationModal({
                       placeholder="Alex"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50 transition-colors"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.12] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-colors"
                     />
                   </div>
 
                   {/* Last Name */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-orange-400" />
+                      <User className="w-4 h-4 text-orange-400" />
                       Last Name *
                     </label>
                     <input
@@ -215,16 +216,14 @@ export function JobApplicationModal({
                       placeholder="Vance"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50 transition-colors"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.12] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-colors"
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Email */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5 text-orange-400" />
+                      <Mail className="w-4 h-4 text-orange-400" />
                       Email Address *
                     </label>
                     <input
@@ -233,14 +232,14 @@ export function JobApplicationModal({
                       placeholder="alex.vance@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50 transition-colors"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.12] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-colors"
                     />
                   </div>
 
                   {/* Phone */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5 text-orange-400" />
+                      <Phone className="w-4 h-4 text-orange-400" />
                       Phone Number
                     </label>
                     <input
@@ -248,22 +247,20 @@ export function JobApplicationModal({
                       placeholder="+880 1818 000 000"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50 transition-colors"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.12] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-colors"
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Experience */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                      <Briefcase className="w-3.5 h-3.5 text-orange-400" />
+                      <Briefcase className="w-4 h-4 text-orange-400" />
                       Years of Experience
                     </label>
                     <select
                       value={experience}
                       onChange={(e) => setExperience(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-[#0F121C] border border-white/[0.1] text-sm text-white focus:outline-none focus:border-orange-500/50 transition-colors"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-[#0F121C] border border-white/[0.12] text-sm text-white focus:outline-none focus:border-orange-500/60 transition-colors"
                     >
                       <option value="Fresh Graduate / < 1 Year">Fresh Graduate / &lt; 1 Year</option>
                       <option value="1-3 Years">1-3 Years</option>
@@ -274,9 +271,9 @@ export function JobApplicationModal({
                   </div>
 
                   {/* Skills */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+                      <Sparkles className="w-4 h-4 text-orange-400" />
                       Primary Skills (Comma separated)
                     </label>
                     <input
@@ -284,16 +281,14 @@ export function JobApplicationModal({
                       placeholder="React, Next.js, Node.js, PostgreSQL"
                       value={skills}
                       onChange={(e) => setSkills(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50 transition-colors"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.12] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-colors"
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* LinkedIn */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                      <Linkedin className="w-3.5 h-3.5 text-orange-400" />
+                      <Linkedin className="w-4 h-4 text-orange-400" />
                       LinkedIn Profile URL
                     </label>
                     <input
@@ -301,14 +296,14 @@ export function JobApplicationModal({
                       placeholder="https://linkedin.com/in/username"
                       value={linkedinUrl}
                       onChange={(e) => setLinkedinUrl(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50 transition-colors"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.12] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-colors"
                     />
                   </div>
 
                   {/* Portfolio / GitHub */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                      <Globe className="w-3.5 h-3.5 text-orange-400" />
+                      <Globe className="w-4 h-4 text-orange-400" />
                       Portfolio / GitHub URL
                     </label>
                     <input
@@ -316,15 +311,15 @@ export function JobApplicationModal({
                       placeholder="https://github.com/username"
                       value={portfolioUrl}
                       onChange={(e) => setPortfolioUrl(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50 transition-colors"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.12] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-colors"
                     />
                   </div>
                 </div>
 
-                {/* Resume Upload Dropzone */}
-                <div className="space-y-1.5">
+                {/* Resume Upload Dropzone (Full Width) */}
+                <div className="space-y-2 pt-2">
                   <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5 text-orange-400" />
+                    <FileText className="w-4 h-4 text-orange-400" />
                     Upload Resume (PDF, DOC, DOCX up to 15MB)
                   </label>
                   <input
@@ -337,34 +332,34 @@ export function JobApplicationModal({
 
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-4 rounded-2xl border-2 border-dashed border-white/[0.15] hover:border-orange-500/50 bg-white/[0.02] hover:bg-white/[0.05] transition-all cursor-pointer flex flex-col items-center justify-center text-center space-y-2 group"
+                    className="p-6 rounded-2xl border-2 border-dashed border-white/[0.15] hover:border-orange-500/50 bg-white/[0.02] hover:bg-white/[0.05] transition-all cursor-pointer flex flex-col items-center justify-center text-center space-y-2 group"
                   >
                     {uploadingResume ? (
                       <div className="flex items-center gap-2 text-xs font-bold text-orange-400">
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-5 h-5 animate-spin" />
                         Processing File...
                       </div>
                     ) : resumeFile ? (
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30">
-                          <FileText className="w-5 h-5" />
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-2xl bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                          <FileText className="w-6 h-6" />
                         </div>
                         <div className="text-left">
-                          <span className="font-bold text-white text-xs block truncate max-w-xs">
+                          <span className="font-bold text-white text-sm block truncate max-w-sm">
                             {resumeFile.name}
                           </span>
-                          <span className="text-[10px] text-slate-400">
-                            {(resumeFile.size / (1024 * 1024)).toFixed(2)} MB • Click to change
+                          <span className="text-xs text-slate-400">
+                            {(resumeFile.size / (1024 * 1024)).toFixed(2)} MB • Click to change file
                           </span>
                         </div>
                       </div>
                     ) : (
                       <>
-                        <Upload className="w-6 h-6 text-slate-400 group-hover:text-orange-400 group-hover:scale-110 transition-all" />
-                        <span className="text-xs font-bold text-slate-300">
+                        <Upload className="w-8 h-8 text-slate-400 group-hover:text-orange-400 group-hover:scale-110 transition-all" />
+                        <span className="text-sm font-bold text-slate-200">
                           Click or drag resume file here (PDF / Word)
                         </span>
-                        <span className="text-[10px] text-slate-500">
+                        <span className="text-xs text-slate-500">
                           Maximum file size 15 MB
                         </span>
                       </>
@@ -372,30 +367,30 @@ export function JobApplicationModal({
                   </div>
                 </div>
 
-                {/* Cover Letter */}
-                <div className="space-y-1.5">
+                {/* Cover Letter (Full Width) */}
+                <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5 text-orange-400" />
+                    <FileText className="w-4 h-4 text-orange-400" />
                     Cover Letter (Optional)
                   </label>
                   <textarea
-                    rows={3}
+                    rows={4}
                     placeholder="Briefly tell us why you are interested in joining BrainForge26..."
                     value={coverLetter}
                     onChange={(e) => setCoverLetter(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50 transition-colors"
+                    className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.12] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/60 transition-colors leading-relaxed"
                   />
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-3">
                   <button
                     type="submit"
                     disabled={loading || uploadingResume}
-                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-extrabold text-sm tracking-wider uppercase shadow-[0_0_25px_rgba(249,115,22,0.4)] transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-extrabold text-sm tracking-wider uppercase shadow-[0_0_25px_rgba(249,115,22,0.4)] transition-all hover:scale-[1.01] flex items-center justify-center gap-2"
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-5 h-5 animate-spin" />
                         Submitting Application...
                       </>
                     ) : (
