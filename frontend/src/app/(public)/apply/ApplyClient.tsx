@@ -20,6 +20,12 @@ import {
   ArrowRight,
   ShieldCheck,
   ChevronLeft,
+  Printer,
+  Download,
+  Calendar,
+  Building2,
+  QrCode,
+  CheckSquare,
 } from 'lucide-react';
 import apiClient from '@/lib/axios';
 import Link from 'next/link';
@@ -62,6 +68,8 @@ export function ApplyClient() {
   const [loading, setLoading] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
   const [error, setError] = React.useState('');
+  const [appReferenceId, setAppReferenceId] = React.useState('');
+  const [submittedDate, setSubmittedDate] = React.useState('');
 
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -115,6 +123,10 @@ export function ApplyClient() {
       };
 
       await apiClient.post('/jobs/applications/apply', payload);
+
+      const randomRef = `BF26-APP-${Math.floor(100000 + Math.random() * 900000)}`;
+      setAppReferenceId(randomRef);
+      setSubmittedDate(new Date().toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' }));
       setSubmitted(true);
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Failed to submit application. Please try again.');
@@ -123,28 +135,169 @@ export function ApplyClient() {
     }
   };
 
+  const handlePrintReceipt = () => {
+    window.print();
+  };
+
   if (submitted) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="p-8 sm:p-14 rounded-2xl bg-[#0E121E] border border-[#1E2638] text-center space-y-5 shadow-xl"
-      >
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center mx-auto shadow-lg">
-          <CheckCircle2 className="w-10 h-10 text-white" />
-        </div>
-        <h3 className="text-3xl font-black text-white">Application Submitted Successfully!</h3>
-        <p className="text-base text-slate-300 max-w-lg mx-auto leading-relaxed">
-          Thank you for applying to <strong className="text-orange-400">BrainForge26</strong>. Our recruitment team will review your resume and reach out to you via email.
-        </p>
-        <div className="pt-4 flex items-center justify-center gap-4">
-          <Link href="/careers">
-            <button className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold text-xs tracking-wider uppercase shadow-md hover:scale-105 transition-all">
-              Return to Open Careers
+      <div className="space-y-8">
+        {/* Print Stylesheet overlay for PDF Export */}
+        <style jsx global>{`
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            #application-pdf-receipt, #application-pdf-receipt * {
+              visibility: visible;
+            }
+            #application-pdf-receipt {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+              background: #ffffff !important;
+              color: #000000 !important;
+              padding: 20px !important;
+              box-shadow: none !important;
+              border: none !important;
+            }
+            .no-print {
+              display: none !important;
+            }
+            .print-text-dark {
+              color: #111827 !important;
+            }
+            .print-bg-light {
+              background: #f8fafc !important;
+              border: 1px solid #e2e8f0 !important;
+            }
+          }
+        `}</style>
+
+        {/* ── Official PDF Receipt Box ───────────────────────────────────────── */}
+        <div
+          id="application-pdf-receipt"
+          className="p-8 sm:p-12 rounded-2xl bg-[#0E121E] border border-[#1E2638] space-y-8 shadow-2xl text-slate-100 relative overflow-hidden"
+        >
+          {/* Top Banner Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-[#1E2638] pb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center text-white shadow-lg shrink-0">
+                <ShieldCheck className="w-8 h-8" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-black text-white tracking-tight print-text-dark">
+                  Brain<span className="text-orange-400">Forge26</span> Technologies
+                </h1>
+                <p className="text-xs text-slate-400 font-semibold print-text-dark">
+                  Official Job Application & Physical Interview Admit Slip
+                </p>
+              </div>
+            </div>
+
+            <div className="text-right sm:text-right space-y-1">
+              <span className="px-3 py-1 rounded-lg bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-mono font-black block w-fit sm:ml-auto print-text-dark">
+                REF: {appReferenceId}
+              </span>
+              <span className="text-[11px] text-slate-400 block print-text-dark">
+                Issued: {submittedDate}
+              </span>
+            </div>
+          </div>
+
+          {/* Success Banner Notice */}
+          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3 text-emerald-300 text-xs font-semibold print-bg-light print-text-dark">
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+            <span>
+              Application Verified & Recorded. Please download/print this receipt to present during physical interview verification.
+            </span>
+          </div>
+
+          {/* Candidate Profile Details Grid */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-black uppercase tracking-wider text-orange-400 border-b border-[#1E2638] pb-2 print-text-dark">
+              1. Candidate & Position Verification
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="p-4 rounded-xl bg-[#141A2B] border border-[#252E44] space-y-1 print-bg-light print-text-dark">
+                <span className="text-slate-400 block font-semibold print-text-dark">Applicant Full Name:</span>
+                <span className="font-extrabold text-white text-base block print-text-dark">{firstName} {lastName}</span>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#141A2B] border border-[#252E44] space-y-1 print-bg-light print-text-dark">
+                <span className="text-slate-400 block font-semibold print-text-dark">Target Applied Position:</span>
+                <span className="font-extrabold text-orange-400 text-base block print-text-dark">{jobTitle || 'General Software Engineering'}</span>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#141A2B] border border-[#252E44] space-y-1 print-bg-light print-text-dark">
+                <span className="text-slate-400 block font-semibold print-text-dark">Contact Email:</span>
+                <span className="font-bold text-white block print-text-dark">{email}</span>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#141A2B] border border-[#252E44] space-y-1 print-bg-light print-text-dark">
+                <span className="text-slate-400 block font-semibold print-text-dark">Phone Number:</span>
+                <span className="font-bold text-white block print-text-dark">{phone || 'Not Provided'}</span>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#141A2B] border border-[#252E44] space-y-1 print-bg-light print-text-dark">
+                <span className="text-slate-400 block font-semibold print-text-dark">Years of Experience:</span>
+                <span className="font-bold text-white block print-text-dark">{experience}</span>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#141A2B] border border-[#252E44] space-y-1 print-bg-light print-text-dark">
+                <span className="text-slate-400 block font-semibold print-text-dark">Resume Document Status:</span>
+                <span className="font-bold text-emerald-400 block print-text-dark">
+                  {resumeFile ? `Attached (${resumeFile.name})` : 'Submitted'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Technical Skills Summary */}
+          {skills && (
+            <div className="space-y-2">
+              <h3 className="text-xs font-black uppercase tracking-wider text-orange-400 border-b border-[#1E2638] pb-2 print-text-dark">
+                2. Technical Skills Summary
+              </h3>
+              <div className="p-4 rounded-xl bg-[#141A2B] border border-[#252E44] text-xs font-semibold text-slate-200 print-bg-light print-text-dark">
+                {skills}
+              </div>
+            </div>
+          )}
+
+          {/* Physical Interview Instructions */}
+          <div className="p-5 rounded-xl bg-[#141A2B] border border-orange-500/30 space-y-2 print-bg-light print-text-dark">
+            <h4 className="text-xs font-extrabold text-orange-400 uppercase tracking-wider flex items-center gap-2 print-text-dark">
+              <Building2 className="w-4 h-4" />
+              Physical Interview Instructions & Requirements
+            </h4>
+            <ul className="text-xs text-slate-300 space-y-1.5 list-disc pl-5 leading-relaxed print-text-dark">
+              <li>Keep a printed or digital copy of this <strong>Official Application Receipt Slip</strong>.</li>
+              <li>Bring your original <strong>National ID Card (NID) / Passport</strong> or Student ID.</li>
+              <li>Be prepared for technical assessment and practical coding verification with our engineering panel.</li>
+            </ul>
+          </div>
+
+          {/* Bottom Actions Bar (Hidden during printing) */}
+          <div className="pt-4 border-t border-[#1E2638] flex flex-wrap items-center justify-between gap-4 no-print">
+            <Link href="/careers">
+              <button className="px-6 py-3 rounded-xl bg-[#141A2B] hover:bg-[#1A2238] border border-[#252E44] text-slate-300 font-bold text-xs transition-colors">
+                Return to Careers Page
+              </button>
+            </Link>
+
+            <button
+              onClick={handlePrintReceipt}
+              className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-black text-xs tracking-wider uppercase shadow-lg hover:scale-105 transition-all flex items-center gap-2"
+            >
+              <Printer className="w-4 h-4" />
+              <span>Download / Print PDF Receipt</span>
             </button>
-          </Link>
+          </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
