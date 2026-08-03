@@ -188,7 +188,7 @@ export function ApplyClient() {
               </div>
               <div>
                 <h1 className="text-2xl font-black text-white tracking-tight print-text-dark">
-                  Brain<span className="text-orange-400">Forge26</span> Technologies
+                  Brain<span className="text-orange-400">Forge26</span> Software Ltd.
                 </h1>
                 <p className="text-xs text-slate-400 font-semibold print-text-dark">
                   Official Job Application & Physical Interview Admit Slip
