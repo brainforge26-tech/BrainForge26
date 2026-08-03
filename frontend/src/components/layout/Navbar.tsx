@@ -52,7 +52,6 @@ export function Navbar({ user }: { user?: { role: string } | null }) {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
   const [searchResults, setSearchResults] = React.useState<any[]>([]);
-  const [loadingSearch, setLoadingSearch] = React.useState(false);
 
   const { scrollY } = useScroll();
 
@@ -72,7 +71,6 @@ export function Navbar({ user }: { user?: { role: string } | null }) {
       return;
     }
     try {
-      setLoadingSearch(true);
       const { data } = await apiClient.get('/services/public');
       const filtered = (data.data || []).filter((s: any) =>
         s.title.toLowerCase().includes(val.toLowerCase()) ||
@@ -81,8 +79,6 @@ export function Navbar({ user }: { user?: { role: string } | null }) {
       setSearchResults(filtered);
     } catch {
       setSearchResults([]);
-    } finally {
-      setLoadingSearch(false);
     }
   };
 
@@ -105,10 +101,13 @@ export function Navbar({ user }: { user?: { role: string } | null }) {
           >
             {/* ── Logo ──────────────────────────────────────────────────────── */}
             <Link href="/" className="flex items-center gap-3 group shrink-0">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 via-amber-500 to-cyan-500 shadow-[0_0_20px_rgba(249,115,22,0.4)] group-hover:scale-105 transition-all">
+              <div
+                suppressHydrationWarning
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 shadow-[0_0_20px_rgba(249,115,22,0.4)] group-hover:scale-105 transition-all"
+              >
                 <ShieldCheck className="w-5 h-5 text-white" />
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col" suppressHydrationWarning>
                 <span className="font-extrabold text-xl text-white tracking-tight leading-none">
                   Brain<span className="text-orange-400">Forge26</span>
                 </span>
@@ -226,11 +225,11 @@ export function Navbar({ user }: { user?: { role: string } | null }) {
                           href={item.href}
                           className="flex items-start gap-3 p-3 rounded-2xl hover:bg-white/[0.06] transition-colors group"
                         >
-                          <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 group-hover:scale-110 transition-transform">
+                          <div className="p-2 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/20 group-hover:scale-110 transition-transform">
                             <item.icon className="w-4 h-4" />
                           </div>
                           <div>
-                            <span className="font-bold text-white text-xs block group-hover:text-cyan-400 transition-colors">
+                            <span className="font-bold text-white text-xs block group-hover:text-orange-400 transition-colors">
                               {item.title}
                             </span>
                             <span className="text-[11px] text-slate-400 leading-tight block">
@@ -271,7 +270,7 @@ export function Navbar({ user }: { user?: { role: string } | null }) {
               {user?.role === 'ADMIN' ? (
                 <Link
                   href="/admin"
-                  className="px-6 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg transition-all hover:scale-105 flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-full bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-extrabold text-xs shadow-lg transition-all hover:scale-105 flex items-center gap-2"
                 >
                   Admin Dashboard
                   <ArrowRight className="w-4 h-4" />
