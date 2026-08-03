@@ -21,6 +21,7 @@ import {
   Star,
   Sparkles,
 } from 'lucide-react';
+import { FloatingShapes3D } from '@/components/ui/FloatingShapes3D';
 
 const CATEGORY_ICONS: Record<string, any> = {
   'website-development': Globe,
@@ -50,7 +51,6 @@ interface ServicesSectionProps {
 }
 
 export function ServicesSection({ categories = [], initialServices = [] }: ServicesSectionProps) {
-  // If categories are passed, render Category Cards in the exact same card design!
   const hasCategories = Array.isArray(categories) && categories.length > 0;
   const displayItems = hasCategories ? categories : initialServices;
 
@@ -61,6 +61,9 @@ export function ServicesSection({ categories = [], initialServices = [] }: Servi
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
+        {/* Interactive Three.js 3D Floating Geometric Shapes */}
+        <FloatingShapes3D />
+
         {/* Section Header */}
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-16">
           <div>

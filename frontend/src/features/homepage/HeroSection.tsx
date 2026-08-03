@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, ShieldCheck, CheckCircle2, Users, Star } from 'lucide-react';
+import { Hero3DGlobe } from '@/components/ui/Hero3DGlobe';
 
 export function HeroSection({ settings }: { settings?: any }) {
   const hero = settings?.hero || {
@@ -86,15 +87,18 @@ export function HeroSection({ settings }: { settings?: any }) {
             </motion.div>
           </div>
 
-          {/* ── Right Column: Device Mockup & Callout Card (5 Cols) ──────────── */}
+          {/* ── Right Column: 3D Globe & Device Mockup (5 Cols) ──────────────── */}
           <div className="lg:col-span-5 relative flex flex-col items-center lg:items-end justify-center">
+            
+            {/* Interactive Three.js 3D Glowing Globe Effect */}
+            <Hero3DGlobe />
 
             {/* Laptop Mockup Image */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="relative w-full max-w-lg group"
+              className="relative w-full max-w-lg group z-10"
             >
               <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/20 to-cyan-500/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all" />
 
