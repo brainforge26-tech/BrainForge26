@@ -23,12 +23,13 @@ interface NavItem {
 
 const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard',          href: '/admin',                  icon: LayoutDashboard },
+  { label: 'Contact Messages',   href: '/admin/contact-messages',  icon: Mail },
+  { label: 'Job Applications',   href: '/admin/job-applications',  icon: FileCheck },
   { label: 'Services',           href: '/admin/services',          icon: Globe },
   { label: 'Service Categories', href: '/admin/service-categories',icon: Layers },
   { label: 'Portfolio',          href: '/admin/portfolio',         icon: FolderKanban },
   { label: 'Industries',         href: '/admin/industries',        icon: Building2 },
   { label: 'Jobs',               href: '/admin/jobs',              icon: Briefcase },
-  { label: 'Job Applications',   href: '/admin/job-applications',  icon: FileCheck },
   { label: 'Blogs',              href: '/admin/blogs',             icon: BookOpen },
   { label: 'Testimonials',       href: '/admin/testimonials',      icon: Quote },
   { label: 'FAQs',               href: '/admin/faqs',              icon: HelpCircle },
@@ -37,7 +38,6 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: 'Clients',            href: '/admin/clients',           icon: Award },
   { label: 'Media Library',      href: '/admin/media',             icon: Image },
   { label: 'Site Settings',      href: '/admin/settings',          icon: Settings },
-  { label: 'Contact Messages',   href: '/admin/contact-messages',  icon: Mail },
 ];
 
 interface SidebarProps {
