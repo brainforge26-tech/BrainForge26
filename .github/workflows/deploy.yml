@@ -22,7 +22,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: 22
-          command_timeout: 15m
+          command_timeout: 30m
           script_stop: false
           script: |
             echo "🔧 [Git Config] Registering safe directory..."
@@ -31,7 +31,9 @@ jobs:
             APP_DIR="/var/www/BrainForge26"
             echo "🚀 [Deploy] Target Directory: $APP_DIR"
 
-            # Step 1: Ensure workspace exists & pull latest code
+            export NODE_OPTIONS="--max-old-space-size=2048"
+
+            # Step 1: Pull latest code
             if [ ! -d "$APP_DIR" ]; then
               echo "📁 Directory missing. Cloning repository..."
               git clone https://github.com/brainforge26-tech/BrainForge26.git "$APP_DIR"
@@ -39,17 +41,19 @@ jobs:
             else
               echo "🔄 Directory exists. Fetching latest changes..."
               cd "$APP_DIR"
-              git fetch --all || true
-              git reset --hard origin/main || git pull origin main || true
+              git fetch origin main
+              git reset --hard origin/main
             fi
 
             cd "$APP_DIR"
 
-            # Step 2: Backend Setup & Seed
+            # Step 2: Backend Setup
             echo "📦 [Backend] Installing dependencies..."
             cd "$APP_DIR/backend"
             if [ ! -f "$APP_DIR/backend/.env" ]; then
-              cp "$APP_DIR/backend/.env.production" "$APP_DIR/backend/.env" || true
+              if [ -f "$APP_DIR/backend/.env.production" ]; then
+                cp "$APP_DIR/backend/.env.production" "$APP_DIR/backend/.env"
+              fi
             fi
             npm install --no-audit
 
@@ -58,9 +62,6 @@ jobs:
 
             echo "🗃️  [Backend] Ensuring PostgreSQL Database Schema exists..."
             npx prisma db push --accept-data-loss || true
-
-            echo "🌱 [Backend] Executing Production Database Cleanup & Seed..."
-            npx prisma db seed || true
 
             echo "🛠️  [Backend] Compiling TypeScript Backend App..."
             npm run build
@@ -78,7 +79,6 @@ jobs:
             # Step 4: PM2 Service Reload
             echo "🔄 [PM2] Reloading services..."
             cd "$APP_DIR"
-            fuser -k 5001/tcp || true
             pm2 startOrReload ecosystem.config.js --env production --update-env || pm2 start ecosystem.config.js --env production
             pm2 save
             echo "✓ PM2 Reload Completed Successfully."
