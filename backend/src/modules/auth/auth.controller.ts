@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import * as AuthService from './auth.service';
-import { loginSchema } from './auth.validation';
+import { loginSchema, changePasswordSchema } from './auth.validation';
 import { sendSuccess } from '../../utils/response';
 import { BadRequestError } from '../../errors/AppError';
+import { authenticate } from '../../middlewares/authenticate';
 
 const REFRESH_COOKIE = 'refreshToken';
 
@@ -58,5 +59,22 @@ export async function getMe(req: Request, res: Response, next: NextFunction) {
 
     const user = await AuthService.getMe(userId);
     sendSuccess(res, { user });
+  } catch (err) { next(err); }
+}
+
+// POST /api/v1/auth/change-password  (authenticated)
+export async function changePassword(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userId = (req as Request & { user?: { userId: string } }).user?.userId;
+    if (!userId) throw new BadRequestError('Not authenticated');
+
+    const parsed = changePasswordSchema.safeParse(req.body);
+    if (!parsed.success) throw new BadRequestError(parsed.error.issues[0].message);
+
+    await AuthService.changePassword(userId, parsed.data.currentPassword, parsed.data.newPassword);
+
+    // Clear refresh token cookie — force re-login
+    res.clearCookie('refreshToken', { path: '/' });
+    sendSuccess(res, null, 'Password changed successfully. Please log in again.');
   } catch (err) { next(err); }
 }

@@ -128,6 +128,26 @@ export async function getMe(userId: string) {
   return sanitizeUser(user);
 }
 
+// ─── CHANGE PASSWORD (authenticated admin) ────────────────────────────────────
+export async function changePassword(userId: string, currentPassword: string, newPassword: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new NotFoundError('User not found');
+
+  const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!valid) {
+    throw new UnauthorizedError('Current password is incorrect');
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, HASH_ROUNDS);
+  await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+
+  // Revoke all refresh tokens so other sessions are invalidated
+  await prisma.refreshToken.updateMany({
+    where: { userId },
+    data:  { isRevoked: true },
+  });
+}
+
 function sanitizeUser(user: any) {
   const { passwordHash, ...rest } = user;
   return rest;

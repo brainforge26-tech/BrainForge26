@@ -1,21 +1,13 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Space_Grotesk } from 'next/font/google';
 import { Providers } from '@/providers';
 import { WhatsAppButton } from '@/components/common/WhatsAppButton';
 import './globals.css';
 
 // ─── Font ─────────────────────────────────────────────────────────────────────
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-space-grotesk',
-  display: 'swap',
-});
+// ─── Font ─────────────────────────────────────────────────────────────────────
+// Using system font stack — add Google Font CDN link in globals.css for production
+const inter        = { variable: '--font-inter' };
+const spaceGrotesk = { variable: '--font-space-grotesk' };
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────
 export const metadata: Metadata = {
