@@ -41,7 +41,6 @@ export default function LoginPage() {
                 name="email"
                 type="email"
                 required
-                defaultValue="admin@brainforceit.com"
                 placeholder="admin@brainforceit.com"
                 className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.1] text-white text-sm focus:outline-none focus:border-cyan-400 transition-colors"
                 autoComplete="email"
@@ -59,7 +58,6 @@ export default function LoginPage() {
                 name="password"
                 type={showPw ? 'text' : 'password'}
                 required
-                defaultValue="admin123"
                 placeholder="••••••••"
                 className="w-full pl-10 pr-10 py-3 rounded-xl bg-white/[0.05] border border-white/[0.1] text-white text-sm focus:outline-none focus:border-cyan-400 transition-colors"
                 autoComplete="current-password"

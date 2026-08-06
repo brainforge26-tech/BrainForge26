@@ -110,7 +110,7 @@ export default async function ContactPage() {
                     type="text"
                     name="name"
                     required
-                    placeholder="Alex Vance"
+                    placeholder="Your Name"
                     className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.1] text-white text-sm focus:outline-none focus:border-orange-500/60 transition-colors"
                   />
                 </div>
@@ -120,7 +120,7 @@ export default async function ContactPage() {
                     type="email"
                     name="email"
                     required
-                    placeholder="alex.vance@example.com"
+                    placeholder="[EMAIL_ADDRESS]"
                     className="w-full px-4 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.1] text-white text-sm focus:outline-none focus:border-orange-500/60 transition-colors"
                   />
                 </div>
