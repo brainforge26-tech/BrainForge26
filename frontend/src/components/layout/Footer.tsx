@@ -17,7 +17,6 @@ const FOOTER_LINKS = {
   QuickLinks: [
     { label: 'Blogs',        href: '/blogs' },
     { label: 'Contact Us',   href: '/contact' },
-    { label: 'Admin Login',  href: '/login' },
   ],
 };
 
@@ -89,11 +88,6 @@ export function Footer() {
           <p className="text-xs text-slate-400">
             © {new Date().getFullYear()} BrainForge26 Software Ltd. All rights reserved.
           </p>
-          <div className="flex gap-6">
-            <Link href="/login" className="text-xs text-slate-400 hover:text-orange-400 transition-colors">
-              Admin Portal Access
-            </Link>
-          </div>
         </div>
       </div>
     </footer>
