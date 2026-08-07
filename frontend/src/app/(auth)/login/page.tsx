@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Loader2, Mail, Lock, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Mail, Lock, ShieldCheck, Check } from 'lucide-react';
 import { loginAction } from '@/features/auth/auth.actions';
 import type { ActionState } from '@/features/auth/auth.actions';
 
@@ -12,6 +12,16 @@ export default function LoginPage() {
   const router = useRouter();
   const [state, formAction, pending] = useActionState<ActionState, FormData>(loginAction, initial);
   const [showPw, setShowPw] = useState(false);
+  const [changedNotice, setChangedNotice] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('changed') === 'true') {
+        setChangedNotice(true);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (state.success) {
@@ -29,6 +39,13 @@ export default function LoginPage() {
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Admin Portal</h1>
           <p className="text-xs text-cyan-400 font-semibold tracking-wider uppercase mt-1">BrainForge26 Corporate CMS</p>
         </div>
+
+        {changedNotice && (
+          <div className="p-3 mb-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+            Password updated successfully! Please log in with your new password.
+          </div>
+        )}
 
         <form action={formAction} className="space-y-5">
           {/* Email */}

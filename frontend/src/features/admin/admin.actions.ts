@@ -23,7 +23,11 @@ export type ActionState = { success: true; message: string } | { success: false;
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 const createSchema = z.object({
   email:      z.string().email('Invalid email'),
-  password:   z.string().min(8, 'Min 8 characters'),
+  password:   z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number'),
   firstName:  z.string().min(1, 'First name required'),
   lastName:   z.string().min(1, 'Last name required'),
   phone:      z.string().optional(),

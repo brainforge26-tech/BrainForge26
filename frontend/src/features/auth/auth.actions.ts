@@ -29,6 +29,16 @@ const resetSchema = z.object({
   password: z.string().min(8, 'At least 8 characters'),
 });
 
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z
+    .string()
+    .min(8, 'New password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number'),
+});
+
+
 // ─── Shared result type ───────────────────────────────────────────────────────
 export type ActionState =
   | { success: true;  message: string; role?: string }
@@ -186,6 +196,74 @@ export async function resetPasswordAction(
   }
 }
 
+// ─── CHANGE PASSWORD ──────────────────────────────────────────────────────────
+export async function changePasswordAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const raw = {
+    currentPassword: formData.get('currentPassword'),
+    newPassword:     formData.get('newPassword'),
+  };
+  const parsed = changePasswordSchema.safeParse(raw);
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+
+  const cookieStore = await cookies();
+  const token = cookieStore.get('accessToken')?.value || cookieStore.get('authToken')?.value;
+
+  if (!token) {
+    return { success: false, error: 'Not authenticated. Please log in again.' };
+  }
+
+  try {
+    const targetUrls = Array.from(new Set([
+      `${BASE}/auth/change-password`,
+      `http://127.0.0.1:5001/api/v1/auth/change-password`,
+      `https://api.brainforge26.tech/api/v1/auth/change-password`,
+    ]));
+
+    let lastError: Error = new Error('Failed to connect to authentication service');
+
+    for (const url of targetUrls) {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(parsed.data),
+          cache: 'no-store',
+        });
+
+        const text = await res.text();
+        let json: any;
+        try { json = JSON.parse(text); } catch {
+          if (!res.ok) throw new Error(`Server returned HTTP ${res.status}`);
+          throw new Error('Invalid response received');
+        }
+
+        if (!res.ok || json?.success === false) {
+          throw new Error(json?.message ?? `Error ${res.status}`);
+        }
+
+        // Clean up session cookies upon successful password change
+        cookieStore.delete('accessToken');
+        cookieStore.delete('authToken');
+        cookieStore.delete('userRole');
+
+        return { success: true, message: json.message || 'Password changed successfully. Please log in again.' };
+      } catch (err: any) {
+        lastError = err;
+      }
+    }
+
+    throw lastError;
+  } catch (err) {
+    return { success: false, error: (err as Error).message };
+  }
+}
+
 // ─── LOGOUT ───────────────────────────────────────────────────────────────────
 export async function logoutAction(): Promise<void> {
   const cookieStore = await cookies();
@@ -206,3 +284,4 @@ export async function logoutAction(): Promise<void> {
   cookieStore.delete('userRole');
   redirect('/login');
 }
+

@@ -66,22 +66,49 @@ export default function AdminSiteSettingsPage() {
       toast.error('New password must be at least 8 characters');
       return;
     }
+    if (!/[A-Z]/.test(pwForm.newPassword)) {
+      toast.error('New password must contain at least one uppercase letter');
+      return;
+    }
+    if (!/[0-9]/.test(pwForm.newPassword)) {
+      toast.error('New password must contain at least one number');
+      return;
+    }
+
     try {
       setPwSaving(true);
       await apiClient.post('/auth/change-password', {
         currentPassword: pwForm.currentPassword,
         newPassword:     pwForm.newPassword,
       });
-      toast.success('Password changed! You will be logged out shortly.');
+
+      toast.success('Password changed successfully! Logging out...');
       setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      // Give the toast time to show before forcing logout
-      setTimeout(() => { window.location.href = '/login'; }, 2000);
+
+      // Clear client-side session cookies so middleware won't bounce back to dashboard
+      document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'userRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      if (typeof window !== 'undefined') {
+        window.__accessToken = undefined;
+      }
+
+      // Give toast time to show before redirecting to login page
+      setTimeout(() => {
+        window.location.href = '/login?changed=true';
+      }, 1500);
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? 'Failed to change password');
     } finally {
       setPwSaving(false);
     }
   };
+
+  const isMinLen = pwForm.newPassword.length >= 8;
+  const hasUpper = /[A-Z]/.test(pwForm.newPassword);
+  const hasNum   = /[0-9]/.test(pwForm.newPassword);
+  const isMatch  = Boolean(pwForm.confirmPassword && pwForm.newPassword === pwForm.confirmPassword);
+  const isPwValid = isMinLen && hasUpper && hasNum && isMatch && Boolean(pwForm.currentPassword);
 
   return (
     <div className="space-y-6 text-slate-100 max-w-4xl">
@@ -192,13 +219,28 @@ export default function AdminSiteSettingsPage() {
               onChange={e => setPwForm({ ...pwForm, newPassword: e.target.value })}
               required
               className="w-full px-4 py-2.5 pr-10 rounded-xl bg-white/[0.05] border border-white/[0.1] text-white text-sm outline-none focus:border-[#4F7DFF]"
-              placeholder="Min 8 chars, 1 uppercase, 1 number"
+              placeholder="Enter new password"
             />
             <button type="button" onClick={() => setShowNew(v => !v)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors">
               {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
+
+          {/* Password requirement badges */}
+          {pwForm.newPassword && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2 text-xs">
+              <span className={`flex items-center gap-1.5 ${isMinLen ? 'text-emerald-400' : 'text-slate-500'}`}>
+                <Check className={`w-3.5 h-3.5 ${isMinLen ? 'opacity-100' : 'opacity-30'}`} /> 8+ characters
+              </span>
+              <span className={`flex items-center gap-1.5 ${hasUpper ? 'text-emerald-400' : 'text-slate-500'}`}>
+                <Check className={`w-3.5 h-3.5 ${hasUpper ? 'opacity-100' : 'opacity-30'}`} /> 1 uppercase letter
+              </span>
+              <span className={`flex items-center gap-1.5 ${hasNum ? 'text-emerald-400' : 'text-slate-500'}`}>
+                <Check className={`w-3.5 h-3.5 ${hasNum ? 'opacity-100' : 'opacity-30'}`} /> 1 number
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Confirm New Password */}
@@ -220,7 +262,7 @@ export default function AdminSiteSettingsPage() {
         <div className="flex items-center gap-3 pt-1">
           <button
             type="submit"
-            disabled={pwSaving || !pwForm.currentPassword || !pwForm.newPassword || pwForm.newPassword !== pwForm.confirmPassword}
+            disabled={pwSaving || !isPwValid}
             className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#4F7DFF] to-[#7C5CFF] hover:opacity-90 text-white font-bold text-sm flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
           >
             {pwSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Changing…</> : <><Lock className="w-4 h-4" /> Change Password</>}
@@ -232,3 +274,4 @@ export default function AdminSiteSettingsPage() {
     </div>
   );
 }
+
